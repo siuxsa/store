@@ -378,11 +378,47 @@
             });
         }
 
+        function updatePseStatusPill(val) {
+            const pill = document.getElementById('pse-status-pill');
+            if (!pill) return;
+            const isDraft = (val || '').toUpperCase() === 'DRAFT';
+            pill.textContent = isDraft ? 'DRAFT' : 'PUBLISHED';
+            pill.style.background = isDraft ? '#f59e0b' : '#10b981';
+            pill.style.color = '#000';
+        }
+
+        async function toggleProductStatusQuick(prodId, btn) {
+            if (btn) btn.disabled = true;
+            try {
+                const res = await fetch(`/api/admin/products/${prodId}/toggle-status`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    showThemeToast(`SYSTEM STATUS UPDATED: ${data.new_status}`);
+                    setTimeout(() => location.reload(), 450);
+                } else {
+                    alert('Error changing status: ' + (data.error || 'Server error'));
+                    if (btn) btn.disabled = false;
+                }
+            } catch(err) {
+                alert('Request failed: ' + err.message);
+                if (btn) btn.disabled = false;
+            }
+        }
+
         function openProductStudio() {
             document.getElementById('pse-id').value = '';
             document.getElementById('pse-breadcrumb-title').textContent = 'NEW ARSENAL SYSTEM';
             document.getElementById('pse-heading-title').textContent = 'CREATE NEW ARSENAL SYSTEM';
             document.getElementById('pse-btn-view-live').style.display = 'none';
+
+            // Status reset
+            if (document.getElementById('pse-status')) {
+                document.getElementById('pse-status').value = 'PUBLISHED';
+                updatePseStatusPill('PUBLISHED');
+            }
 
             // Reset fields
             document.getElementById('pse-sku').value = '';
@@ -476,6 +512,10 @@
             document.getElementById('pse-platform').value = p.platform || '';
             document.getElementById('pse-badge').value = p.badge_text || 'INSTANT DELIVERY';
             if (document.getElementById('pse-featured')) document.getElementById('pse-featured').checked = !!p.featured;
+            if (document.getElementById('pse-status')) {
+                document.getElementById('pse-status').value = p.status || 'PUBLISHED';
+                updatePseStatusPill(p.status || 'PUBLISHED');
+            }
 
             const coverUrl = p.image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=85';
             document.getElementById('pse-image').value = coverUrl;
@@ -709,10 +749,11 @@
             showThemeToast('CLEARED AD OVERRIDES — DEFAULTING TO STORE CATALOG');
         }
 
-        async function submitProductStudio(e) {
-            e.preventDefault();
+        async function submitProductStudio(e, targetStatus = null) {
+            if (e && e.preventDefault) e.preventDefault();
             const id = document.getElementById('pse-id').value;
             const saveBtn = document.getElementById('pse-btn-save');
+            const draftBtn = document.getElementById('pse-btn-draft');
             const origText = saveBtn ? saveBtn.textContent : 'SAVE SYSTEM SPECIFICATIONS →';
 
             const sku = document.getElementById('pse-sku').value.trim();
@@ -723,7 +764,17 @@
                 return;
             }
 
+            let finalStatus = targetStatus;
+            if (!finalStatus) {
+                finalStatus = (document.getElementById('pse-status') ? document.getElementById('pse-status').value : 'PUBLISHED');
+            }
+            if (document.getElementById('pse-status')) {
+                document.getElementById('pse-status').value = finalStatus;
+                updatePseStatusPill(finalStatus);
+            }
+
             if (saveBtn) { saveBtn.textContent = 'PERSISTING SPECIFICATIONS...'; saveBtn.disabled = true; }
+            if (draftBtn) { draftBtn.disabled = true; }
 
             const payload = {
                 sku: sku,
@@ -737,6 +788,7 @@
                 license_duration: document.getElementById('pse-duration').value.trim(),
                 platform: document.getElementById('pse-platform').value.trim(),
                 badge_text: document.getElementById('pse-badge').value.trim(),
+                status: finalStatus,
                 featured: (document.getElementById('pse-featured') && document.getElementById('pse-featured').checked) ? 1 : 0,
                 image_url: document.getElementById('pse-image').value.trim(),
                 sha256_hash: document.getElementById('pse-sha256').value.trim(),
@@ -775,7 +827,8 @@
                 });
                 const data = await res.json();
                 if (data.ok || data.success) {
-                    showThemeToast(`SYSTEM SPECIFICATION PERSISTED: ${payload.sku}`);
+                    const statusMsg = payload.status === 'DRAFT' ? 'SAVED AS DRAFT' : 'PUBLISHED TO STOREFRONT';
+                    showThemeToast(`SYSTEM SPECIFICATION ${statusMsg}: ${payload.sku}`);
                     setTimeout(() => location.reload(), 600);
                 } else {
                     alert('Error saving system: ' + (data.error || 'Server error'));
@@ -784,6 +837,7 @@
                 alert('Save error: ' + err.message);
             } finally {
                 if (saveBtn) { saveBtn.textContent = origText; saveBtn.disabled = false; }
+                if (draftBtn) { draftBtn.disabled = false; }
             }
         }
 

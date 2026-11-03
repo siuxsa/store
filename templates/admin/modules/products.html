@@ -27,6 +27,7 @@
                             <th>SYSTEM NAME</th>
                             <th>CATEGORY</th>
                             <th>PRICE / RETAIL</th>
+                            <th>STATUS</th>
                             <th>VERSION</th>
                             <th>PLATFORMS</th>
                             <th>SHA-256 HASH</th>
@@ -47,6 +48,13 @@
                                 ${{ "%.0f"|format(p.price) }}
                                 <span style="color:var(--admin-muted); text-decoration:line-through; font-size:11px;">${{ "%.0f"|format(p.retail_price) }}</span>
                             </td>
+                            <td>
+                                {% if p.status == 'DRAFT' %}
+                                <span class="badge-tag" style="background:#f59e0b; color:#000; font-weight:800; font-size:10px; padding:2px 7px;">DRAFT</span>
+                                {% else %}
+                                <span class="badge-tag" style="background:#10b981; color:#000; font-weight:800; font-size:10px; padding:2px 7px;">PUBLISHED</span>
+                                {% endif %}
+                            </td>
                             <td>{{ p.version }}</td>
                             <td style="font-size:11px; color:var(--admin-muted);">{{ p.platform }}</td>
                             <td style="font-size:10px; max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--admin-muted);">
@@ -54,7 +62,18 @@
                             </td>
                             <td style="text-align:right; white-space:nowrap;">
                                 <script id="product-data-{{ p.id }}" type="application/json">{{ p|tojson|safe }}</script>
-                                <button type="button" class="btn-admin btn-admin-outline" style="padding:0.35rem 0.65rem;"
+                                {% if p.status == 'DRAFT' %}
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:0.35rem 0.65rem; border-color:#10b981; color:#10b981;"
+                                        onclick="toggleProductStatusQuick({{ p.id }}, this)" title="Publish this system immediately">
+                                    PUBLISH
+                                </button>
+                                {% else %}
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:0.35rem 0.65rem; border-color:#f59e0b; color:#f59e0b;"
+                                        onclick="toggleProductStatusQuick({{ p.id }}, this)" title="Unpublish and return to draft">
+                                    UNPUBLISH
+                                </button>
+                                {% endif %}
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:0.35rem 0.65rem; margin-left:4px;"
                                         onclick="openProductStudioForId({{ p.id }})">
                                     EDIT (STUDIO)
                                 </button>

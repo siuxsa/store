@@ -95,6 +95,7 @@ def row_to_product(row):
         d["discount_pct"] = int(round((1.0 - (price / retail)) * 100))
     else:
         d["discount_pct"] = 0
+    d["status"] = (d.get("status") or "PUBLISHED").strip().upper()
     return d
 
 
@@ -119,6 +120,7 @@ def row_to_post(row):
         d["ad_paragraph_interval"] = 4
     if d.get("summary"):
         d["summary"] = re.sub(r"\[(?:ad|product)(?::[A-Za-z0-9_\-]+)?\]", "", d["summary"], flags=re.IGNORECASE).strip()
+    d["status"] = (d.get("status") or "PUBLISHED").strip().upper()
     return d
 
 

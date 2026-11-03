@@ -15,13 +15,16 @@
                 </div>
                 <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
                     <a id="pse-btn-view-live" href="#" target="_blank" class="btn-admin btn-admin-outline" style="display:none;">
-                        VIEW LIVE STORE PAGE ↗
+                        VIEW LIVE / PREVIEW ↗
                     </a>
                     <button type="button" onclick="closeProductStudio()" class="btn-admin btn-admin-outline">
                         CANCEL
                     </button>
-                    <button type="button" onclick="submitProductStudio(event)" class="btn-admin btn-admin-primary" id="pse-btn-save">
-                        SAVE SYSTEM SPECIFICATIONS →
+                    <button type="button" onclick="submitProductStudio(event, 'DRAFT')" class="btn-admin btn-admin-outline" id="pse-btn-draft" style="border-color:#f59e0b; color:#f59e0b;">
+                        💾 SAVE AS DRAFT
+                    </button>
+                    <button type="button" onclick="submitProductStudio(event, 'PUBLISHED')" class="btn-admin btn-admin-primary" id="pse-btn-save">
+                        🚀 PUBLISH TO STOREFRONT →
                     </button>
                 </div>
             </div>
@@ -60,6 +63,22 @@
                 <!-- TAB 1: CORE SPECS & PRICING -->
                 <div id="pse-tab-specs" class="pse-pane">
                     <div class="form-grid" style="margin-bottom:1.5rem;">
+                        <div class="form-group" style="grid-column: 1 / -1; background:rgba(0,0,0,0.3); border:1px solid var(--admin-border); padding:1rem; border-radius:4px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                                <label class="form-label" style="color:#00e5ff; font-weight:700; margin:0;">
+                                    PUBLICATION STATUS (DRAFT VS PUBLISHED)
+                                </label>
+                                <span id="pse-status-pill" class="badge-tag" style="background:#10b981; color:#000; font-size:10px; font-weight:800; padding:2px 8px;">PUBLISHED</span>
+                            </div>
+                            <select id="pse-status" class="form-select" onchange="updatePseStatusPill(this.value);" style="font-weight:700;">
+                                <option value="PUBLISHED" selected>PUBLISHED (Instantly visible live on storefront)</option>
+                                <option value="DRAFT">DRAFT (Hidden from storefront, review &amp; publish anytime)</option>
+                            </select>
+                            <p style="font-size:11px; color:var(--admin-muted); margin-top:0.4rem; margin-bottom:0;">
+                                Save as draft to write descriptions, verify hashes, and check pricing privately. Only logged-in administrators can preview draft products.
+                            </p>
+                        </div>
+
                         <div class="form-group">
                             <label class="form-label">
                                 <span>SYSTEM SKU</span>
@@ -624,13 +643,18 @@
                     </div>
                 </div>
 
-                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--admin-border); margin-top:2rem; padding-top:1.25rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; border-top:1px solid var(--admin-border); margin-top:2rem; padding-top:1.25rem;">
                     <button type="button" onclick="closeProductStudio()" class="btn-admin btn-admin-outline">
                         ← RETURN TO INVENTORY TABLE
                     </button>
-                    <button type="submit" class="btn-admin btn-admin-primary" style="padding:0.75rem 1.75rem; font-size:12px;">
-                        SAVE ALL SYSTEM SPECIFICATIONS →
-                    </button>
+                    <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
+                        <button type="button" onclick="submitProductStudio(event, 'DRAFT')" class="btn-admin btn-admin-outline" style="border-color:#f59e0b; color:#f59e0b; padding:0.75rem 1.4rem;">
+                            💾 SAVE AS DRAFT
+                        </button>
+                        <button type="button" onclick="submitProductStudio(event, 'PUBLISHED')" class="btn-admin btn-admin-primary" style="padding:0.75rem 1.75rem; font-size:12px;">
+                            🚀 PUBLISH ALL SYSTEM SPECIFICATIONS →
+                        </button>
+                    </div>
                 </div>
             </form>
         </section>

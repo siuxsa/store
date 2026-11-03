@@ -53,7 +53,7 @@ def inject_globals():
     settings = get_settings_dict(conn)
     current_user = get_current_user(conn)
     current_admin = get_current_admin(conn)
-    prods = [row_to_product(r) for r in conn.execute("SELECT * FROM products ORDER BY featured DESC, id ASC").fetchall()]
+    prods = [row_to_product(r) for r in conn.execute("SELECT * FROM products WHERE status = 'PUBLISHED' ORDER BY featured DESC, id ASC").fetchall()]
     conn.close()
     return {
         "site_settings": settings,

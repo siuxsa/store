@@ -1,9 +1,44 @@
+        function updateJseStatusPill(val) {
+            const pill = document.getElementById('jse-status-pill');
+            if (!pill) return;
+            const isDraft = (val || '').toUpperCase() === 'DRAFT';
+            pill.textContent = isDraft ? 'DRAFT' : 'PUBLISHED';
+            pill.style.background = isDraft ? '#f59e0b' : '#10b981';
+            pill.style.color = '#000';
+        }
+
+        async function togglePostStatusQuick(postId, btn) {
+            if (btn) btn.disabled = true;
+            try {
+                const res = await fetch(`/api/admin/posts/${postId}/toggle-status`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    showThemeToast(`ADVISORY STATUS UPDATED: ${data.new_status}`);
+                    setTimeout(() => location.reload(), 450);
+                } else {
+                    alert('Error changing status: ' + (data.error || 'Server error'));
+                    if (btn) btn.disabled = false;
+                }
+            } catch(err) {
+                alert('Request failed: ' + err.message);
+                if (btn) btn.disabled = false;
+            }
+        }
+
         function openPostStudio() {
             document.getElementById('jse-id').value = '';
             document.getElementById('jse-slug').value = '';
             document.getElementById('jse-breadcrumb-title').textContent = 'DRAFT ADVISORY';
             document.getElementById('jse-heading-title').textContent = 'DRAFT THREAT INTEL ADVISORY';
             document.getElementById('jse-btn-view-live').style.display = 'none';
+
+            if (document.getElementById('jse-status')) {
+                document.getElementById('jse-status').value = 'PUBLISHED';
+                updateJseStatusPill('PUBLISHED');
+            }
 
             // Reset fields
             document.getElementById('jse-title').value = '';
@@ -86,6 +121,10 @@
                 document.getElementById('jse-author').value = p.author || 'ZERO//FORM RESEARCH LAB';
                 document.getElementById('jse-read-time').value = p.read_time || '8 MIN READ';
                 if (document.getElementById('jse-featured')) document.getElementById('jse-featured').checked = !!p.featured;
+                if (document.getElementById('jse-status')) {
+                    document.getElementById('jse-status').value = p.status || 'PUBLISHED';
+                    updateJseStatusPill(p.status || 'PUBLISHED');
+                }
 
                 const bannerUrl = p.image_url || 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1600&q=85';
                 document.getElementById('jse-image').value = bannerUrl;
@@ -706,10 +745,11 @@
             const pPitch = document.getElementById('prev-art-ad-pitch'); if (pPitch) pPitch.textContent = pitch;
         }
 
-        async function submitPostStudio(e) {
-            e.preventDefault();
+        async function submitPostStudio(e, targetStatus = null) {
+            if (e && e.preventDefault) e.preventDefault();
             const id = document.getElementById('jse-id').value;
             const saveBtn = document.getElementById('jse-btn-save');
+            const draftBtn = document.getElementById('jse-btn-draft');
             const origText = saveBtn ? saveBtn.textContent : 'PUBLISH / SAVE ADVISORY →';
 
             const title = document.getElementById('jse-title').value.trim();
@@ -719,7 +759,17 @@
                 return;
             }
 
-            if (saveBtn) { saveBtn.textContent = 'PUBLISHING ADVISORY...'; saveBtn.disabled = true; }
+            let finalStatus = targetStatus;
+            if (!finalStatus) {
+                finalStatus = (document.getElementById('jse-status') ? document.getElementById('jse-status').value : 'PUBLISHED');
+            }
+            if (document.getElementById('jse-status')) {
+                document.getElementById('jse-status').value = finalStatus;
+                updateJseStatusPill(finalStatus);
+            }
+
+            if (saveBtn) { saveBtn.textContent = 'PERSISTING ADVISORY...'; saveBtn.disabled = true; }
+            if (draftBtn) { draftBtn.disabled = true; }
 
             const payload = {
                 title: title,
@@ -728,6 +778,7 @@
                 cvss_score: document.getElementById('jse-cvss').value.trim(),
                 severity: document.getElementById('jse-severity').value,
                 category: document.getElementById('jse-category').value.trim(),
+                status: finalStatus,
                 author: document.getElementById('jse-author').value.trim() || 'ZERO//FORM RESEARCH LAB',
                 read_time: document.getElementById('jse-read-time').value.trim() || '8 MIN READ',
                 image_url: document.getElementById('jse-image').value.trim(),
@@ -755,7 +806,8 @@
                 const data = await res.json();
                 if (data.ok || data.success) {
                     try { sessionStorage.setItem('activeAdminTab', 'posts'); } catch(e) {}
-                    showThemeToast(`ADVISORY PUBLISHED & ARCHIVED: ${payload.title.substring(0, 30)}...`);
+                    const statusMsg = payload.status === 'DRAFT' ? 'SAVED AS DRAFT' : 'PUBLISHED & ARCHIVED';
+                    showThemeToast(`ADVISORY ${statusMsg}: ${payload.title.substring(0, 30)}...`);
 
                     const liveBtn = document.getElementById('jse-btn-view-live');
                     if (liveBtn) {
@@ -774,6 +826,7 @@
                 alert('Save error: ' + err.message);
             } finally {
                 if (saveBtn) { saveBtn.textContent = origText; saveBtn.disabled = false; }
+                if (draftBtn) { draftBtn.disabled = false; }
             }
         }
 

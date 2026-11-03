@@ -35,11 +35,11 @@ def register_frontend_routes(app):
         settings = get_settings_dict(conn)
         all_products_raw = [
             row_to_product(r)
-            for r in conn.execute("SELECT * FROM products ORDER BY id DESC").fetchall()
+            for r in conn.execute("SELECT * FROM products WHERE status = 'PUBLISHED' ORDER BY id DESC").fetchall()
         ]
         prod_by_id = {str(p["id"]): p for p in all_products_raw}
         prod_by_sku = {p["sku"]: p for p in all_products_raw}
-    
+
         # Curate exactly 4 products by Serial (1 -> 4)
         curated_products = []
         seen_prod_ids = set()
@@ -49,7 +49,7 @@ def register_frontend_routes(app):
             if matched and matched["id"] not in seen_prod_ids:
                 curated_products.append(matched)
                 seen_prod_ids.add(matched["id"])
-    
+
         # Fallback to catalog products if fewer than 4 were configured
         if len(curated_products) < 4:
             for p in all_products_raw:
@@ -58,10 +58,10 @@ def register_frontend_routes(app):
                     seen_prod_ids.add(p["id"])
                     if len(curated_products) == 4:
                         break
-    
+
         all_posts_raw = [
             row_to_post(r)
-            for r in conn.execute("SELECT * FROM posts ORDER BY id DESC").fetchall()
+            for r in conn.execute("SELECT * FROM posts WHERE status = 'PUBLISHED' ORDER BY id DESC").fetchall()
         ]
         post_by_id = {str(p["id"]): p for p in all_posts_raw}
         post_by_slug = {p["slug"]: p for p in all_posts_raw}
@@ -145,7 +145,7 @@ def register_frontend_routes(app):
 
         conn = get_db()
         settings = get_settings_dict(conn)
-        rows = conn.execute("SELECT * FROM products ORDER BY featured DESC, id ASC").fetchall()
+        rows = conn.execute("SELECT * FROM products WHERE status = 'PUBLISHED' ORDER BY featured DESC, id ASC").fetchall()
         all_products = [row_to_product(r) for r in rows]
         categories = sorted(list({p["category"] for p in all_products}))
         conn.close()
@@ -238,27 +238,34 @@ def register_frontend_routes(app):
         if not row:
             conn.close()
             return redirect(url_for("shop"))
-    
-        try:
-            conn.execute("UPDATE products SET views_count = views_count + 1 WHERE id = ?", (row["id"],))
-            conn.commit()
-        except Exception:
-            pass
-    
+
         product = row_to_product(row)
+        is_draft = (product.get("status") or "PUBLISHED").upper() == "DRAFT"
+        admin = get_current_admin(conn)
+        if is_draft and not admin:
+            conn.close()
+            return redirect(url_for("shop"))
+
+        if not is_draft:
+            try:
+                conn.execute("UPDATE products SET views_count = views_count + 1 WHERE id = ?", (row["id"],))
+                conn.commit()
+            except Exception:
+                pass
+
         settings = get_settings_dict(conn)
         product["telegram_buy_url"] = build_telegram_product_url(product, settings)
-    
-        all_posts = [row_to_post(r) for r in conn.execute("SELECT * FROM posts ORDER BY id DESC").fetchall()]
+
+        all_posts = [row_to_post(r) for r in conn.execute("SELECT * FROM posts WHERE status = 'PUBLISHED' ORDER BY id DESC").fetchall()]
         related_posts = [p for p in all_posts if product["sku"] in p["related_sku_list"] or product["sku"] in p["content"]]
         if not related_posts:
             related_posts = all_posts[:2]
-    
+
         other_products = [
             row_to_product(r)
-            for r in conn.execute("SELECT * FROM products WHERE id != ? ORDER BY featured DESC LIMIT 3", (product["id"],)).fetchall()
+            for r in conn.execute("SELECT * FROM products WHERE id != ? AND status = 'PUBLISHED' ORDER BY featured DESC LIMIT 3", (product["id"],)).fetchall()
         ]
-    
+
         product_reviews = [
             dict(r)
             for r in conn.execute(
@@ -272,12 +279,13 @@ def register_frontend_routes(app):
                 for r in conn.execute("SELECT * FROM product_reviews ORDER BY id DESC LIMIT 3").fetchall()
             ]
         avg_rating = round(sum(r["rating"] for r in product_reviews) / len(product_reviews), 1) if product_reviews else 5.0
-    
+
         conn.close()
-    
+
         return render_template(
             "product_detail.html",
             product=product,
+            is_draft_preview=is_draft,
             related_posts=related_posts,
             other_products=other_products,
             reviews=product_reviews,
@@ -301,10 +309,10 @@ def register_frontend_routes(app):
 
         conn = get_db()
         settings = get_settings_dict(conn)
-        all_posts = [row_to_post(r) for r in conn.execute("SELECT * FROM posts ORDER BY featured DESC, id DESC").fetchall()]
+        all_posts = [row_to_post(r) for r in conn.execute("SELECT * FROM posts WHERE status = 'PUBLISHED' ORDER BY featured DESC, id DESC").fetchall()]
         products_by_sku = {
             r["sku"]: row_to_product(r)
-            for r in conn.execute("SELECT * FROM products").fetchall()
+            for r in conn.execute("SELECT * FROM products WHERE status = 'PUBLISHED'").fetchall()
         }
         categories = sorted(list({p["category"] for p in all_posts}))
         conn.close()
@@ -399,43 +407,51 @@ def register_frontend_routes(app):
         if not row:
             conn.close()
             return redirect(url_for("blog"))
-    
-        try:
-            conn.execute("UPDATE posts SET views = views + 1 WHERE id = ?", (row["id"],))
-            conn.commit()
-        except Exception:
-            pass
-    
+
         post = row_to_post(row)
+        is_draft = (post.get("status") or "PUBLISHED").upper() == "DRAFT"
+        admin = get_current_admin(conn)
+        if is_draft and not admin:
+            conn.close()
+            return redirect(url_for("blog"))
+
+        if not is_draft:
+            try:
+                conn.execute("UPDATE posts SET views = views + 1 WHERE id = ?", (row["id"],))
+                conn.commit()
+            except Exception:
+                pass
+
         settings = get_settings_dict(conn)
-        all_prods = [row_to_product(r) for r in conn.execute("SELECT * FROM products").fetchall()]
+        all_prods = [row_to_product(r) for r in conn.execute("SELECT * FROM products WHERE status = 'PUBLISHED'").fetchall()]
         products_by_sku = {p["sku"].upper(): p for p in all_prods}
-    
+
         for p in all_prods:
             p["telegram_buy_url"] = build_telegram_product_url(p, settings)
-    
+
         post["rendered_content"] = process_post_smart_ads(post, products_by_sku, settings, all_prods=all_prods)
         linked_products = [products_by_sku[s.upper()] for s in post["related_sku_list"] if s.upper() in products_by_sku]
         if not linked_products and all_prods:
             linked_products = all_prods[:2]
-    
+
         comments = [
             dict(c)
             for c in conn.execute("SELECT * FROM post_comments WHERE post_id = ? AND status = 'APPROVED' ORDER BY id DESC", (post["id"],)).fetchall()
         ]
-    
+
         more_posts = [
             row_to_post(r)
-            for r in conn.execute("SELECT * FROM posts WHERE id != ? ORDER BY id DESC LIMIT 3", (post["id"],)).fetchall()
+            for r in conn.execute("SELECT * FROM posts WHERE id != ? AND status = 'PUBLISHED' ORDER BY id DESC LIMIT 3", (post["id"],)).fetchall()
         ]
         conn.close()
-    
+
         return render_template(
             "post_detail.html",
             post=post,
             comments=comments,
             linked_products=linked_products,
             more_posts=more_posts,
+            is_draft_preview=is_draft,
             page_type="BLOG_POST",
             target_slug=post["slug"],
             target_title=post["title"]

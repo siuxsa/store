@@ -53,13 +53,16 @@ def register_admin_posts_routes(app):
             curr = conn.execute("SELECT featured FROM posts WHERE id=?", (int(post_id),)).fetchone()
             if curr:
                 featured = curr["featured"]
+        status = (data.get("status") or "PUBLISHED").strip().upper()
+        if status not in ("PUBLISHED", "DRAFT"):
+            status = "PUBLISHED"
         image_url = (data.get("image_url") or "").strip()
         meta_title = (data.get("meta_title") or "").strip()
         meta_desc = (data.get("meta_desc") or "").strip()
         meta_keywords = (data.get("meta_keywords") or "").strip()
         og_image = (data.get("og_image") or "").strip()
         now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
+
         try:
             saved_id = None
             if post_id:
@@ -68,45 +71,64 @@ def register_admin_posts_routes(app):
                     title=?, slug=?, category=?, severity=?, cve_id=?, cvss_score=?,
                     author=?, read_time=?, summary=?, content=?, related_skus=?,
                     ad_mode=?, ad_count=?, ad_placement=?, ad_paragraph_interval=?,
-                    ad_custom_pitch=?, featured=?, image_url=?,
+                    ad_custom_pitch=?, featured=?, status=?, image_url=?,
                     meta_title=?, meta_desc=?, meta_keywords=?, og_image=?
                 WHERE id=?
                 """, (
                     title, slug, category, severity, cve_id, cvss_score,
                     author, read_time, summary, content, related_skus,
                     ad_mode, ad_count, ad_placement, ad_paragraph_interval,
-                    ad_custom_pitch, featured, image_url,
+                    ad_custom_pitch, featured, status, image_url,
                     meta_title, meta_desc, meta_keywords, og_image, int(post_id)
                 ))
                 saved_id = int(post_id)
-                log_audit_event(conn, admin["id"], admin["username"], "POST_UPDATED", f"Slug={slug}")
+                log_audit_event(conn, admin["id"], admin["username"], "POST_UPDATED", f"Slug={slug} STATUS={status}")
             else:
                 cur = conn.execute("""
                 INSERT INTO posts (
                     title, slug, category, severity, cve_id, cvss_score,
                     author, read_time, summary, content, related_skus,
                     ad_mode, ad_count, ad_placement, ad_paragraph_interval,
-                    ad_custom_pitch, featured, views, published_at, image_url,
+                    ad_custom_pitch, featured, status, views, published_at, image_url,
                     meta_title, meta_desc, meta_keywords, og_image
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?)
                 """, (
                     title, slug, category, severity, cve_id, cvss_score,
                     author, read_time, summary, content, related_skus,
                     ad_mode, ad_count, ad_placement, ad_paragraph_interval,
-                    ad_custom_pitch, featured, now_str, image_url,
+                    ad_custom_pitch, featured, status, now_str, image_url,
                     meta_title, meta_desc, meta_keywords, og_image
                 ))
                 saved_id = cur.lastrowid
-                log_audit_event(conn, admin["id"], admin["username"], "POST_PUBLISHED", f"Slug={slug}")
+                action_tag = "POST_PUBLISHED" if status == "PUBLISHED" else "POST_DRAFTED"
+                log_audit_event(conn, admin["id"], admin["username"], action_tag, f"Slug={slug} STATUS={status}")
             conn.commit()
         except Exception as exc:
             conn.close()
             return jsonify({"error": str(exc)}), 400
-    
+
         conn.close()
-        return jsonify({"ok": True, "slug": slug, "id": saved_id})
-    
-    
+        return jsonify({"ok": True, "slug": slug, "id": saved_id, "status": status})
+
+
+    @app.route("/api/admin/posts/<int:post_id>/toggle-status", methods=["POST"])
+    @admin_required
+    def api_admin_toggle_post_status(post_id):
+        admin = get_current_admin()
+        conn = get_db()
+        row = conn.execute("SELECT status, slug, title FROM posts WHERE id = ?", (post_id,)).fetchone()
+        if not row:
+             conn.close()
+             return jsonify({"error": "Post not found"}), 404
+        current_status = (row["status"] or "PUBLISHED").strip().upper()
+        new_status = "DRAFT" if current_status == "PUBLISHED" else "PUBLISHED"
+        conn.execute("UPDATE posts SET status = ? WHERE id = ?", (new_status, post_id))
+        log_audit_event(conn, admin["id"], admin["username"], "POST_STATUS_TOGGLED", f"Slug={row['slug']} {current_status}->{new_status}")
+        conn.commit()
+        conn.close()
+        return jsonify({"ok": True, "new_status": new_status, "id": post_id})
+
+
     @app.route("/api/admin/posts/<int:post_id>", methods=["DELETE"])
     @admin_required
     def api_admin_delete_post(post_id):

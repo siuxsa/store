@@ -95,6 +95,7 @@ def init_db():
         sha256_hash TEXT NOT NULL DEFAULT '',
         download_url TEXT NOT NULL DEFAULT '',
         badge_text TEXT NOT NULL DEFAULT 'INSTANT DELIVERY',
+        status TEXT NOT NULL DEFAULT 'PUBLISHED',
         featured INTEGER NOT NULL DEFAULT 0,
         views_count INTEGER NOT NULL DEFAULT 0,
         created_at TEXT NOT NULL
@@ -119,6 +120,7 @@ def init_db():
         ad_mode TEXT NOT NULL DEFAULT 'ALL',
         ad_custom_pitch TEXT NOT NULL DEFAULT '',
         featured INTEGER NOT NULL DEFAULT 0,
+        status TEXT NOT NULL DEFAULT 'PUBLISHED',
         views INTEGER NOT NULL DEFAULT 0,
         published_at TEXT NOT NULL,
         image_url TEXT NOT NULL DEFAULT ''
@@ -193,6 +195,8 @@ def init_db():
         cur.execute("ALTER TABLE products ADD COLUMN faq_json TEXT NOT NULL DEFAULT '[]';")
     if "description" not in prod_cols:
         cur.execute("ALTER TABLE products ADD COLUMN description TEXT NOT NULL DEFAULT '';")
+    if "status" not in prod_cols:
+        cur.execute("ALTER TABLE products ADD COLUMN status TEXT NOT NULL DEFAULT 'PUBLISHED';")
 
     # Populate realistic default FAQs for products with empty faq_json
     default_faqs_map = {
@@ -451,6 +455,8 @@ Splunk Enterprise paired with Enterprise Security (ES) provides enterprise-wide 
         cur.execute("ALTER TABLE posts ADD COLUMN ad_placement TEXT NOT NULL DEFAULT 'MIDDLE';")
     if "ad_paragraph_interval" not in post_cols:
         cur.execute("ALTER TABLE posts ADD COLUMN ad_paragraph_interval INTEGER NOT NULL DEFAULT 4;")
+    if "status" not in post_cols:
+        cur.execute("ALTER TABLE posts ADD COLUMN status TEXT NOT NULL DEFAULT 'PUBLISHED';")
 
     # Ensure status column exists for post_comments (moderation workflow)
     comment_cols = [r["name"] for r in cur.execute("PRAGMA table_info(post_comments)").fetchall()]

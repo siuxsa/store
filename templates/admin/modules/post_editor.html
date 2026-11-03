@@ -15,13 +15,16 @@
                 </div>
                 <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
                     <a id="jse-btn-view-live" href="#" target="_blank" class="btn-admin btn-admin-outline" style="display:none;">
-                        VIEW LIVE ARTICLE ↗
+                        VIEW LIVE / PREVIEW ↗
                     </a>
                     <button type="button" onclick="closePostStudio()" class="btn-admin btn-admin-outline">
                         CANCEL
                     </button>
-                    <button type="button" onclick="submitPostStudio(event)" class="btn-admin btn-admin-primary" id="jse-btn-save">
-                        PUBLISH / SAVE ADVISORY →
+                    <button type="button" onclick="submitPostStudio(event, 'DRAFT')" class="btn-admin btn-admin-outline" id="jse-btn-draft" style="border-color:#f59e0b; color:#f59e0b;">
+                        💾 SAVE AS DRAFT
+                    </button>
+                    <button type="button" onclick="submitPostStudio(event, 'PUBLISHED')" class="btn-admin btn-admin-primary" id="jse-btn-save">
+                        🚀 PUBLISH ADVISORY →
                     </button>
                 </div>
             </div>
@@ -55,6 +58,22 @@
                 <!-- TAB 1: RESEARCH & CVE SPECS -->
                 <div id="jse-tab-specs" class="jse-pane">
                     <div class="form-grid" style="margin-bottom:1.5rem;">
+                        <div class="form-group" style="grid-column: 1 / -1; background:rgba(0,0,0,0.3); border:1px solid var(--admin-border); padding:1rem; border-radius:4px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                                <label class="form-label" style="color:#10b981; font-weight:700; margin:0;">
+                                    PUBLICATION STATUS (DRAFT VS PUBLISHED)
+                                </label>
+                                <span id="jse-status-pill" class="badge-tag" style="background:#10b981; color:#000; font-size:10px; font-weight:800; padding:2px 8px;">PUBLISHED</span>
+                            </div>
+                            <select id="jse-status" class="form-select" onchange="updateJseStatusPill(this.value);" style="font-weight:700;">
+                                <option value="PUBLISHED" selected>PUBLISHED (Live on threat wire &amp; public catalog)</option>
+                                <option value="DRAFT">DRAFT (Saved internally, preview &amp; publish anytime)</option>
+                            </select>
+                            <p style="font-size:11px; color:var(--admin-muted); margin-top:0.4rem; margin-bottom:0;">
+                                Draft advisories can be written, reviewed, and previewed with private live URL by administrators without being accessible to the public.
+                            </p>
+                        </div>
+
                         <div class="form-group" style="grid-column: 1 / -1;">
                             <label class="form-label">
                                 <span>ADVISORY RESEARCH TITLE</span>
@@ -536,13 +555,18 @@
                     </div>
                 </div>
 
-                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--admin-border); margin-top:2rem; padding-top:1.25rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; border-top:1px solid var(--admin-border); margin-top:2rem; padding-top:1.25rem;">
                     <button type="button" onclick="closePostStudio()" class="btn-admin btn-admin-outline">
                         ← RETURN TO INTEL REPOSITORY
                     </button>
-                    <button type="submit" class="btn-admin btn-admin-primary" style="padding:0.75rem 1.75rem; font-size:12px;">
-                        PUBLISH ALL ADVISORY SPECIFICATIONS →
-                    </button>
+                    <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
+                        <button type="button" onclick="submitPostStudio(event, 'DRAFT')" class="btn-admin btn-admin-outline" style="border-color:#f59e0b; color:#f59e0b; padding:0.75rem 1.4rem;">
+                            💾 SAVE AS DRAFT
+                        </button>
+                        <button type="button" onclick="submitPostStudio(event, 'PUBLISHED')" class="btn-admin btn-admin-primary" style="padding:0.75rem 1.75rem; font-size:12px;">
+                            🚀 PUBLISH ALL ADVISORY SPECIFICATIONS →
+                        </button>
+                    </div>
                 </div>
             </form>
         </section>

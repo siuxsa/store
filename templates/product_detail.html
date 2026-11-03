@@ -43,6 +43,14 @@
 {% endblock %}
 
 {% block content %}
+{% if is_draft_preview %}
+<div style="background:#f59e0b; color:#050505; font-family:var(--font-mono); font-size:0.75rem; font-weight:800; padding:0.75rem 1.25rem; text-align:center; letter-spacing:0.06em; display:flex; justify-content:center; align-items:center; gap:1.25rem; border-bottom:2px solid #000; position:sticky; top:0; z-index:9999;">
+    <span>⚠️ DRAFT PREVIEW MODE // THIS SYSTEM IS IN DRAFT STATUS AND HIDDEN FROM PUBLIC STOREFRONT</span>
+    <a href="{{ url_for('admin_panel') }}" style="background:#050505; color:#fff; padding:0.3rem 0.8rem; text-decoration:none; font-weight:700; font-size:0.7rem; border-radius:2px;">
+        OPEN ADMIN STUDIO →
+    </a>
+</div>
+{% endif %}
 <div class="container" style="padding-top: 2rem; padding-bottom: 5rem;">
 
     <!-- 1. BREADCRUMBS -->

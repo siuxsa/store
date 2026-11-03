@@ -291,7 +291,7 @@ def register_auth_routes(app):
     
         free_tools = [
             row_to_product(r)
-            for r in conn.execute("SELECT * FROM products WHERE product_type = 'FREE_TOOL' OR download_url != ''").fetchall()
+            for r in conn.execute("SELECT * FROM products WHERE (product_type = 'FREE_TOOL' OR download_url != '') AND status = 'PUBLISHED'").fetchall()
         ]
         conn.close()
     

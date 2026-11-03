@@ -63,6 +63,9 @@ def register_admin_products_routes(app):
         download_url = (data.get("download_url") or "").strip()
         badge_text = (data.get("badge_text") or "INSTANT DELIVERY").strip()
         featured = 1 if data.get("featured") else 0
+        status = (data.get("status") or "PUBLISHED").strip().upper()
+        if status not in ("PUBLISHED", "DRAFT"):
+            status = "PUBLISHED"
         image_url = (data.get("image_url") or "").strip()
         meta_title = (data.get("meta_title") or "").strip()
         meta_desc = (data.get("meta_desc") or "").strip()
@@ -74,7 +77,7 @@ def register_admin_products_routes(app):
         ad_cta_text = (data.get("ad_cta_text") or "").strip()
         ad_image_url = (data.get("ad_image_url") or "").strip()
         now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
+
         conn = get_db()
         try:
             if prod_id:
@@ -82,45 +85,63 @@ def register_admin_products_routes(app):
                 UPDATE products SET
                     sku=?, name=?, slug=?, category=?, product_type=?, price=?, retail_price=?,
                     version=?, license_duration=?, platform=?, short_desc=?, description=?, specs_json=?, faq_json=?,
-                    sha256_hash=?, download_url=?, badge_text=?, featured=?,
+                    sha256_hash=?, download_url=?, badge_text=?, featured=?, status=?,
                     image_url=?, meta_title=?, meta_desc=?, meta_keywords=?, og_image=?,
                     ad_headline=?, ad_description=?, ad_badge=?, ad_cta_text=?, ad_image_url=?
                 WHERE id=?
                 """, (
                     sku, name, slug, category, product_type, price, retail_price,
                     version, license_duration, platform, short_desc, description, specs_json, faq_json,
-                    sha256_hash, download_url, badge_text, featured,
+                    sha256_hash, download_url, badge_text, featured, status,
                     image_url, meta_title, meta_desc, meta_keywords, og_image,
                     ad_headline, ad_description, ad_badge, ad_cta_text, ad_image_url, int(prod_id)
                 ))
-                log_audit_event(conn, admin["id"], admin["username"], "PRODUCT_UPDATED", f"SKU={sku}")
+                log_audit_event(conn, admin["id"], admin["username"], "PRODUCT_UPDATED", f"SKU={sku} STATUS={status}")
             else:
                 cur = conn.execute("""
                 INSERT INTO products (
                     sku, name, slug, category, product_type, price, retail_price,
                     version, license_duration, platform, short_desc, description, specs_json, faq_json,
-                    sha256_hash, download_url, badge_text, featured, views_count, created_at,
+                    sha256_hash, download_url, badge_text, featured, status, views_count, created_at,
                     image_url, meta_title, meta_desc, meta_keywords, og_image,
                     ad_headline, ad_description, ad_badge, ad_cta_text, ad_image_url
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     sku, name, slug, category, product_type, price, retail_price,
                     version, license_duration, platform, short_desc, description, specs_json, faq_json,
-                    sha256_hash, download_url, badge_text, featured, now_str,
+                    sha256_hash, download_url, badge_text, featured, status, now_str,
                     image_url, meta_title, meta_desc, meta_keywords, og_image,
                     ad_headline, ad_description, ad_badge, ad_cta_text, ad_image_url
                 ))
                 saved_id = cur.lastrowid
-                log_audit_event(conn, admin["id"], admin["username"], "PRODUCT_CREATED", f"SKU={sku}")
+                log_audit_event(conn, admin["id"], admin["username"], "PRODUCT_CREATED", f"SKU={sku} STATUS={status}")
             conn.commit()
         except Exception as exc:
             conn.close()
             return jsonify({"error": str(exc)}), 400
-    
+
         conn.close()
-        return jsonify({"ok": True, "id": int(prod_id) if prod_id else saved_id, "sku": sku})
-    
-    
+        return jsonify({"ok": True, "id": int(prod_id) if prod_id else saved_id, "sku": sku, "status": status})
+
+
+    @app.route("/api/admin/products/<int:prod_id>/toggle-status", methods=["POST"])
+    @admin_required
+    def api_admin_toggle_product_status(prod_id):
+        admin = get_current_admin()
+        conn = get_db()
+        row = conn.execute("SELECT status, sku, name FROM products WHERE id = ?", (prod_id,)).fetchone()
+        if not row:
+             conn.close()
+             return jsonify({"error": "Product not found"}), 404
+        current_status = (row["status"] or "PUBLISHED").strip().upper()
+        new_status = "DRAFT" if current_status == "PUBLISHED" else "PUBLISHED"
+        conn.execute("UPDATE products SET status = ? WHERE id = ?", (new_status, prod_id))
+        log_audit_event(conn, admin["id"], admin["username"], "PRODUCT_STATUS_TOGGLED", f"SKU={row['sku']} {current_status}->{new_status}")
+        conn.commit()
+        conn.close()
+        return jsonify({"ok": True, "new_status": new_status, "id": prod_id})
+
+
     @app.route("/api/admin/products/<int:prod_id>", methods=["DELETE"])
     @admin_required
     def api_admin_delete_product(prod_id):
