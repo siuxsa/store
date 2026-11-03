@@ -1,0 +1,77 @@
+<div id="modal-review" class="admin-modal">
+        <div class="admin-modal-box" style="max-width:680px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; padding-bottom:0.75rem; border-bottom:1px solid var(--admin-border);">
+                <h3 id="rev-modal-title" style="font-size:16px; font-weight:700; text-transform:uppercase;">ADD VERIFIED REVIEW</h3>
+                <button type="button" onclick="closeModal('modal-review')" class="btn-admin btn-admin-outline" style="padding:0.25rem 0.6rem; display:inline-flex; align-items:center;">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <form onsubmit="submitReviewForm(event)">
+                <input type="hidden" id="rev-id" value="">
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">ASSIGN TO CATALOG SYSTEM (OR GLOBAL)</label>
+                        <select id="rev-product-sku" class="form-select">
+                            <option value="">-- GLOBAL / ALL SYSTEMS &amp; MANIFESTO --</option>
+                            {% for p in products %}
+                            <option value="{{ p.sku }}">{{ p.sku }} — {{ p.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">RATING (1 - 5 STARS)</label>
+                        <select id="rev-rating" class="form-select">
+                            <option value="5">[5 / 5] EXCELLENT / ESSENTIAL</option>
+                            <option value="4">[4 / 5] HIGHLY RECOMMENDED</option>
+                            <option value="3">[3 / 5] FUNCTIONAL</option>
+                            <option value="2">[2 / 5] NEEDS IMPROVEMENT</option>
+                            <option value="1">[1 / 5] CRITICAL DEFECT</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">AUTHOR NAME *</label>
+                        <input type="text" id="rev-author-name" class="form-input" required placeholder="e.g. Marcus Vance">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">AUTHOR ROLE / JOB TITLE</label>
+                        <input type="text" id="rev-author-role" class="form-input" placeholder="e.g. Lead Red Teamer">
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">AUTHOR COMPANY / ORGANIZATION</label>
+                        <input type="text" id="rev-author-org" class="form-input" placeholder="e.g. FinTech Threat Simulation Group">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">VERIFIED BADGE TEXT</label>
+                        <input type="text" id="rev-verified-badge" class="form-input" value="VERIFIED ENTERPRISE DEPLOYMENT · PGP SIGNED">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">REVIEW HEADLINE / TITLE *</label>
+                    <input type="text" id="rev-title" class="form-input" required placeholder="e.g. Flawless offline verification in high-security airgap">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">ASSESSMENT / REVIEW CONTENT *</label>
+                    <textarea id="rev-content" class="form-input" rows="4" required placeholder="Enter the full verified client feedback or operational test debrief..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">REVIEW DATE</label>
+                    <input type="date" id="rev-date" class="form-input">
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1.5rem;">
+                    <button type="button" onclick="closeModal('modal-review')" class="btn-admin btn-admin-outline">CANCEL</button>
+                    <button type="submit" id="btn-save-review" class="btn-admin btn-admin-primary">SAVE VERIFIED REVIEW →</button>
+                </div>
+            </form>
+        </div>
+    </div>

@@ -1,0 +1,526 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.meta_title or (product.name ~ ' (' ~ product.sku ~ ') — Enterprise License // ' ~ site_settings.site_name) }}{% endblock %}
+{% block meta_description %}{{ product.meta_desc or product.short_desc or site_settings.seo_meta_description }}{% endblock %}
+{% block meta_keywords %}{{ product.meta_keywords or (product.name ~ ', ' ~ product.sku ~ ', ' ~ product.category ~ ', ' ~ product.platform ~ ', ' ~ product.version ~ ', cyber security software, binary analysis toolkit, ' ~ site_settings.seo_meta_keywords) }}{% endblock %}
+{% block og_type %}product{% endblock %}
+{% block og_title %}{{ product.meta_title or (product.name ~ ' [' ~ product.sku ~ '] — ' ~ product.category) }}{% endblock %}
+{% block og_description %}{{ product.meta_desc or product.short_desc or site_settings.seo_meta_description }}{% endblock %}
+{% block og_image %}{{ product.og_image or product.image_url or site_settings.seo_og_image or site_settings.hero_image }}{% endblock %}
+{% block twitter_title %}{{ product.meta_title or (product.name ~ ' [' ~ product.sku ~ ']') }}{% endblock %}
+{% block twitter_description %}{{ product.meta_desc or product.short_desc or site_settings.seo_meta_description }}{% endblock %}
+{% block twitter_image %}{{ product.og_image or product.image_url or site_settings.seo_og_image or site_settings.hero_image }}{% endblock %}
+
+{% block structured_data %}
+{{ super() }}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "{{ product.meta_title or product.name }}",
+  "image": ["{{ product.og_image or product.image_url or site_settings.seo_og_image or site_settings.hero_image }}"],
+  "description": "{{ product.meta_desc or product.short_desc }}",
+  "sku": "{{ product.sku }}",
+  "category": "{{ product.category }}",
+  "brand": {
+    "@type": "Brand",
+    "name": "{{ site_settings.site_name }}"
+  },
+  "offers": {
+    "@type": "Offer",
+    "url": "{{ request.base_url }}",
+    "priceCurrency": "USD",
+    "price": "{{ '%.2f'|format(product.price) }}",
+    "itemCondition": "https://schema.org/NewCondition",
+    "availability": "https://schema.org/InStock",
+    "seller": {
+      "@type": "Organization",
+      "name": "{{ site_settings.site_name }}"
+    }
+  }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2rem; padding-bottom: 5rem;">
+
+    <!-- 1. BREADCRUMBS -->
+    <nav class="breadcrumb-nav" aria-label="Breadcrumbs" style="margin-bottom: 2rem; font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);">
+        <a href="{{ url_for('index') }}" style="color: var(--muted); text-decoration: none;">HOME</a>
+        <span style="margin: 0 0.5rem; color: rgba(17,17,17,0.3);">/</span>
+        <a href="{{ url_for('shop') }}" style="color: var(--muted); text-decoration: none;">ARSENAL</a>
+        <span style="margin: 0 0.5rem; color: rgba(17,17,17,0.3);">/</span>
+        <a href="{{ url_for('shop', category=product.category) }}" style="color: var(--muted); text-decoration: none;">{{ product.category }}</a>
+        <span style="margin: 0 0.5rem; color: rgba(17,17,17,0.3);">/</span>
+        <span style="color: var(--text); font-weight: 600;">{{ product.sku }}</span>
+    </nav>
+
+    <!-- 2. MAIN TWO-COLUMN PDP LAYOUT -->
+    <div class="pdp-layout">
+
+        <!-- ========================================== -->
+        <!-- LEFT COLUMN: SYSTEM GALLERY & VERIFICATION -->
+        <!-- ========================================== -->
+        <div class="pdp-gallery">
+            <!-- MAIN STAGE VISUAL -->
+            <div class="pdp-main-stage" id="pdp-stage">
+                <img id="pdp-active-img" src="{{ product.image_url }}" alt="{{ product.name }}" loading="eager">
+                <span class="product-badge">{{ product.badge_text }}</span>
+                <button type="button" class="gallery-nav-btn gallery-prev" onclick="stepPdpImage(-1)" aria-label="Previous system visual">←</button>
+                <button type="button" class="gallery-nav-btn gallery-next" onclick="stepPdpImage(1)" aria-label="Next system visual">→</button>
+                <button type="button" class="gallery-fullscreen-btn" onclick="openPdpLightbox()" aria-label="View visual fullscreen">⤢ FULLSCREEN</button>
+            </div>
+
+            <!-- THUMBNAILS STRIP -->
+            <div class="pdp-thumbnails">
+                <div class="pdp-thumb active" onclick="setPdpImage('{{ product.image_url }}', this)" tabindex="0">
+                    <img src="{{ product.image_url }}" alt="{{ product.name }} Perspective 1">
+                </div>
+                {% if product.image2_url %}
+                <div class="pdp-thumb" onclick="setPdpImage('{{ product.image2_url }}', this)" tabindex="0">
+                    <img src="{{ product.image2_url }}" alt="{{ product.name }} Perspective 2">
+                </div>
+                {% else %}
+                <div class="pdp-thumb" onclick="setPdpImage('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=85', this)" tabindex="0">
+                    <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=85" alt="Terminal Diagram">
+                </div>
+                {% endif %}
+                <div class="pdp-thumb" onclick="setPdpImage('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=85', this)" tabindex="0">
+                    <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=85" alt="Operations Overview">
+                </div>
+                <div class="pdp-thumb" onclick="setPdpImage('https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=85', this)" tabindex="0">
+                    <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=85" alt="Infrastructure Matrix">
+                </div>
+            </div>
+
+            <!-- CRYPTOGRAPHIC SHA-256 HASH VERIFICATION CARD -->
+            <div style="border: 1px solid var(--border); background-color: var(--bg-alt); padding: 1.5rem; margin-top: 0.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span class="meta-label">// SHA-256 RELEASE CHECKSUM</span>
+                    </div>
+                    <button type="button" id="copy-hash-btn" onclick="copyReleaseHash(this)" class="link-underline" style="font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase;">
+                        COPY HASH
+                    </button>
+                </div>
+                <div class="meta-mono" style="font-size: 0.72rem; word-break: break-all; color: var(--text); background: var(--white); padding: 0.75rem; border: 1px solid var(--border); line-height: 1.5;">
+                    {{ product.sha256_hash }}
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem; font-size: 0.7rem; color: var(--muted); font-family: var(--font-mono);">
+                    <span>VERIFICATION: VALIDATED AGAINST VENDOR MANIFEST</span>
+                    <span>STATUS: DEPLOYMENT READY</span>
+                </div>
+            </div>
+
+            <!-- ARCHITECTURAL CAPABILITIES BULLET LIST -->
+            <div style="border: 1px solid var(--border); background-color: var(--white); padding: 1.75rem;">
+                <span class="meta-label" style="display: block; margin-bottom: 1rem;">// CORE SYSTEM SPECIFICATIONS</span>
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+                    {% for spec in product.specs %}
+                    <li style="display: flex; gap: 0.75rem; font-size: 0.85rem; line-height: 1.55; color: var(--text); border-bottom: 1px solid rgba(17,17,17,0.06); padding-bottom: 0.65rem;">
+                        <span style="color: var(--muted); font-family: var(--font-mono); font-weight: 600;">—</span>
+                        <span>{{ spec }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- RIGHT COLUMN: STICKY PRODUCT INFORMATION  -->
+        <!-- ========================================== -->
+        <div class="pdp-info-panel">
+            <!-- PRODUCT IDENTITY & PRICING -->
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.5rem;">
+                    <span class="meta-mono" style="color: var(--muted); font-size: 0.75rem;">SYSTEM {{ product.sku }} // {{ product.category|upper }}</span>
+                    {% if product.discount_pct > 0 %}
+                    <span class="badge-tag">SAVE {{ product.discount_pct }}% OFF RETAIL</span>
+                    {% endif %}
+                </div>
+
+                <h1 class="display-md" style="margin: 0.4rem 0 1rem; line-height: 1.15; text-transform: uppercase;">
+                    {{ product.name }}
+                </h1>
+
+                <!-- PRICE ROW -->
+                <div style="display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 1.25rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border);">
+                    {% if product.retail_price > product.price %}
+                    <span class="meta-mono" style="text-decoration: line-through; color: var(--muted); font-size: 1.15rem;">${{ "%.0f"|format(product.retail_price) }}</span>
+                    {% endif %}
+                    <span class="meta-mono" style="font-size: 2rem; font-weight: 700; color: var(--text);">${{ "%.0f"|format(product.price) }}</span>
+                    <span class="meta-label" style="color: var(--muted); margin-left: 0.25rem;">/ COMMERCIAL SEAT</span>
+                </div>
+
+                <p style="font-size: 0.95rem; color: var(--muted); line-height: 1.65; margin-bottom: 0;">
+                    {{ product.short_desc }}
+                </p>
+            </div>
+
+            <!-- DEPLOYMENT METRICS SPEC MATRIX -->
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+                <div style="border: 1px solid var(--border); padding: 0.9rem; background: var(--bg-alt);">
+                    <span class="meta-label" style="display: block; font-size: 0.65rem; color: var(--muted); margin-bottom: 0.25rem;">PLATFORM ENVIRONMENT</span>
+                    <span class="meta-mono" style="font-size: 0.78rem; font-weight: 600;">{{ product.platform }}</span>
+                </div>
+                <div style="border: 1px solid var(--border); padding: 0.9rem; background: var(--bg-alt);">
+                    <span class="meta-label" style="display: block; font-size: 0.65rem; color: var(--muted); margin-bottom: 0.25rem;">LICENSE DURATION</span>
+                    <span class="meta-mono" style="font-size: 0.78rem; font-weight: 600;">{{ product.license_duration }}</span>
+                </div>
+                <div style="border: 1px solid var(--border); padding: 0.9rem; background: var(--bg-alt);">
+                    <span class="meta-label" style="display: block; font-size: 0.65rem; color: var(--muted); margin-bottom: 0.25rem;">BUILD VERSION</span>
+                    <span class="meta-mono" style="font-size: 0.78rem; font-weight: 600;">{{ product.version }}</span>
+                </div>
+                <div style="border: 1px solid var(--border); padding: 0.9rem; background: var(--bg-alt);">
+                    <span class="meta-label" style="display: block; font-size: 0.65rem; color: var(--muted); margin-bottom: 0.25rem;">AIRGAP ISOLATION</span>
+                    <span class="meta-mono" style="font-size: 0.78rem; font-weight: 600;">100% OFFLINE SAFE</span>
+                </div>
+            </div>
+
+            <!-- PRIMARY ACTION BUTTONS -->
+            <div style="display: flex; flex-direction: column; gap: 0.75rem; padding-top: 0.5rem;">
+                <button type="button" class="btn btn-dark" style="width: 100%; padding: 1.2rem; font-size: 0.85rem;" onclick="window.NFCart && window.NFCart.quickAdd({{ product.id }})">
+                    + ADD SYSTEM TO BAG →
+                </button>
+                <a href="{{ product.telegram_buy_url }}" target="_blank" rel="noopener" class="btn btn-outline-dark" style="width: 100%; text-align: center; padding: 1rem; font-size: 0.78rem;">
+                    DIRECT TELEGRAM CONCIERGE ORDER ↗
+                </a>
+                <div class="meta-mono" style="text-align: center; font-size: 0.68rem; color: var(--muted); margin-top: 0.25rem;">
+                    INSTANT CRYPTOGRAPHIC DISPATCH VIA TELEGRAM // VERIFIED SEAT
+                </div>
+            </div>
+
+            <!-- ACCORDIONS LIST / FAQ -->
+            <div style="margin-top: 2.25rem;">
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.85rem;">
+                    <span class="meta-label" style="font-size: 0.68rem; letter-spacing: 0.12em; color: var(--muted);">
+                        // FREQUENTLY ASKED QUESTIONS &amp; TECHNICAL DISCLOSURES
+                    </span>
+                    <span class="meta-mono" style="font-size: 0.7rem; color: var(--muted);">
+                        {{ product.faq|length if product.faq else 4 }} ITEMS
+                    </span>
+                </div>
+
+                <div class="accordion-list">
+                    {% if product.faq and product.faq|length > 0 %}
+                        {% for item in product.faq %}
+                        <div class="accordion-item">
+                            <button type="button" class="accordion-trigger" onclick="togglePdpAccordion(this)">
+                                <span class="faq-question-text">{{ item.q }}</span>
+                                <span class="acc-icon">+</span>
+                            </button>
+                            <div class="accordion-content">
+                                <div class="accordion-content-inner">
+                                    {{ item.a }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <!-- Accordion 1: SYSTEM CAPABILITIES -->
+                        <div class="accordion-item">
+                            <button type="button" class="accordion-trigger" onclick="togglePdpAccordion(this)">
+                                <span class="faq-question-text">SYSTEM CAPABILITIES &amp; MODULES</span>
+                                <span class="acc-icon">+</span>
+                            </button>
+                            <div class="accordion-content">
+                                <div class="accordion-content-inner">
+                                    Fully unlocked enterprise architecture containing complete module access without trial restrictions, expiration countdowns, or throttled worker threads. Optimized for high-throughput multi-threaded operations.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Accordion 2: AIRGAP & ENVIRONMENT ISOLATION -->
+                        <div class="accordion-item">
+                            <button type="button" class="accordion-trigger" onclick="togglePdpAccordion(this)">
+                                <span class="faq-question-text">AIRGAP &amp; ENVIRONMENT ISOLATION</span>
+                                <span class="acc-icon">+</span>
+                            </button>
+                            <div class="accordion-content">
+                                <div class="accordion-content-inner">
+                                    Requires zero recurring cloud phone-home callbacks or SaaS license enforcement servers. Operates natively in disconnected, airgapped enclaves, virtualized testbeds, and strict firewall boundaries.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Accordion 3: CRYPTOGRAPHIC INTEGRITY -->
+                        <div class="accordion-item">
+                            <button type="button" class="accordion-trigger" onclick="togglePdpAccordion(this)">
+                                <span class="faq-question-text">CRYPTOGRAPHIC SIGNATURE &amp; CHECKSUM</span>
+                                <span class="acc-icon">+</span>
+                            </button>
+                            <div class="accordion-content">
+                                <div class="accordion-content-inner">
+                                    Every archive is packaged with a signed manifest and SHA-256 hash. Operators can independently verify binary integrity against the official vendor release manifest before loading onto audit targets.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Accordion 4: TELEGRAM DISPATCH -->
+                        <div class="accordion-item">
+                            <button type="button" class="accordion-trigger" onclick="togglePdpAccordion(this)">
+                                <span class="faq-question-text">INSTANT DISPATCH &amp; CONCIERGE DESK</span>
+                                <span class="acc-icon">+</span>
+                            </button>
+                            <div class="accordion-content">
+                                <div class="accordion-content-inner">
+                                    Orders are fulfilled via our encrypted Telegram concierge desk (<a href="https://t.me/{{ site_settings.telegram_user.lstrip('@') }}" target="_blank" style="color:var(--text); text-decoration:underline;">@{{ site_settings.telegram_user.lstrip('@') }}</a>). Upon payment confirmation, your order ticket reveals your private license key and permanent download links.
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- 2.4 SYSTEM ARCHITECTURE & FULL OPERATIONAL MANUAL (FULL MARKDOWN PROSE) -->
+    {% if product.rendered_description %}
+    <div style="margin-top: 5rem; border-top: 1px solid var(--border); padding-top: 3.5rem;">
+        <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <span class="meta-label">// SYSTEM ARCHITECTURE &amp; OPERATIONAL MANUAL</span>
+                <h2 class="section-title" style="margin: 0.35rem 0 0 0; font-size: clamp(1.6rem, 3vw, 2.2rem);">
+                    TECHNICAL SPECIFICATIONS &amp; OVERVIEW
+                </h2>
+            </div>
+            <div class="meta-mono" style="font-size: 0.78rem; color: var(--muted);">
+                CLASSIFICATION: VERIFIED DEPLOYMENT // UNRESTRICTED DISCLOSURE
+            </div>
+        </div>
+
+        <div class="editorial-prose" style="background: var(--white); border: 1px solid var(--border); padding: clamp(1.5rem, 4vw, 3rem); font-size: 0.95rem; line-height: 1.8;">
+            {{ product.rendered_description | safe }}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- 2.5 VERIFIED CLIENT REVIEWS & OPERATIONAL ASSESSMENTS -->
+    <div style="margin-top: 5rem; border-top: 1px solid var(--border); padding-top: 3.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1.25rem; margin-bottom: 2rem;">
+            <div>
+                <span class="meta-label">// OPERATIONAL EVALUATIONS &amp; VERIFIED FEEDBACK</span>
+                <h2 class="section-title" style="margin: 0.35rem 0 0 0; font-size: clamp(1.6rem, 3vw, 2.2rem);">
+                    VERIFIED CLIENT REVIEWS
+                </h2>
+            </div>
+            <div class="meta-mono" style="font-size: 0.8rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                <span style="color: #f59e0b; font-weight: 700;">★★★★★ {{ "%.1f"|format(avg_rating or 5.0) }} SCORE</span>
+                <span style="color: var(--border);">|</span>
+                <span style="color: #10b981; font-weight: 700;">● 100% AIRGAP COMPLIANT</span>
+                <span style="color: var(--border);">|</span>
+                <span style="color: var(--muted);">{{ reviews|length }} AUDITED DEPLOYMENTS</span>
+            </div>
+        </div>
+
+        {% if reviews %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.75rem;">
+            {% for rev in reviews %}
+            <div style="border: 1px solid var(--border); background: var(--white); padding: 1.75rem; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; flex-wrap: wrap; gap: 0.5rem;">
+                        <span style="color: #f59e0b; font-size: 0.9rem; letter-spacing: 2px;">
+                            {% for i in range(rev.rating) %}★{% endfor %}
+                        </span>
+                        <span class="badge-tag" style="background: var(--bg-alt); color: var(--text); border: 1px solid var(--border); font-size: 0.65rem; font-weight: 700;">
+                            {{ rev.verified_badge or '● VERIFIED ENTERPRISE DEPLOYMENT' }}
+                        </span>
+                    </div>
+
+                    <h4 style="font-size: 1rem; font-weight: 700; text-transform: uppercase; margin: 0 0 0.65rem 0; line-height: 1.35; letter-spacing: -0.01em;">
+                        {{ rev.title }}
+                    </h4>
+
+                    <p style="font-size: 0.88rem; color: var(--muted); line-height: 1.75; margin: 0 0 1.5rem 0; text-align: justify; text-justify: inter-word;">
+                        "{{ rev.content }}"
+                    </p>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid var(--border); padding-top: 1rem; margin-top: auto;" class="meta-mono">
+                    <div>
+                        <div style="font-weight: 700; font-size: 0.82rem; color: var(--text);">{{ rev.author_name }}</div>
+                        <div style="font-size: 0.72rem; color: var(--muted); margin-top: 2px;">{{ rev.author_role }}{% if rev.author_org %} · {{ rev.author_org }}{% endif %}</div>
+                    </div>
+                    <span style="font-size: 0.7rem; color: var(--muted);">{{ rev.created_at[:10] }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="padding: 2.5rem; border: 1px dashed var(--border); background: var(--bg-alt); text-align: center;">
+            <p style="margin: 0; font-size: 0.88rem; color: var(--muted); font-family: var(--font-mono);">
+                // CURRENTLY COMPILING AUDITED DEPLOYMENT REVIEWS FOR THIS SYSTEM SKU.
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- AUDIT DISCLOSURE FOOTNOTE -->
+        <div style="margin-top: 1.5rem; padding: 0.85rem 1.25rem; background: var(--bg-alt); border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;" class="meta-mono">
+            <span style="font-size: 0.72rem; color: var(--muted);">
+                🔒 AUDIT INTEGRITY: All reviews are verified from direct Telegram contract fulfillment &amp; PGP signatures. Unsolicited public submissions are restricted to preserve cryptographic audit trail.
+            </span>
+            <a href="https://t.me/{{ site_settings.telegram_user.lstrip('@') }}" target="_blank" rel="noopener noreferrer" style="font-size: 0.72rem; color: var(--text); text-decoration: underline; font-weight: 700;">
+                SUBMIT OPERATOR AUDIT VIA TELEGRAM ↗
+            </a>
+        </div>
+    </div>
+
+    <!-- 3. COMPATIBLE SYSTEMS & RELATED ARSENAL SECTION -->
+    {% if other_products %}
+    <div style="margin-top: 5rem; border-top: 1px solid var(--border); padding-top: 3.5rem;">
+        <div class="section-header" style="margin-bottom: 2rem;">
+            <div>
+                <span class="meta-label">// COMPATIBLE ARSENAL &amp; INTEGRATIONS</span>
+                <h2 class="section-title">RELATED SYSTEMS</h2>
+            </div>
+            <a href="{{ url_for('shop') }}" class="link-arrow">
+                EXPLORE FULL ARSENAL ({{ global_products|length }}) <span class="arrow-icon">→</span>
+            </a>
+        </div>
+
+        <div class="product-grid">
+            {% for op in other_products %}
+            <div class="product-card">
+                <a href="{{ url_for('product_detail', slug=op.slug) }}" class="product-card-image-wrap">
+                    <img src="{{ op.image_url }}" alt="{{ op.name }}" class="product-card-img" loading="lazy">
+                    <span class="product-badge">{{ op.badge_text }}</span>
+                </a>
+                <div class="product-meta">
+                    <div class="product-meta-header">
+                        <span class="meta-label">{{ op.category }}</span>
+                        <div>
+                            {% if op.retail_price > op.price %}
+                            <span class="meta-mono" style="text-decoration:line-through; color:var(--muted); font-size:0.8rem; margin-right:0.35rem;">${{ "%.0f"|format(op.retail_price) }}</span>
+                            {% endif %}
+                            <span class="meta-mono" style="font-weight:700;">${{ "%.0f"|format(op.price) }}</span>
+                        </div>
+                    </div>
+                    <h3 class="product-title">
+                        <a href="{{ url_for('product_detail', slug=op.slug) }}">{{ op.name }}</a>
+                    </h3>
+                    <p class="product-desc">
+                        {{ op.short_desc }}
+                    </p>
+                    <div class="product-specs-line">
+                        {{ op.version }} · {{ op.platform }}
+                    </div>
+                    <div class="product-actions">
+                        <button type="button" class="btn btn-outline-dark" style="flex:1; padding:0.55rem 0.5rem; font-size:0.7rem;" onclick="window.NFCart && window.NFCart.quickAdd({{ op.id }})">+ ADD TO BAG</button>
+                        <a href="{{ url_for('product_detail', slug=op.slug) }}" class="btn btn-dark" style="padding:0.55rem 0.85rem; font-size:0.7rem;">VIEW →</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- 4. FULLSCREEN LIGHTBOX MODAL -->
+<div id="pdp-lightbox" class="lightbox-modal" onclick="closePdpLightbox()">
+    <button type="button" class="lightbox-close" onclick="closePdpLightbox()" aria-label="Close fullscreen modal">✕ ESC</button>
+    <img id="lightbox-img" src="{{ product.image_url }}" alt="{{ product.name }} Fullscreen Preview">
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    // Gallery Image List
+    var images = [
+        "{{ product.image_url }}",
+        {% if product.image2_url %}"{{ product.image2_url }}",{% endif %}
+        "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=85",
+        "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=85",
+        "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=85"
+    ];
+    var currentIdx = 0;
+
+    window.setPdpImage = function(url, thumbEl) {
+        var mainImg = document.getElementById("pdp-active-img");
+        var lightImg = document.getElementById("lightbox-img");
+        if (mainImg) mainImg.src = url;
+        if (lightImg) lightImg.src = url;
+
+        document.querySelectorAll(".pdp-thumb").forEach(function(t) {
+            t.classList.remove("active");
+        });
+        if (thumbEl) thumbEl.classList.add("active");
+
+        var found = images.indexOf(url);
+        if (found !== -1) currentIdx = found;
+    };
+
+    window.stepPdpImage = function(delta) {
+        currentIdx = (currentIdx + delta + images.length) % images.length;
+        var nextUrl = images[currentIdx];
+        var thumbs = document.querySelectorAll(".pdp-thumb");
+        var targetThumb = thumbs[currentIdx] || null;
+        window.setPdpImage(nextUrl, targetThumb);
+    };
+
+    window.openPdpLightbox = function() {
+        var modal = document.getElementById("pdp-lightbox");
+        if (modal) {
+            modal.classList.add("is-open");
+            document.body.classList.add("no-scroll");
+        }
+    };
+
+    window.closePdpLightbox = function() {
+        var modal = document.getElementById("pdp-lightbox");
+        if (modal) {
+            modal.classList.remove("is-open");
+            document.body.classList.remove("no-scroll");
+        }
+    };
+
+    window.togglePdpAccordion = function(trigger) {
+        var item = trigger.closest(".accordion-item");
+        var content = item ? item.querySelector(".accordion-content") : null;
+        var icon = trigger.querySelector(".acc-icon");
+        if (!content) return;
+
+        var isOpen = content.style.maxHeight && content.style.maxHeight !== "0px";
+
+        // Close others in same accordion
+        document.querySelectorAll(".accordion-content").forEach(function(c) {
+            c.style.maxHeight = "0px";
+        });
+        document.querySelectorAll(".acc-icon").forEach(function(i) {
+            i.textContent = "+";
+        });
+
+        if (!isOpen) {
+            content.style.maxHeight = content.scrollHeight + 30 + "px";
+            if (icon) icon.textContent = "−";
+        }
+    };
+
+    window.copyReleaseHash = function(btn) {
+        navigator.clipboard.writeText("{{ product.sha256_hash }}");
+        btn.textContent = "COPIED ✓";
+        setTimeout(function() {
+            btn.textContent = "COPY HASH";
+        }, 2000);
+    };
+
+    // Keyboard support for Lightbox
+    document.addEventListener("keydown", function(e) {
+        if (e.key === "Escape") {
+            window.closePdpLightbox();
+        }
+        if (e.key === "ArrowLeft") {
+            window.stepPdpImage(-1);
+        }
+        if (e.key === "ArrowRight") {
+            window.stepPdpImage(1);
+        }
+    });
+})();
+</script>
+{% endblock %}

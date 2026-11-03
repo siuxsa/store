@@ -1,0 +1,468 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.meta_title or (post.title ~ ' [' ~ post.cve_id ~ '] // ' ~ site_settings.site_name ~ ' Threat Research') }}{% endblock %}
+{% block meta_description %}{{ post.meta_desc or post.summary or site_settings.seo_meta_description }}{% endblock %}
+{% block meta_keywords %}{{ post.meta_keywords or (post.cve_id ~ ', ' ~ post.title ~ ', ' ~ post.category ~ ', threat intelligence, zero-day disclosure, CVE research, offensive security, ' ~ site_settings.seo_meta_keywords) }}{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_title %}{{ post.meta_title or (post.title ~ ' — ' ~ post.cve_id) }}{% endblock %}
+{% block og_description %}{{ post.meta_desc or post.summary or site_settings.seo_meta_description }}{% endblock %}
+{% block og_image %}{{ post.og_image or post.image_url or site_settings.seo_og_image or site_settings.hero_image }}{% endblock %}
+{% block twitter_title %}{{ post.meta_title or (post.title ~ ' (' ~ post.cve_id ~ ')') }}{% endblock %}
+{% block twitter_description %}{{ post.meta_desc or post.summary or site_settings.seo_meta_description }}{% endblock %}
+{% block twitter_image %}{{ post.og_image or post.image_url or site_settings.seo_og_image or site_settings.hero_image }}{% endblock %}
+
+{% block structured_data %}
+{{ super() }}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "{{ post.meta_title or post.title }}",
+  "image": ["{{ post.og_image or post.image_url or site_settings.seo_og_image or site_settings.hero_image }}"],
+  "datePublished": "{{ post.published_at }}",
+  "dateModified": "{{ post.published_at }}",
+  "author": {
+    "@type": "Person",
+    "name": "{{ post.author }}"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "{{ site_settings.site_name }}",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "{{ site_settings.seo_og_image or site_settings.hero_image }}"
+    }
+  },
+  "description": "{{ post.summary }}"
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2.5rem; padding-bottom: 6rem;">
+
+    <!-- 1. BREADCRUMBS -->
+    <nav class="breadcrumb-nav" aria-label="Breadcrumbs" style="margin-bottom: 2rem; font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);">
+        <a href="{{ url_for('index') }}" style="color: var(--muted); text-decoration: none;">HOME</a>
+        <span style="margin: 0 0.5rem; color: rgba(17,17,17,0.3);">/</span>
+        <a href="{{ url_for('blog') }}" style="color: var(--muted); text-decoration: none;">THREAT JOURNAL</a>
+        <span style="margin: 0 0.5rem; color: rgba(17,17,17,0.3);">/</span>
+        <a href="{{ url_for('blog', category=post.category) }}" style="color: var(--muted); text-decoration: none;">{{ post.category }}</a>
+        <span style="margin: 0 0.5rem; color: rgba(17,17,17,0.3);">/</span>
+        <span style="color: var(--text); font-weight: 600;">{{ post.cve_id or post.slug }}</span>
+    </nav>
+
+    <!-- 2. FULL-WIDTH EDITORIAL PAGE HEADER STRIP (MATCHING OUR SITE STRUCTURE) -->
+    <div style="border-bottom: 1px solid var(--border); padding-bottom: 2.25rem; margin-bottom: 3rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                <span class="meta-label">// RESEARCH DISCLOSURE · {{ post.category|upper }}</span>
+                <span style="color: var(--border);">|</span>
+                <span class="badge-tag" style="background: var(--dark); color: var(--white); font-weight: 700;">{{ post.cve_id or 'ADVISORY' }}</span>
+                {% if post.severity == 'CRITICAL' or (post.cvss_score|float) >= 9.0 %}
+                <span class="badge-tag" style="background: #991b1b; color: #ffffff; border: none;">CRITICAL // CVSS {{ post.cvss_score }}</span>
+                {% else %}
+                <span class="badge-tag" style="background: #854d0e; color: #ffffff; border: none;">HIGH // CVSS {{ post.cvss_score }}</span>
+                {% endif %}
+            </div>
+            <div class="meta-mono" style="font-size: 0.78rem; color: var(--muted);">
+                PUBLISHED: {{ post.published_at[:10] }} · {{ post.read_time }} ESTIMATED · {{ post.views }} VERIFIED READS
+            </div>
+        </div>
+
+        <h1 class="display-lg journal-post-title">
+            {{ post.title }}
+        </h1>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-top: 1.5rem;" class="meta-mono">
+            <div style="display: flex; align-items: center; gap: 0.85rem; font-size: 0.8rem; flex-wrap: wrap;">
+                <span style="display: inline-block; width: 8px; height: 8px; background: var(--text); border-radius: 50%;"></span>
+                <span>RESEARCH DESK: <strong>{{ post.author }}</strong></span>
+                <span style="color: var(--border);">|</span>
+                <span style="color: #15803d; font-weight: 700;">● PGP SIGNED &amp; REPRODUCED</span>
+                <span style="color: var(--border);">|</span>
+                <span style="color: var(--muted);">CLASSIFICATION: UNRESTRICTED DISCLOSURE</span>
+            </div>
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+                <button type="button" onclick="navigator.clipboard && navigator.clipboard.writeText(window.location.href); alert('Advisory link copied to clipboard.');" class="btn btn-outline-dark" style="padding: 0.45rem 0.95rem; font-size: 0.72rem;">
+                    SHARE ADVISORY ↗
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. MAIN FULL-WIDTH TWO-COLUMN EDITORIAL LAYOUT (MATCHING OUR PDP & JOURNAL GRID STRUCTURE) -->
+    <div class="journal-detail-layout">
+
+        <!-- ========================================== -->
+        <!-- LEFT COLUMN: PRIMARY EDITORIAL STREAM     -->
+        <!-- ========================================== -->
+        <div class="journal-primary-column">
+
+            <!-- HERO COVER IMAGE STAGE (EXPANSIVE) -->
+            {% if post.image_url %}
+            <div class="journal-hero-cover">
+                <img src="{{ post.image_url }}" alt="{{ post.title }}" loading="lazy">
+                <div class="journal-hero-cover-overlay"></div>
+                <div class="journal-hero-cover-caption">
+                    <div style="display: flex; align-items: center; gap: 0.65rem;">
+                        <span class="badge-tag" style="background: rgba(243,242,238,0.95); font-weight: 700; color: var(--text);">{{ post.cve_id or 'ZERO//FORM RESEARCH' }}</span>
+                        <span class="meta-mono" style="color: rgba(255,255,255,0.85); font-size: 0.75rem;">LIVE DISCLOSURE PLATFORM</span>
+                    </div>
+                    <span class="meta-mono" style="color: rgba(255,255,255,0.7); font-size: 0.72rem;">LAB TELEMETRY VERIFIED</span>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- EXECUTIVE BRIEF CALLOUT -->
+            {% if post.summary %}
+            <div class="journal-exec-brief">
+                <span class="meta-label" style="display: block; margin-bottom: 0.5rem; color: var(--muted);">// EXECUTIVE RESEARCH BRIEF</span>
+                <p style="white-space: pre-line; word-break: break-word; overflow-wrap: break-word; line-height: 1.8; margin: 0; text-align: justify; text-justify: inter-word;">
+                    {{ post.summary }}
+                </p>
+            </div>
+            {% endif %}
+
+            <!-- ARTICLE CONTENT BODY (RENDERED MARKDOWN PROSE) -->
+            <div class="editorial-prose">
+                {{ post.rendered_content | safe }}
+            </div>
+
+            <!-- AUTHOR BIO / RESEARCH DESK FOOTER -->
+            <div class="journal-author-box">
+                <div style="width: 58px; height: 58px; background: var(--dark); color: var(--white); display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-weight: 700; font-size: 1.15rem; flex-shrink: 0;">
+                    ZF
+                </div>
+                <div style="flex: 1; min-width: 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.35rem; flex-wrap: wrap; gap: 0.5rem;">
+                        <span style="font-weight: 700; text-transform: uppercase; font-size: 0.95rem; letter-spacing: 0.04em;">ZERO//FORM INTEL RESEARCH UNIT</span>
+                        <span class="meta-mono" style="font-size: 0.72rem; color: var(--muted);">PGP 0x9B42A1D7</span>
+                    </div>
+                    <p style="font-size: 0.88rem; color: var(--muted); line-height: 1.6; margin: 0;">
+                        Our threat research unit investigates zero-day attack surfaces, hypervisor primitives, and distributed cloud vulnerabilities. Disclosures are published for defensive fortification and authorized verification.
+                    </p>
+                </div>
+            </div>
+
+            <!-- COMMENTS & OPERATOR DISPATCH SECTION -->
+            <div id="verification-log" class="journal-comments-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 0.5rem;">
+                    <div>
+                        <span class="meta-label">// OPERATOR LOG &amp; TECHNICAL DISCUSSIONS</span>
+                        <h3 style="font-size: 1.25rem; font-weight: 700; text-transform: uppercase; margin-top: 0.35rem;">
+                            VERIFICATION LOG ({{ comments|length }})
+                        </h3>
+                    </div>
+                    <span class="meta-mono" style="font-size: 0.75rem; color: #10b981; font-weight: 700;">● AUDITED &amp; APPROVED LOGS</span>
+                </div>
+
+                <!-- SUBMISSION STATUS BANNER -->
+                {% if request.args.get('comment_status') == 'pending' %}
+                <div class="meta-mono" style="padding: 1.15rem 1.4rem; background: rgba(245, 158, 11, 0.1); border: 1px solid #f59e0b; color: #f59e0b; margin-bottom: 1.75rem; font-size: 0.8rem; line-height: 1.5;">
+                    <div style="font-weight: 700; margin-bottom: 4px;">▲ OBSERVATION LOG SUBMITTED TO OPERATIONAL CONTROL</div>
+                    <div style="font-family: var(--font-sans); color: var(--text); font-size: 0.85rem;">
+                        Your technical report has been received and encrypted. To maintain research integrity, observations are reviewed and approved by command before appearing publicly.
+                    </div>
+                </div>
+                {% endif %}
+
+                <div id="comment-status-alert" style="display: none; padding: 1.15rem 1.4rem; background: rgba(245, 158, 11, 0.1); border: 1px solid #f59e0b; color: #f59e0b; margin-bottom: 1.75rem; font-size: 0.8rem;" class="meta-mono">
+                    <div style="font-weight: 700; margin-bottom: 4px;">▲ OBSERVATION LOG SUBMITTED TO OPERATIONAL CONTROL</div>
+                    <div id="comment-status-alert-body" style="font-family: var(--font-sans); color: var(--text); font-size: 0.85rem;">
+                        Your technical report has been received. Observations require administrator review and approval before becoming visible.
+                    </div>
+                </div>
+
+                {% if comments %}
+                <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2.5rem;">
+                    {% for c in comments %}
+                    <div style="padding: 1.35rem 1.65rem; background: var(--white); border: 1px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.65rem;" class="meta-mono">
+                            <span style="font-weight: 700; font-size: 0.82rem; color: var(--text);">
+                                {{ c.author_name }} <span style="font-weight: 400; color: var(--muted);">[{{ c.author_role }}]</span>
+                            </span>
+                            <span style="color: var(--muted); font-size: 0.72rem;">{{ c.created_at[:16] }}</span>
+                        </div>
+                        <p style="font-size: 0.92rem; line-height: 1.65; color: var(--text); margin: 0; text-align: justify; text-justify: inter-word;">{{ c.body }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div style="padding: 2.5rem 0; text-align: center; border: 1px dashed var(--border); margin-bottom: 2.5rem; background: var(--white);">
+                    <p class="meta-label" style="margin-bottom: 0.35rem;">NO VERIFICATION NOTES PUBLISHED YET</p>
+                    <p style="font-size: 0.85rem; color: var(--muted); margin: 0;">Be the first operator to submit a reproduction or mitigation log for administrative review.</p>
+                </div>
+                {% endif %}
+
+                <!-- ADD COMMENT FORM (LOGIN REQUIRED) -->
+                {% if current_user or current_admin %}
+                <div class="journal-comment-form-box">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem; flex-wrap: wrap; gap: 0.5rem;">
+                        <span class="meta-label">// DISPATCH TECHNICAL OBSERVATION</span>
+                        <span class="meta-mono" style="font-size: 0.72rem; color: #00e5ff; font-weight: 700;">
+                            ● OPERATOR: {{ current_user.username if current_user else current_admin.username }} [{{ current_user.role if current_user else 'ADMIN' }}]
+                        </span>
+                    </div>
+                    <p style="font-size: 0.78rem; color: var(--muted); margin-bottom: 1.25rem;" class="meta-mono">
+                        🔒 AUDIT INTEGRITY: Submissions are held in the administrative review queue and published upon verification.
+                    </p>
+                    <form id="comment-dispatch-form" onsubmit="submitCommentForm(event, {{ post.id }})" method="POST" action="{{ url_for('api_add_post_comment', post_id=post.id) }}" style="display: flex; flex-direction: column; gap: 1rem;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+                            <div>
+                                <label class="meta-label" style="display: block; margin-bottom: 0.35rem;">CALLSIGN / OPERATOR NAME</label>
+                                <input type="text" id="comment-author-name" name="author_name" placeholder="e.g. RED_TEAM_LEAD" required readonly
+                                       value="{{ current_user.username if current_user else current_admin.username }}"
+                                       style="width: 100%; padding: 0.75rem 0.9rem; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.82rem; background: rgba(255,255,255,0.04); color: var(--text);">
+                            </div>
+                            <div>
+                                <label class="meta-label" style="display: block; margin-bottom: 0.35rem;">OPERATOR ROLE</label>
+                                <input type="text" id="comment-author-role" name="author_role" placeholder="e.g. SECURITY RESEARCHER" readonly
+                                       value="{{ current_user.role if current_user else 'ZERO-DAY RESEARCH UNIT' }}"
+                                       style="width: 100%; padding: 0.75rem 0.9rem; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.82rem; background: rgba(255,255,255,0.04); color: var(--text);">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="meta-label" style="display: block; margin-bottom: 0.35rem;">TECHNICAL OBSERVATION / VERIFICATION REPORT</label>
+                            <textarea id="comment-body-input" name="comment_body" rows="4" placeholder="Enter reproduction notes, vendor patch confirmation, or telemetry indicators..." required
+                                      style="width: 100%; padding: 0.85rem; border: 1px solid var(--border); font-family: var(--font-sans); font-size: 0.9rem; line-height: 1.5; background: var(--white);"></textarea>
+                        </div>
+                        <button type="submit" id="btn-submit-comment" class="btn btn-dark" style="align-self: flex-start; padding: 0.85rem 1.85rem; font-size: 0.75rem;">
+                            SUBMIT DISPATCH NOTE FOR ADMIN REVIEW →
+                        </button>
+                    </form>
+                </div>
+                {% else %}
+                <!-- LOGIN REQUIRED FOR VERIFICATION LOGS -->
+                <div class="journal-comment-auth-gate" style="padding: 2rem; background: var(--white); border: 1px dashed var(--border); text-align: center;">
+                    <div style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; background: rgba(0, 229, 255, 0.08); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 50%; color: #00e5ff; margin-bottom: 1rem;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </div>
+                    <span class="meta-label" style="display: block; margin-bottom: 0.5rem; color: #00e5ff;">// OPERATOR AUTHENTICATION REQUIRED</span>
+                    <h4 style="font-size: 1.1rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem;">
+                        LOG IN TO SUBMIT TECHNICAL VERIFICATION REPORTS
+                    </h4>
+                    <p style="font-size: 0.88rem; color: var(--muted); max-width: 480px; margin: 0 auto 1.5rem; line-height: 1.55;">
+                        To protect threat research integrity, only authenticated operators can submit technical observations, proof-of-concept reproductions, and telemetry indicators. Observations are reviewed by command before publication.
+                    </p>
+                    <div style="display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap;">
+                        <a href="{{ url_for('login_page', next=request.path) }}" class="btn btn-dark" style="padding: 0.75rem 1.6rem; font-size: 0.75rem;">
+                            OPERATOR LOGIN →
+                        </a>
+                        <a href="{{ url_for('register_page', next=request.path) }}" class="btn btn-outline-dark" style="padding: 0.75rem 1.6rem; font-size: 0.75rem;">
+                            CREATE ACCOUNT
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+
+        <!-- ========================================== -->
+        <!-- RIGHT COLUMN: STICKY INTEL & ARSENAL PANEL -->
+        <!-- ========================================== -->
+        <aside class="journal-sidebar-column">
+
+            <!-- ADVISORY MATRIX CARD -->
+            <div style="border: 1px solid var(--border); background: var(--white); padding: 1.75rem;">
+                <span class="meta-label" style="display: block; margin-bottom: 1rem;">// ADVISORY MATRIX</span>
+                
+                <div style="display: flex; flex-direction: column; gap: 0.95rem; font-size: 0.82rem;" class="meta-mono">
+                    <div style="display: flex; justify-content: space-between; padding-bottom: 0.65rem; border-bottom: 1px solid var(--border);">
+                        <span style="color: var(--muted);">CVE ID</span>
+                        <span style="font-weight: 700; color: var(--text);">{{ post.cve_id or 'PROPRIETARY' }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding-bottom: 0.65rem; border-bottom: 1px solid var(--border);">
+                        <span style="color: var(--muted);">CVSS 3.1 BASE</span>
+                        <span style="font-weight: 700; color: {% if post.severity == 'CRITICAL' or (post.cvss_score|float) >= 9.0 %}#991b1b{% else %}#854d0e{% endif %};">{{ post.cvss_score }} / 10.0</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding-bottom: 0.65rem; border-bottom: 1px solid var(--border);">
+                        <span style="color: var(--muted);">SEVERITY</span>
+                        <span style="font-weight: 700;">{{ post.severity }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding-bottom: 0.65rem; border-bottom: 1px solid var(--border);">
+                        <span style="color: var(--muted);">SURFACE</span>
+                        <span>{{ post.category }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding-bottom: 0.65rem; border-bottom: 1px solid var(--border);">
+                        <span style="color: var(--muted);">DISCLOSED</span>
+                        <span>{{ post.published_at[:10] }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--muted);">VERIFICATION</span>
+                        <span style="color: #15803d; font-weight: 700;">● REPRODUCED IN LAB</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QUICK AUDIT SYSTEMS -->
+            {% if linked_products %}
+            <div style="border: 1px solid var(--border); background: var(--white); padding: 1.75rem;">
+                <span class="meta-label" style="display: block; margin-bottom: 1rem;">// REPRODUCTION ARSENAL</span>
+                <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                    {% for lp in linked_products %}
+                    <div style="border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+                        <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 0.75rem;">
+                            {% if lp.image_url %}
+                            <img src="{{ lp.image_url }}" alt="{{ lp.name }}" style="width: 52px; height: 52px; object-fit: cover; border: 1px solid var(--border); flex-shrink: 0;">
+                            {% endif %}
+                            <div style="flex: 1; min-width: 0;">
+                                <a href="{{ url_for('product_detail', slug=lp.slug) }}" style="font-weight: 700; font-size: 0.85rem; text-transform: uppercase; color: var(--text); text-decoration: none; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    {{ lp.name }}
+                                </a>
+                                <div class="meta-mono" style="font-size: 0.8rem; color: var(--text); font-weight: 700; margin-top: 0.25rem;">
+                                    ${{ "%.0f"|format(lp.price) }}
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button type="button" class="btn btn-outline-dark" style="flex: 1; padding: 0.5rem 0.5rem; font-size: 0.7rem;" onclick="window.NFCart && window.NFCart.quickAdd({{ lp.id }})">
+                                + ADD TO BAG
+                            </button>
+                            <a href="{{ url_for('product_detail', slug=lp.slug) }}" class="btn btn-dark" style="padding: 0.5rem 0.85rem; font-size: 0.7rem;">
+                                VIEW →
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- RESEARCH CONCIERGE -->
+            <div style="border: 1px solid var(--border); background: var(--bg-alt); padding: 1.75rem;">
+                <span class="meta-label" style="display: block; margin-bottom: 0.65rem;">// RESEARCH CONCIERGE</span>
+                <p style="font-size: 0.84rem; color: var(--muted); line-height: 1.55; margin-bottom: 1.25rem;">
+                    Require custom exploit reproduction advisories, zero-day threat intelligence, or dedicated pen-testing tooling?
+                </p>
+                <a href="https://t.me/{{ site_settings.telegram_user.lstrip('@') }}" target="_blank" rel="noopener noreferrer" class="btn btn-dark" style="width: 100%; padding: 0.85rem 0.5rem; font-size: 0.74rem; text-align: center; display: block;">
+                    CONTACT RESEARCH DESK →
+                </a>
+            </div>
+
+        </aside>
+
+    </div>
+
+    <!-- 4. MORE ADVISORIES SECTION (FULL CONTAINER WIDTH MATCHING PRODUCT DETAIL PAGE) -->
+    {% if more_posts %}
+    <div style="margin-top: 6rem; border-top: 1px solid var(--border); padding-top: 4rem;">
+        <div class="section-header" style="margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <span class="meta-label">// INTEL RESEARCH ARCHIVE</span>
+                <h2 class="section-title" style="margin: 0.35rem 0 0 0; font-size: clamp(1.6rem, 3vw, 2.2rem);">MORE ADVISORIES</h2>
+            </div>
+            <a href="{{ url_for('blog') }}" class="link-arrow">
+                EXPLORE ALL ADVISORIES <span class="arrow-icon">→</span>
+            </a>
+        </div>
+
+        <div class="more-advisories-grid">
+            {% for mp in more_posts %}
+            <article class="journal-card" style="border: 1px solid var(--border); background: var(--white); display: flex; flex-direction: column;">
+                {% if mp.image_url %}
+                <a href="{{ url_for('post_detail', slug=mp.slug) }}" style="display: block; width: 100%; height: 210px; overflow: hidden; position: relative; background: var(--dark);">
+                    <img src="{{ mp.image_url }}" alt="{{ mp.title }}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 500ms var(--ease-out);" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <span class="badge-tag" style="position: absolute; top: 1rem; left: 1rem; background: rgba(243,242,238,0.95); font-weight: 700;">{{ mp.cve_id }}</span>
+                </a>
+                {% endif %}
+                <div style="padding: 1.5rem; display: flex; flex-direction: column; flex: 1;">
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.75rem;" class="meta-mono">
+                        <span class="meta-label">{{ mp.category }}</span>
+                        <span style="font-size: 0.72rem; color: var(--muted);">CVSS {{ mp.cvss_score }}</span>
+                    </div>
+                    <h3 style="font-size: 1.05rem; font-weight: 700; text-transform: uppercase; margin: 0 0 0.75rem 0; line-height: 1.35;">
+                        <a href="{{ url_for('post_detail', slug=mp.slug) }}" style="color: var(--text); text-decoration: none;">{{ mp.title }}</a>
+                    </h3>
+                    <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.55; margin: 0 0 1.25rem 0; flex: 1; text-align: justify; text-justify: inter-word;">
+                        {{ mp.summary[:130] }}...
+                    </p>
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; border-top: 1px solid var(--border); padding-top: 1rem;" class="meta-mono">
+                        <span style="font-size: 0.74rem; color: var(--muted);">{{ mp.published_at[:10] }}</span>
+                        <a href="{{ url_for('post_detail', slug=mp.slug) }}" class="link-arrow" style="font-size: 0.75rem; font-weight: 700;">READ ADVISORY →</a>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+async function submitCommentForm(e, postId) {
+    e.preventDefault();
+    const btn = document.getElementById('btn-submit-comment');
+    const originalText = btn ? btn.textContent : 'SUBMIT DISPATCH NOTE →';
+    const bodyInput = document.getElementById('comment-body-input');
+    const authorInput = document.getElementById('comment-author-name');
+    const roleInput = document.getElementById('comment-author-role');
+    const alertBox = document.getElementById('comment-status-alert');
+    const alertMsg = document.getElementById('comment-status-alert-body');
+
+    const bodyVal = (bodyInput.value || '').trim();
+    if (!bodyVal) {
+        alert('Please enter a verification observation report.');
+        return;
+    }
+
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'DISPATCHING TO CONTROL...';
+    }
+
+    try {
+        const res = await fetch(`/api/posts/${postId}/comments`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                author_name: (authorInput ? authorInput.value : '').trim(),
+                author_role: (roleInput ? roleInput.value : '').trim(),
+                body: bodyVal
+            })
+        });
+        const data = await res.json();
+        if (res.status === 401 || data.error === 'AUTH_REQUIRED') {
+            alert('Authentication Required: Please log in as an operator to submit a verification note.');
+            window.location.href = '/login?next=' + encodeURIComponent(window.location.pathname);
+            return;
+        }
+        if (data.ok) {
+            bodyInput.value = '';
+            if (alertBox) {
+                if (data.message && alertMsg) {
+                    alertMsg.textContent = data.message;
+                }
+                alertBox.style.display = 'block';
+                alertBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            if (btn) {
+                btn.textContent = 'LOG DISPATCHED ✓';
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+                }, 3000);
+            }
+        } else {
+            alert('Submission error: ' + (data.error || 'Failed to submit observation.'));
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
+    } catch(err) {
+        alert('Network error while dispatching observation: ' + err.message);
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = originalText;
+        }
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,71 @@
+<section id="mod-products" class="admin-module">
+            <div class="module-header">
+                <div>
+                    <h2 class="module-title">SECURITY ARSENAL CATALOG</h2>
+                    <p style="font-size:12px; color:var(--admin-muted); margin-top:2px;">
+                        Manage digital licenses, pricing, build versions, and cryptographic SHA-256 integrity checksums.
+                    </p>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    {% if current_admin and current_admin.role == 'ADMIN' %}
+                    <button type="button" class="btn-admin btn-admin-outline" onclick="switchFeature('products', 'curation')" style="border-color:#00e5ff; color:#00e5ff; display:inline-flex; align-items:center; gap:6px;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        <span>HOMEPAGE 4-SYSTEM SHOWCASE</span>
+                    </button>
+                    {% endif %}
+                    <button type="button" class="btn-admin btn-admin-primary" onclick="openProductStudio()">
+                        + ADD NEW SYSTEM (DEDICATED STUDIO)
+                    </button>
+                </div>
+            </div>
+
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>SKU</th>
+                            <th>SYSTEM NAME</th>
+                            <th>CATEGORY</th>
+                            <th>PRICE / RETAIL</th>
+                            <th>VERSION</th>
+                            <th>PLATFORMS</th>
+                            <th>SHA-256 HASH</th>
+                            <th style="text-align:right;">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody style="font-family: var(--admin-font-mono); font-size:12px;">
+                        {% for p in products %}
+                        <tr>
+                            <td style="font-weight:700;">{{ p.sku }}</td>
+                            <td>
+                                <a href="{{ url_for('product_detail', slug=p.slug) }}" target="_blank" style="color:#fff; text-decoration:none; font-weight:600;">
+                                    {{ p.name }}
+                                </a>
+                            </td>
+                            <td>{{ p.category }}</td>
+                            <td>
+                                ${{ "%.0f"|format(p.price) }}
+                                <span style="color:var(--admin-muted); text-decoration:line-through; font-size:11px;">${{ "%.0f"|format(p.retail_price) }}</span>
+                            </td>
+                            <td>{{ p.version }}</td>
+                            <td style="font-size:11px; color:var(--admin-muted);">{{ p.platform }}</td>
+                            <td style="font-size:10px; max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--admin-muted);">
+                                {{ p.sha256_hash }}
+                            </td>
+                            <td style="text-align:right; white-space:nowrap;">
+                                <script id="product-data-{{ p.id }}" type="application/json">{{ p|tojson|safe }}</script>
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:0.35rem 0.65rem;"
+                                        onclick="openProductStudioForId({{ p.id }})">
+                                    EDIT (STUDIO)
+                                </button>
+                                <button type="button" class="btn-admin btn-admin-danger" style="padding:0.35rem 0.65rem; margin-left:4px;"
+                                        onclick="deleteProduct({{ p.id }}, '{{ p.name }}')">
+                                    DEL
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>

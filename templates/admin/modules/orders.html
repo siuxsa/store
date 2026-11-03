@@ -1,0 +1,79 @@
+<section id="mod-orders" class="admin-module">
+            <div class="module-header">
+                <div>
+                    <h2 class="module-title">ORDER TICKETS &amp; PROVISIONING DISPATCH</h2>
+                    <p style="font-size:12px; color:var(--admin-muted); margin-top:2px;">
+                        Manage customer purchases, confirm Telegram transfers, and fulfill cryptographically unlocked keys.
+                    </p>
+                </div>
+                <div style="display:flex; gap:6px; align-items:center;">
+                    <button type="button" class="btn-admin btn-admin-outline order-filter-btn active" onclick="filterAdminOrders('ALL', this)" style="padding:0.35rem 0.75rem; font-size:11px;">
+                        ALL ({{ orders|length }})
+                    </button>
+                    <button type="button" class="btn-admin btn-admin-outline order-filter-btn" onclick="filterAdminOrders('PENDING', this)" style="padding:0.35rem 0.75rem; font-size:11px; border-color:#f59e0b; color:#f59e0b;">
+                        PENDING
+                    </button>
+                    <button type="button" class="btn-admin btn-admin-outline order-filter-btn" onclick="filterAdminOrders('COMPLETED', this)" style="padding:0.35rem 0.75rem; font-size:11px; border-color:#10b981; color:#10b981;">
+                        COMPLETED
+                    </button>
+                </div>
+            </div>
+
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>TICKET #</th>
+                            <th>TIMESTAMP</th>
+                            <th>BUYER TELEGRAM</th>
+                            <th>ITEMS &amp; SKU</th>
+                            <th>TOTAL</th>
+                            <th>STATUS</th>
+                            <th>PROVISIONED KEY</th>
+                            <th style="text-align:right;">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody style="font-family: var(--admin-font-mono);">
+                        {% for o in orders %}
+                        <tr>
+                            <td style="font-weight:700;">{{ o.order_number }}</td>
+                            <td style="color:var(--admin-muted); font-size:11px;">{{ o.created_at[:16] }}</td>
+                            <td>
+                                <a href="https://t.me/{{ o.buyer_telegram.lstrip('@') }}" target="_blank" style="color:#fff; text-decoration:underline;">
+                                    {{ o.buyer_telegram }}
+                                </a>
+                            </td>
+                            <td>
+                                {% for it in o['items'] %}
+                                <div style="font-size:11px;">• {{ it.name }} ({{ it.sku }}) x{{ it.qty }}</div>
+                                {% endfor %}
+                            </td>
+                            <td style="font-weight:700;">${{ "%.2f"|format(o.total_amount) }}</td>
+                            <td>
+                                {% if o.status == 'COMPLETED' %}
+                                <span class="status-pill completed">COMPLETED</span>
+                                {% elif o.status == 'PENDING_TELEGRAM' %}
+                                <span class="status-pill pending">PENDING</span>
+                                {% else %}
+                                <span class="status-pill">{{ o.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td style="font-size:11px; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                {{ o.fulfilled_license_info or '—' }}
+                            </td>
+                            <td style="text-align:right; white-space:nowrap;">
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:0.35rem 0.65rem;"
+                                        onclick="openFulfillModal({{ o.id }}, '{{ o.order_number }}', '{{ o.status }}', '{{ o.fulfilled_license_info|replace('\'', '\\\'') }}')">
+                                    FULFILL / EDIT
+                                </button>
+                                <button type="button" class="btn-admin btn-admin-danger" style="padding:0.35rem 0.65rem; margin-left:4px;"
+                                        onclick="deleteOrder({{ o.id }}, '{{ o.order_number }}')">
+                                    DEL
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>

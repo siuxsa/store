@@ -1,0 +1,180 @@
+<div id="modal-product" class="admin-modal">
+        <div class="admin-modal-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; padding-bottom:0.75rem; border-bottom:1px solid var(--admin-border);">
+                <h3 id="prod-modal-title" style="font-size:16px; font-weight:700; text-transform:uppercase;">SYSTEM DETAILS</h3>
+                <button type="button" onclick="closeModal('modal-product')" class="btn-admin btn-admin-outline" style="padding:0.25rem 0.6rem; display:inline-flex; align-items:center;">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <form onsubmit="submitProduct(event)" style="display:flex; flex-direction:column; gap:1.25rem;">
+                <input type="hidden" id="prod-id">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">SKU</label>
+                        <input type="text" id="prod-sku" class="form-input" required placeholder="e.g. LIC-BURP-PRO">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">SYSTEM NAME</label>
+                        <input type="text" id="prod-name" class="form-input" required placeholder="Burp Suite Professional">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">CATEGORY</label>
+                        <input type="text" id="prod-category" class="form-input" required placeholder="Web & AppSec">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">PRICE ($)</label>
+                        <input type="number" step="0.01" id="prod-price" class="form-input" required placeholder="149">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">RETAIL PRICE ($)</label>
+                        <input type="number" step="0.01" id="prod-retail" class="form-input" placeholder="475">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">BUILD VERSION</label>
+                        <input type="text" id="prod-version" class="form-input" placeholder="v2026.10">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">LICENSE DURATION</label>
+                        <input type="text" id="prod-duration" class="form-input" placeholder="1-Year Pro Multi-Seat">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">PLATFORMS</label>
+                        <input type="text" id="prod-platform" class="form-input" placeholder="Windows / Linux / macOS">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">IMAGE URL</label>
+                    <div style="display:flex; gap:0.5rem;">
+                        <input type="text" id="prod-image" class="form-input" placeholder="https://images.unsplash.com/..." style="flex:1;">
+                        <label class="btn-admin btn-admin-outline" style="cursor:pointer; padding:0.5rem 0.85rem; font-size:10px; white-space:nowrap; display:inline-flex; align-items:center; gap:4px;" title="Upload picture from your device">
+                            <span>UPLOAD</span>
+                            <input type="file" accept="image/*" style="display:none;" onchange="handleImageFileUpload(this, 'product')">
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">SHA-256 HASH</label>
+                    <input type="text" id="prod-sha256" class="form-input" placeholder="8f4e2b91a04d...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">SHORT DESCRIPTION</label>
+                    <textarea id="prod-desc" rows="2" class="form-textarea" placeholder="Enterprise Web Vulnerability Scanner..."></textarea>
+                </div>
+
+                <!-- DEDICATED PRODUCT SEO & SOCIAL METADATA -->
+                <div style="border-top:1px solid var(--admin-border); margin-top:0.75rem; padding-top:1rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                        <span style="font-family:var(--admin-font-mono); font-size:11px; font-weight:700; color:#00e5ff; letter-spacing:0.06em; text-transform:uppercase;">
+                            // DEDICATED SYSTEM SEO &amp; SOCIAL SHARE
+                        </span>
+                        <span style="font-family:var(--admin-font-mono); font-size:9.5px; color:var(--admin-muted);">
+                            AUTO-FALLBACK IF LEFT BLANK
+                        </span>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0.75rem;">
+                        <label class="form-label">DEDICATED SEARCH TITLE (META TITLE)</label>
+                        <input type="text" id="prod-meta-title" class="form-input" placeholder="Default: [Name] ([SKU]) — Enterprise License // ZERO//FORM">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0.75rem;">
+                        <label class="form-label">DEDICATED META DESCRIPTION</label>
+                        <textarea id="prod-meta-desc" rows="2" class="form-textarea" placeholder="Default: Uses product short description automatically..."></textarea>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0.75rem;">
+                        <label class="form-label">DEDICATED KEYWORDS (COMMA-SEPARATED)</label>
+                        <input type="text" id="prod-meta-keywords" class="form-input" placeholder="Default: [Name], [SKU], [Category], [Platform], cyber security software">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">CUSTOM SOCIAL SHARE IMAGE (OG:IMAGE)</label>
+                        <div style="display:flex; gap:0.5rem;">
+                            <input type="text" id="prod-og-image" class="form-input" placeholder="Default: Uses system image automatically..." style="flex:1;">
+                            <label class="btn-admin btn-admin-outline" style="cursor:pointer; padding:0.5rem 0.85rem; font-size:10px; white-space:nowrap; display:inline-flex; align-items:center; gap:4px;" title="Upload picture directly from your device">
+                                <span>UPLOAD</span>
+                                <input type="file" accept="image/*" style="display:none;" onchange="handleImageFileUpload(this, 'product-og')">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DEDICATED IN-ARTICLE SMART AD SYSTEM -->
+                <div style="border-top:1px solid var(--admin-border); margin-top:0.75rem; padding-top:1rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                        <span style="font-family:var(--admin-font-mono); font-size:11px; font-weight:700; color:#00e5ff; letter-spacing:0.06em; text-transform:uppercase;">
+                            // IN-ARTICLE SMART AD BANNER CUSTOMIZATION
+                        </span>
+                        <span style="font-family:var(--admin-font-mono); font-size:9.5px; color:var(--admin-muted);">
+                            AUTO-FALLBACK TO SYSTEM SPECS IF BLANK
+                        </span>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0.75rem;">
+                        <label class="form-label">CUSTOM AD HEADLINE</label>
+                        <input type="text" id="prod-ad-headline" class="form-input" placeholder="Default: Uses product name...">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0.75rem;">
+                        <label class="form-label">TWO-LINE AD DESCRIPTION</label>
+                        <textarea id="prod-ad-desc" rows="2" class="form-textarea" placeholder="Default: Uses product short description..."></textarea>
+                    </div>
+                    <div class="form-grid" style="margin-bottom:0.75rem;">
+                        <div class="form-group">
+                            <label class="form-label">CUSTOM DISCOUNT / TAG BADGE</label>
+                            <input type="text" id="prod-ad-badge" class="form-input" placeholder="e.g. SAVE 90% OFF">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">CUSTOM CTA BUTTON TEXT</label>
+                            <input type="text" id="prod-ad-cta" class="form-input" placeholder="e.g. ORDER VIA TELEGRAM →">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">CUSTOM AD BACKGROUND IMAGE (URL OR UPLOAD)</label>
+                        <div style="display:flex; gap:0.5rem;">
+                            <input type="text" id="prod-ad-image" class="form-input" placeholder="Default: Uses system cover image..." style="flex:1;">
+                            <label class="btn-admin btn-admin-outline" style="cursor:pointer; padding:0.5rem 0.85rem; font-size:10px; white-space:nowrap; display:inline-flex; align-items:center; gap:4px;" title="Upload photo directly from your device">
+                                <span>UPLOAD</span>
+                                <input type="file" accept="image/*" style="display:none;" onchange="handleImageFileUpload(this, 'product-ad-bg')">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CORE SYSTEM SPECIFICATIONS (LINE BY LINE) -->
+                <div style="border-top:1px solid var(--admin-border); margin-top:0.75rem; padding-top:1rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                        <span style="font-family:var(--admin-font-mono); font-size:11px; font-weight:700; color:#00e5ff; letter-spacing:0.06em; text-transform:uppercase;">
+                            // CORE SYSTEM SPECIFICATIONS (LINE BY LINE)
+                        </span>
+                        <button type="button" onclick="addModalSpecRow()" class="btn-admin btn-admin-outline" style="border-color:#00e5ff; color:#00e5ff; padding:0.25rem 0.6rem; font-size:10px; font-weight:700;">
+                            + ADD SPEC ITEM
+                        </button>
+                    </div>
+                    <div id="modal-specs-container" style="display:flex; flex-direction:column; gap:0.5rem;">
+                        <!-- Dynamic modal specs rows -->
+                    </div>
+                </div>
+
+                <!-- FULL TECHNICAL DESCRIPTION (MARKDOWN) -->
+                <div class="form-group" style="margin-top:0.75rem;">
+                    <label class="form-label">FULL TECHNICAL DESCRIPTION (MARKDOWN MANUAL)</label>
+                    <textarea id="prod-description" rows="4" class="form-textarea" placeholder="### 01 · System Architecture..."></textarea>
+                </div>
+
+                <!-- DEDICATED PRODUCT FAQ SECTION -->
+                <div style="border-top:1px solid var(--admin-border); margin-top:0.75rem; padding-top:1rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                        <span style="font-family:var(--admin-font-mono); font-size:11px; font-weight:700; color:#10b981; letter-spacing:0.06em; text-transform:uppercase;">
+                            // PER-PRODUCT FAQ &amp; ACCORDIONS
+                        </span>
+                        <button type="button" onclick="addModalFaqRow()" class="btn-admin btn-admin-outline" style="border-color:#10b981; color:#10b981; padding:0.25rem 0.6rem; font-size:10px; font-weight:700;">
+                            + ADD FAQ ITEM
+                        </button>
+                    </div>
+                    <div id="modal-faq-container" style="display:flex; flex-direction:column; gap:0.75rem;">
+                        <!-- Dynamic modal FAQ rows -->
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1rem;">
+                    <button type="button" onclick="closeModal('modal-product')" class="btn-admin btn-admin-outline">CANCEL</button>
+                    <button type="submit" class="btn-admin btn-admin-primary">SAVE SYSTEM →</button>
+                </div>
+            </form>
+        </div>
+    </div>

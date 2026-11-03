@@ -1,0 +1,108 @@
+<section id="mod-comments" class="admin-module">
+            <div class="module-header">
+                <div>
+                    <h2 class="module-title">JOURNAL VERIFICATION LOGS &amp; PEER ASSESSMENTS</h2>
+                    <p style="font-size:12px; color:var(--admin-muted); margin-top:2px;">
+                        Audit, approve, or reject technical reproduction notes and observations submitted by operators on threat research dispatches.
+                    </p>
+                </div>
+            </div>
+
+            <!-- COMMENT STATS -->
+            <div class="stat-grid" style="margin-bottom:1.5rem;">
+                <div class="stat-card">
+                    <div class="stat-label">TOTAL VERIFICATION NOTES</div>
+                    <div class="stat-value" style="color:#00e5ff;">{{ comments_list|length }}</div>
+                    <div class="stat-sub">Across all research dispatches</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">PENDING APPROVAL</div>
+                    <div class="stat-value" style="color:{% if pending_comments_count %}#f59e0b{% else %}var(--admin-muted){% endif %}; font-weight:700;">{{ pending_comments_count }}</div>
+                    <div class="stat-sub">Awaiting admin review before publication</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">APPROVED &amp; LIVE</div>
+                    <div class="stat-value" style="color:#10b981;">{{ comments_list|selectattr('status', 'equalto', 'APPROVED')|list|length }}</div>
+                    <div class="stat-sub">Active in public journal dispatches</div>
+                </div>
+            </div>
+
+            <!-- COMMENTS TABLE -->
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>STATUS</th>
+                            <th>RESEARCH DISPATCH</th>
+                            <th>OPERATOR / CALLSIGN</th>
+                            <th>OBSERVATION DEBRIEF</th>
+                            <th>TIMESTAMP</th>
+                            <th style="text-align:right;">MODERATION ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in comments_list %}
+                        <tr id="comment-row-{{ c.id }}" style="{% if c.status == 'PENDING' %}background:rgba(245,158,11,0.04);{% endif %}">
+                            <td>
+                                {% if c.status == 'APPROVED' %}
+                                <span class="status-pill completed" style="font-size:10px; background:rgba(16,185,129,0.15); color:#10b981; border:1px solid #10b981;">
+                                    APPROVED
+                                </span>
+                                {% elif c.status == 'PENDING' %}
+                                <span class="status-pill pending" style="font-size:10px; background:rgba(245,158,11,0.18); color:#f59e0b; border:1px solid #f59e0b; font-weight:700;">
+                                    PENDING REVIEW
+                                </span>
+                                {% else %}
+                                <span class="status-pill cancelled" style="font-size:10px; background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid #ef4444;">
+                                    REJECTED
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td style="max-width:240px;">
+                                {% if c.post_slug %}
+                                <a href="{{ url_for('post_detail', slug=c.post_slug) }}" target="_blank" style="color:#00e5ff; font-weight:600; text-decoration:none; font-size:12px; display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                    {{ c.post_title or c.post_slug }} ↗
+                                </a>
+                                {% else %}
+                                <span style="color:var(--admin-muted); font-size:11px;">Post #{{ c.post_id }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div style="font-weight:700; color:#fff;">{{ c.author_name }}</div>
+                                <div style="font-size:11px; color:var(--admin-muted); font-family:var(--admin-font-mono);">{{ c.author_role }}</div>
+                            </td>
+                            <td style="max-width:380px;">
+                                <div style="font-size:12px; color:var(--admin-text); line-height:1.45; word-break:break-word; text-align:justify; text-justify:inter-word;">
+                                    {{ c.body }}
+                                </div>
+                            </td>
+                            <td style="color:var(--admin-muted); font-size:11px; white-space:nowrap; font-family:var(--admin-font-mono);">
+                                {{ c.created_at[:16] }}
+                            </td>
+                            <td style="text-align:right; white-space:nowrap;">
+                                {% if c.status != 'APPROVED' %}
+                                <button type="button" class="btn-admin btn-admin-primary" style="padding:0.35rem 0.65rem; background:#10b981; border-color:#10b981; color:#000; font-weight:700;" onclick="updateCommentStatus({{ c.id }}, 'APPROVED')">
+                                    APPROVE
+                                </button>
+                                {% endif %}
+                                {% if c.status != 'REJECTED' %}
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:0.35rem 0.65rem; color:#f59e0b; border-color:rgba(245,158,11,0.4); margin-left:4px;" onclick="updateCommentStatus({{ c.id }}, 'REJECTED')">
+                                    REJECT
+                                </button>
+                                {% endif %}
+                                <button type="button" class="btn-admin btn-admin-danger" style="padding:0.35rem 0.65rem; margin-left:4px;" onclick="deleteComment({{ c.id }})">
+                                    DEL
+                                </button>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" style="text-align:center; padding:3rem; color:var(--admin-muted);">
+                                // NO VERIFICATION OBSERVATIONS LOGGED ACROSS THREAT INTEL DISPATCHES.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>

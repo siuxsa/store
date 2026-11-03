@@ -1,0 +1,237 @@
+/* ==========================================================================
+   NORTH//FORM — RESPONSIVE ARCHITECTURE SYSTEM
+   Breakpoints: 1440px, 1280px, 1024px, 768px, 600px, 480px, 390px, 375px
+   ========================================================================== */
+
+@media (max-width: 1280px) {
+    .product-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .editorial-intro-grid {
+        grid-template-columns: 240px 1fr;
+    }
+
+    .shop-layout {
+        grid-template-columns: 220px 1fr;
+        gap: 2rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    .nav-center {
+        display: none;
+    }
+
+    .hamburger-btn {
+        display: inline-flex;
+    }
+
+    .header-inner {
+        grid-template-columns: 1fr auto 1fr;
+    }
+
+    .header-left {
+        justify-self: start;
+    }
+
+    .brand-logo-center-mobile {
+        justify-self: center;
+    }
+
+    .hero-content {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .hero-meta-block {
+        justify-self: start;
+        max-width: 540px;
+    }
+
+    .editorial-intro-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+
+    .category-strip-list {
+        display: flex;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .category-strip-list::-webkit-scrollbar {
+        display: none;
+    }
+
+    .category-strip-item {
+        flex: 0 0 240px;
+    }
+
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .tech-features-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .tech-feature-card:nth-child(2) {
+        border-right: none;
+    }
+
+    .tech-feature-card:nth-child(1),
+    .tech-feature-card:nth-child(2) {
+        border-bottom: 1px solid var(--border);
+    }
+
+    .featured-system-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .journal-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .footer-top-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2.5rem;
+    }
+
+    .shop-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .shop-sidebar {
+        position: static;
+        display: none;
+        background-color: var(--bg-alt);
+        padding: 1.5rem;
+        border: 1px solid var(--border);
+        margin-bottom: 1.5rem;
+    }
+
+    .shop-sidebar.is-open {
+        display: flex;
+    }
+
+    .mobile-filter-toggle {
+        display: inline-flex !important;
+    }
+
+    .pdp-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .pdp-info-panel {
+        position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    :root {
+        --header-h: 66px;
+    }
+
+    .announcement-bar .hide-mobile {
+        display: none;
+    }
+
+    .announcement-bar {
+        justify-content: center;
+    }
+
+    .split-panels {
+        grid-template-columns: 1fr;
+    }
+
+    .split-panel {
+        height: 58vh;
+        min-height: 400px;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .newsletter-grid {
+        grid-template-columns: 1fr;
+        gap: 1.75rem;
+    }
+
+    .journal-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .quick-add-btn {
+        opacity: 1;
+        transform: translateY(0);
+        padding: 0.6rem 0.75rem;
+        font-size: 0.64rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem 0.85rem;
+    }
+
+    .tech-features-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tech-feature-card {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        min-height: auto;
+        padding: 2rem 1.25rem;
+    }
+
+    .tech-feature-card:last-child {
+        border-bottom: none;
+    }
+
+    .footer-top-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .cart-drawer {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .hero-actions .btn {
+        width: 100%;
+    }
+
+    .header-action .action-text-hide {
+        display: none;
+    }
+
+    .header-right {
+        gap: 1rem;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.85rem;
+    }
+}

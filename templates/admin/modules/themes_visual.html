@@ -1,0 +1,154 @@
+<section id="mod-themes-visual" class="admin-module">
+    <div class="module-header">
+        <div>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <h2 class="module-title">VISUAL INSPECT STUDIO // LIVE STORE ENGINE</h2>
+                <span class="status-pill completed" style="font-size:10px;">RESPONSIVE CANVAS READY</span>
+            </div>
+            <p style="font-size:12px; color:var(--admin-muted); margin-top:2px;">
+                Visually inspect and test the live storefront on Desktop, Tablet, and Mobile viewports with interactive point-and-click element inspection.
+            </p>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.65rem;">
+            <button type="button" class="btn-admin btn-admin-outline" onclick="switchFeature('system', 'themes-text')" style="border-color:#10b981; color:#10b981; font-weight:700; display:inline-flex; align-items:center;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" style="margin-right:5px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                <span>TEXT-BASED EDIT MODE →</span>
+            </button>
+            <button type="button" class="btn-admin btn-admin-outline" onclick="switchFeature('system', 'seo')" style="border-color:#00e5ff; color:#00e5ff; display:inline-flex; align-items:center;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" style="margin-right:5px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <span>LIVE SEO STUDIO</span>
+            </button>
+            <button type="button" class="btn-admin btn-admin-outline" onclick="refreshThemePreview()" style="display:inline-flex; align-items:center; gap:4px;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                <span>RELOAD</span>
+            </button>
+            <a id="theme-open-external-btn" href="/" target="_blank" class="btn-admin btn-admin-outline" style="text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+                <span>OPEN WINDOW</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- PAGE ROUTE SWITCHER STRIP FOR LIVE CANVAS -->
+    <div class="module-subnav" style="margin-bottom:1rem;">
+        <button type="button" class="subnav-btn active" onclick="switchVisualCanvasPage('home', '/', this)">
+            [01] HOME PAGE (/)
+        </button>
+        <button type="button" class="subnav-btn" onclick="switchVisualCanvasPage('about', '/about', this)">
+            [02] ABOUT &amp; MANIFESTO (/about)
+        </button>
+        <button type="button" class="subnav-btn" onclick="switchVisualCanvasPage('shop', '/shop', this)">
+            [03] DIGITAL ARSENAL (/shop)
+        </button>
+        <button type="button" class="subnav-btn" onclick="switchVisualCanvasPage('journal', '/journal', this)">
+            [04] THREAT JOURNAL (/journal)
+        </button>
+        <button type="button" class="subnav-btn" onclick="switchVisualCanvasPage('request', '/request', this)">
+            [05] REQUEST TOOL (/request)
+        </button>
+    </div>
+
+    <!-- DEDICATED VISUAL CANVAS WRAPPER -->
+    <div class="theme-viewport-wrap" style="width:100%;">
+        <div class="theme-viewport-toolbar">
+            <div style="display:flex; align-items:center; gap:0.65rem; flex-wrap:wrap;">
+                <div style="display:inline-flex; align-items:center; gap:0.45rem;">
+                    <span class="live-pulse"></span>
+                    <span style="font-family:var(--admin-font-mono); font-size:11px; font-weight:700; color:#fff;">
+                        CANVAS: <span id="theme-preview-url-label" style="color:var(--admin-accent-green);">/ (HOME PAGE)</span>
+                    </span>
+                </div>
+
+                <!-- POINT & CLICK INSPECT MODE TOGGLE -->
+                <button type="button" id="btn-inspect-mode" class="btn-inspect-toggle" onclick="toggleInspectMode()" title="Click any element in preview to open quick edit popup">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="22" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg>
+                    <span id="inspect-mode-text">INSPECT &amp; EDIT: ON</span>
+                </button>
+            </div>
+
+            <!-- RESPONSIVE DEVICE TOGGLES & ZOOM SCALE -->
+            <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
+                <div class="theme-device-bar">
+                    <button type="button" class="theme-device-btn active" onclick="setThemeDevice('desktop', this)" title="Full Desktop View (1280px)">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x2="12" y1="17" x2="12" y2="21"/></svg>
+                        DESKTOP (1280px)
+                    </button>
+                    <button type="button" class="theme-device-btn" onclick="setThemeDevice('tablet', this)" title="Tablet (768px)">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                        TABLET (768px)
+                    </button>
+                    <button type="button" class="theme-device-btn" onclick="setThemeDevice('mobile', this)" title="Mobile Phone (390px)">
+                        <svg width="11" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                        MOBILE (390px)
+                    </button>
+                </div>
+
+                <!-- ZOOM / SCALE CONTROLS -->
+                <div class="theme-scale-bar" id="theme-scale-controls">
+                    <span style="font-family:var(--admin-font-mono); font-size:10px; color:var(--admin-muted); padding:0 4px;">ZOOM:</span>
+                    <button type="button" class="theme-scale-btn active" onclick="setThemeScale('fit', this)">FIT</button>
+                    <button type="button" class="theme-scale-btn" onclick="setThemeScale('80', this)">80%</button>
+                    <button type="button" class="theme-scale-btn" onclick="setThemeScale('100', this)">100%</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISUAL THEME QUICK COLOR BAR -->
+        <div style="padding:0.5rem 1.25rem; background:rgba(0,0,0,0.65); border-bottom:1px solid var(--admin-border); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.75rem;">
+            <div style="display:flex; align-items:center; gap:0.85rem; flex-wrap:wrap;">
+                <span style="font-family:var(--admin-font-mono); font-size:11px; font-weight:700; color:#00e5ff; letter-spacing:0.06em; text-transform:uppercase;">LIVE COLOR PALETTE:</span>
+                
+                <div style="display:flex; align-items:center; gap:5px;">
+                    <span style="font-family:var(--admin-font-mono); font-size:10px; color:var(--admin-muted);">BG:</span>
+                    <input type="color" id="quick-theme_bg_color" value="{{ site_settings.theme_bg_color or '#f3f2ee' }}" style="width:24px; height:24px; padding:0; background:transparent; border:1px solid var(--admin-border); cursor:pointer;" oninput="onColorControlSync('theme_bg_color', this.value)" title="Storefront Background Color">
+                </div>
+
+                <div style="display:flex; align-items:center; gap:5px;">
+                    <span style="font-family:var(--admin-font-mono); font-size:10px; color:var(--admin-muted);">TEXT:</span>
+                    <input type="color" id="quick-theme_text_color" value="{{ site_settings.theme_text_color or '#111111' }}" style="width:24px; height:24px; padding:0; background:transparent; border:1px solid var(--admin-border); cursor:pointer;" oninput="onColorControlSync('theme_text_color', this.value)" title="Storefront Text Color">
+                </div>
+
+                <div style="display:flex; align-items:center; gap:5px;">
+                    <span style="font-family:var(--admin-font-mono); font-size:10px; color:var(--admin-muted);">DARK:</span>
+                    <input type="color" id="quick-theme_dark_color" value="{{ site_settings.theme_dark_color or '#101010' }}" style="width:24px; height:24px; padding:0; background:transparent; border:1px solid var(--admin-border); cursor:pointer;" oninput="onColorControlSync('theme_dark_color', this.value)" title="Dark Surface / Buttons">
+                </div>
+
+                <div style="display:flex; align-items:center; gap:5px;">
+                    <span style="font-family:var(--admin-font-mono); font-size:10px; color:var(--admin-muted);">CYAN:</span>
+                    <input type="color" id="quick-accent_cyan_color" value="{{ site_settings.accent_cyan_color or '#00e5ff' }}" style="width:24px; height:24px; padding:0; background:transparent; border:1px solid var(--admin-border); cursor:pointer;" oninput="onColorControlSync('accent_cyan_color', this.value)" title="Accent Cyan Color">
+                </div>
+
+                <div style="display:flex; align-items:center; gap:5px;">
+                    <span style="font-family:var(--admin-font-mono); font-size:10px; color:var(--admin-muted);">GREEN:</span>
+                    <input type="color" id="quick-accent_green_color" value="{{ site_settings.accent_green_color or '#10b981' }}" style="width:24px; height:24px; padding:0; background:transparent; border:1px solid var(--admin-border); cursor:pointer;" oninput="onColorControlSync('accent_green_color', this.value)" title="Accent Green Color">
+                </div>
+
+                <div style="display:flex; align-items:center; gap:5px;">
+                    <span style="font-family:var(--admin-font-mono); font-size:10px; color:var(--admin-muted);">AMBER:</span>
+                    <input type="color" id="quick-accent_amber_color" value="{{ site_settings.accent_amber_color or '#f59e0b' }}" style="width:24px; height:24px; padding:0; background:transparent; border:1px solid var(--admin-border); cursor:pointer;" oninput="onColorControlSync('accent_amber_color', this.value)" title="Accent Amber Color">
+                </div>
+
+                <div style="display:flex; align-items:center; gap:4px; margin-left:6px;">
+                    <button type="button" class="theme-preset-btn" style="padding:2px 6px; font-size:9.5px;" onclick="applyColorPalettePreset('#f3f2ee', '#111111', '#101010', '#00e5ff', '#10b981', '#f59e0b')">DEFAULT</button>
+                    <button type="button" class="theme-preset-btn" style="padding:2px 6px; font-size:9.5px;" onclick="applyColorPalettePreset('#0b0c0e', '#f0f0f2', '#141619', '#00e5ff', '#10b981', '#f59e0b')">DARK</button>
+                    <button type="button" class="theme-preset-btn" style="padding:2px 6px; font-size:9.5px;" onclick="applyColorPalettePreset('#080d0a', '#dcfce7', '#0f1f14', '#22c55e', '#10b981', '#facc15')">MATRIX</button>
+                </div>
+            </div>
+
+            <div>
+                <button type="button" id="btn-save-colors-quick" class="btn-admin btn-admin-primary" onclick="saveThemeStudio()" style="padding:0.35rem 0.85rem; font-size:10px; background:#10b981; border-color:#10b981; color:#000; font-weight:700;">
+                    SAVE COLORS
+                </button>
+            </div>
+        </div>
+
+        <!-- CANVAS STAGE -->
+        <div class="theme-stage-canvas" id="theme-stage-canvas" style="min-height:760px;">
+            <div id="theme-frame-scaler" class="theme-frame-scaler">
+                <div id="theme-frame-container" class="theme-viewport-frame device-desktop">
+                    <iframe id="theme-preview-iframe" src="/" title="Interactive Live Store Preview" onload="onThemeIframeLoaded()"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,29 @@
+<div id="modal-fulfill" class="admin-modal">
+        <div class="admin-modal-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; padding-bottom:0.75rem; border-bottom:1px solid var(--admin-border);">
+                <h3 id="fulfill-title" style="font-size:16px; font-weight:700; text-transform:uppercase;">FULFILL ORDER</h3>
+                <button type="button" onclick="closeModal('modal-fulfill')" class="btn-admin btn-admin-outline" style="padding:0.25rem 0.6rem; display:inline-flex; align-items:center;">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <form onsubmit="submitFulfillment(event)" style="display:flex; flex-direction:column; gap:1.25rem;">
+                <input type="hidden" id="fulfill-order-id">
+                <div class="form-group">
+                    <label class="form-label">ORDER STATUS</label>
+                    <select id="fulfill-status" class="form-select">
+                        <option value="PENDING_TELEGRAM">PENDING_TELEGRAM</option>
+                        <option value="COMPLETED">COMPLETED (PROVISIONED)</option>
+                        <option value="CANCELLED">CANCELLED</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">PROVISIONED LICENSE KEY / DOWNLOAD INFO</label>
+                    <textarea id="fulfill-license-info" rows="4" class="form-textarea" placeholder="Paste license key, activation token, or private customer download instructions..."></textarea>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1rem;">
+                    <button type="button" onclick="closeModal('modal-fulfill')" class="btn-admin btn-admin-outline">CANCEL</button>
+                    <button type="submit" class="btn-admin btn-admin-primary">SAVE FULFILLMENT →</button>
+                </div>
+            </form>
+        </div>
+    </div>

@@ -1,0 +1,445 @@
+/* ==========================================================================
+   NORTH//FORM — RESPONSIVE ARCHITECTURE SYSTEM
+   Breakpoints: 1440px, 1280px, 1024px, 768px, 600px, 480px, 390px, 375px
+   ========================================================================== */
+
+@media (max-width: 1280px) {
+    .product-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .editorial-intro-grid {
+        grid-template-columns: 240px 1fr;
+    }
+
+    .shop-layout {
+        grid-template-columns: 220px 1fr;
+        gap: 2rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    .nav-center {
+        display: none;
+    }
+
+    .hamburger-btn {
+        display: inline-flex;
+    }
+
+    .header-inner {
+        grid-template-columns: 1fr auto 1fr;
+    }
+
+    .header-left {
+        justify-self: start;
+    }
+
+    .brand-logo-center-mobile {
+        justify-self: center;
+    }
+
+    .hero-content {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .hero-meta-block {
+        justify-self: start;
+        max-width: 540px;
+    }
+
+    .editorial-intro-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+
+    .category-strip-list {
+        display: flex;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .category-strip-list::-webkit-scrollbar {
+        display: none;
+    }
+
+    .category-strip-item {
+        flex: 0 0 240px;
+    }
+
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .tech-features-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .tech-feature-card:nth-child(2) {
+        border-right: none;
+    }
+
+    .tech-feature-card:nth-child(1),
+    .tech-feature-card:nth-child(2) {
+        border-bottom: 1px solid var(--border);
+    }
+
+    .featured-system-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .journal-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .footer-top-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2.5rem;
+    }
+
+    .shop-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .shop-sidebar {
+        position: static;
+        display: none;
+        background-color: var(--bg-alt);
+        padding: 1.5rem;
+        border: 1px solid var(--border);
+        margin-bottom: 1.5rem;
+    }
+
+    .shop-sidebar.is-open {
+        display: flex;
+    }
+
+    .mobile-filter-toggle {
+        display: inline-flex !important;
+    }
+
+    .pdp-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .pdp-info-panel {
+        position: static;
+    }
+
+    .journal-detail-layout {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+
+    .journal-sidebar-column {
+        position: static;
+        top: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    :root {
+        --header-h: 66px;
+    }
+
+    .announcement-bar {
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    .split-panels {
+        grid-template-columns: 1fr;
+    }
+
+    .split-panel {
+        height: 58vh;
+        min-height: 400px;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .newsletter-grid {
+        grid-template-columns: 1fr;
+        gap: 1.75rem;
+    }
+
+    .journal-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .quick-add-btn {
+        opacity: 1;
+        transform: translateY(0);
+        padding: 0.6rem 0.75rem;
+        font-size: 0.64rem;
+    }
+
+    .journal-post-title {
+        font-size: clamp(1.75rem, 6vw, 2.4rem);
+    }
+
+    .editorial-prose {
+        padding: 1.5rem 1.25rem;
+        font-size: 1rem;
+        line-height: 1.75;
+    }
+
+    .journal-exec-brief {
+        padding: 1.25rem 1.25rem;
+    }
+
+    .journal-exec-brief p {
+        font-size: 1rem;
+        line-height: 1.65;
+    }
+
+    .journal-author-box {
+        padding: 1.5rem 1.25rem;
+        gap: 1.25rem;
+    }
+
+    .journal-comment-form-box {
+        padding: 1.5rem 1.25rem;
+    }
+}
+
+@media (max-width: 600px) {
+    /* Clean Mobile Header: brand logo on left, 3-line hamburger menu on right */
+    .header-inner {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        grid-template-columns: none !important;
+    }
+
+    .header-left {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .brand-logo {
+        order: 1;
+    }
+
+    .hamburger-btn {
+        order: 2;
+        display: inline-flex !important;
+    }
+
+    /* Hide Search, Sign In, and Bag in header on mobile mode (already inside 3-line menu) */
+    .header-right {
+        display: none !important;
+    }
+
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem 0.85rem;
+    }
+
+    .tech-features-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tech-feature-card {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        min-height: auto;
+        padding: 2rem 1.25rem;
+    }
+
+    .tech-feature-card:last-child {
+        border-bottom: none;
+    }
+
+    .footer-top-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .cart-drawer {
+        max-width: 100%;
+    }
+
+    /* Threat Journal & Smart Native Ad Mobile Polish */
+    .smart-native-ad,
+    .smart-native-ad-banner {
+        min-height: 180px !important;
+        height: auto !important;
+        padding: 1.15rem 1.15rem !important;
+        margin: 1.75rem 0 !important;
+    }
+
+    .smart-ad-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.65rem !important;
+    }
+
+    .smart-ad-header-right {
+        width: 100% !important;
+        justify-content: space-between !important;
+    }
+
+    .smart-ad-footer {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0.85rem !important;
+    }
+
+    .smart-ad-actions {
+        width: 100% !important;
+        display: flex !important;
+        gap: 0.5rem !important;
+    }
+
+    .smart-ad-actions a,
+    .smart-ad-actions button {
+        flex: 1 1 auto !important;
+        text-align: center !important;
+        justify-content: center !important;
+        padding: 0.65rem 0.65rem !important;
+        font-size: 0.72rem !important;
+    }
+
+    .editorial-prose {
+        padding: 1.25rem 1rem !important;
+        font-size: 0.95rem;
+    }
+
+    .editorial-prose pre {
+        padding: 1rem;
+        margin: 1.5rem 0;
+        font-size: 0.76rem;
+    }
+
+    .journal-author-box {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1.25rem 1rem;
+        gap: 1rem;
+    }
+
+    .journal-author-box > div:last-child {
+        min-width: 0 !important;
+        width: 100%;
+    }
+
+    .breadcrumb-nav {
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 0.4rem;
+    }
+
+    .breadcrumb-nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Journal Feed Card Mobile Alignment & Spacing */
+    .journal-card-footer {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0.85rem !important;
+        padding-top: 1.15rem !important;
+    }
+
+    .journal-card-footer .journal-date {
+        width: 100% !important;
+        display: block !important;
+        font-size: 0.74rem !important;
+        color: var(--muted) !important;
+    }
+
+    .journal-card-footer .journal-read-btn {
+        width: 100% !important;
+        text-align: center !important;
+        justify-content: center !important;
+        padding: 0.75rem 1rem !important;
+        font-size: 0.76rem !important;
+        display: flex !important;
+        box-sizing: border-box !important;
+    }
+
+    .journal-summary-text {
+        font-size: 0.9rem !important;
+        line-height: 1.65 !important;
+        white-space: pre-line !important;
+        margin-bottom: 1.25rem !important;
+        text-align: justify !important;
+        text-justify: inter-word !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .hero-actions .btn {
+        width: 100%;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.85rem;
+    }
+
+    .editorial-prose {
+        padding: 1rem 0.85rem !important;
+        font-size: 0.94rem !important;
+        line-height: 1.7 !important;
+    }
+
+    .editorial-prose p {
+        margin-bottom: 1.15rem !important;
+        line-height: 1.7 !important;
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+        text-align: justify !important;
+        text-justify: inter-word !important;
+    }
+
+    .editorial-prose h1 { font-size: 1.4rem !important; margin-top: 1.75rem !important; }
+    .editorial-prose h2 { font-size: 1.25rem !important; margin-top: 1.5rem !important; }
+    .editorial-prose h3 { font-size: 1.1rem !important; margin-top: 1.25rem !important; }
+
+    .editorial-prose pre {
+        padding: 0.75rem 0.85rem !important;
+        font-size: 0.74rem !important;
+        margin: 1.25rem 0 !important;
+    }
+
+    .callout-alert {
+        padding: 0.85rem 1rem !important;
+        margin: 1.25rem 0 !important;
+    }
+
+    .more-advisories-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .smart-ad-actions {
+        flex-direction: column;
+    }
+
+    .smart-ad-actions a,
+    .smart-ad-actions button {
+        width: 100%;
+    }
+}
