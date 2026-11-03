@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RESTRICTED // ADMIN COMMAND GATEWAY · ZERO//FORM</title>
+    {% if site_settings.site_favicon %}
+    <link rel="icon" href="{{ site_settings.site_favicon }}">
+    <link rel="shortcut icon" href="{{ site_settings.site_favicon }}">
+    <link rel="apple-touch-icon" href="{{ site_settings.site_favicon }}">
+    {% else %}
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ef4444' stroke-width='2.5'><polygon points='12 2 2 7 12 12 22 7 12 2'/><polyline points='2 17 12 22 22 17'/><polyline points='2 12 12 17 22 12'/></svg>">
+    {% endif %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -191,27 +198,6 @@
             transform: translateY(1px);
         }
 
-        .btn-quickfill {
-            width: 100%;
-            margin-top: 1rem;
-            padding: 0.65rem;
-            background: transparent;
-            border: 1px dashed var(--border);
-            color: var(--muted);
-            font-family: var(--font-mono);
-            font-size: 0.72rem;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn-quickfill:hover {
-            border-color: var(--border-focus);
-            color: var(--text);
-            background: rgba(255, 255, 255, 0.04);
-        }
-
         .telemetry-strip {
             margin-top: 2rem;
             padding-top: 1.5rem;
@@ -284,7 +270,7 @@
                     <span>LEVEL 4</span>
                 </label>
                 <input type="text" id="admin_identifier" name="identifier" required autocomplete="username"
-                       placeholder="admin or admin@zerodaymatrix.io" value="{{ default_identifier or 'admin' }}"
+                       placeholder="Operator callsign or email" value="{{ default_identifier or '' }}"
                        class="form-input">
             </div>
 
@@ -294,16 +280,12 @@
                     <span>ENCRYPTED</span>
                 </label>
                 <input type="password" id="admin_password" name="password" required autocomplete="current-password"
-                       placeholder="••••••••••••" value="{{ default_password or 'Admin@2026' }}"
+                       placeholder="••••••••••••" value=""
                        class="form-input">
             </div>
 
             <button type="submit" class="btn-submit">
                 AUTHENTICATE &amp; LAUNCH DASHBOARD →
-            </button>
-
-            <button type="button" class="btn-quickfill" onclick="quickFillAdmin()">
-                ⚡ LOAD DEFAULT ADMIN CREDENTIALS (admin / Admin@2026)
             </button>
         </form>
 
@@ -329,13 +311,6 @@
             </a>
         </div>
     </div>
-
-    <script>
-        function quickFillAdmin() {
-            document.getElementById('admin_identifier').value = 'admin';
-            document.getElementById('admin_password').value = 'Admin@2026';
-        }
-    </script>
 
 </body>
 </html>

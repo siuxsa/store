@@ -368,8 +368,9 @@ def register_auth_routes(app):
                 "admin_login.html",
                 next_url=request.args.get("next", ""),
                 error=None,
-                default_identifier="admin",
-                default_password=""
+                default_identifier="",
+                default_password="",
+                site_settings=get_settings_dict()
             )
     
         identifier = (request.form.get("identifier") or "").strip()
@@ -390,7 +391,8 @@ def register_auth_routes(app):
                 "admin_login.html",
                 next_url=next_url,
                 error="ACCESS DENIED: Invalid administrative credentials.",
-                default_identifier=identifier
+                default_identifier=identifier,
+                site_settings=get_settings_dict()
             ), 401
     
         if not row["is_active"]:
