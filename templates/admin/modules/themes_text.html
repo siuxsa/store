@@ -226,9 +226,15 @@
                 <textarea name="shop_subtitle" rows="3" class="form-textarea theme-field" oninput="onThemeFieldInput(this.name, this.value)">{{ site_settings.shop_subtitle }}</textarea>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom:1rem;">
                 <label class="form-label">SEARCH INPUT PLACEHOLDER</label>
                 <input type="text" name="shop_search_placeholder" value="{{ site_settings.shop_search_placeholder or 'SEARCH BY SKU, CVE, OR SYSTEM NAME...' }}" class="form-input theme-field" oninput="onThemeFieldInput(this.name, this.value)">
+            </div>
+
+            <div class="form-group" style="padding-top:1rem; border-top:1px solid var(--admin-border);">
+                <label class="form-label" style="color:#00e5ff; font-weight:700;">PRODUCTS PER PAGE (PAGINATION THRESHOLD)</label>
+                <p style="font-size:11.5px; color:var(--admin-muted); margin-bottom:0.6rem; line-height:1.5;">Maximum number of security systems displayed per catalog page before Next/Previous buttons appear.</p>
+                <input type="number" name="products_per_page" min="1" max="100" value="{{ site_settings.products_per_page or 8 }}" class="form-input theme-field" oninput="onThemeFieldInput(this.name, this.value)">
             </div>
         </div>
     </div>
@@ -253,9 +259,15 @@
                 <textarea name="journal_subtitle" rows="3" class="form-textarea theme-field" oninput="onThemeFieldInput(this.name, this.value)">{{ site_settings.journal_subtitle }}</textarea>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom:1rem;">
                 <label class="form-label">DISCLOSURE ALERT BADGE</label>
                 <input type="text" name="journal_badge" value="{{ site_settings.journal_badge or 'CVE ADVISORIES // VERIFIED POC RESEARCH' }}" class="form-input theme-field" oninput="onThemeFieldInput(this.name, this.value)">
+            </div>
+
+            <div class="form-group" style="padding-top:1rem; border-top:1px solid var(--admin-border);">
+                <label class="form-label" style="color:#10b981; font-weight:700;">DISCLOSURES PER PAGE (PAGINATION THRESHOLD)</label>
+                <p style="font-size:11.5px; color:var(--admin-muted); margin-bottom:0.6rem; line-height:1.5;">Maximum number of research disclosures displayed per journal page before Next/Previous buttons appear.</p>
+                <input type="number" name="journal_per_page" min="1" max="100" value="{{ site_settings.journal_per_page or 4 }}" class="form-input theme-field" oninput="onThemeFieldInput(this.name, this.value)">
             </div>
         </div>
     </div>

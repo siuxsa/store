@@ -2751,3 +2751,105 @@ ul, ol {
     0%, 49% { opacity: 1; }
     50%, 100% { opacity: 0; }
 }
+
+/* ==========================================================================
+   CATALOG & JOURNAL PAGINATION CONTROLS
+   ========================================================================== */
+.pagination-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin-top: 3.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+}
+
+.pagination-info {
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.pagination-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.4rem;
+    height: 2.4rem;
+    padding: 0 0.85rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    transition: all 180ms var(--ease-out);
+    user-select: none;
+}
+
+.pagination-btn:hover:not(.disabled) {
+    background: var(--text);
+    color: var(--white);
+    border-color: var(--text);
+}
+
+.pagination-btn.active {
+    background: var(--text);
+    color: var(--white);
+    border-color: var(--text);
+    font-weight: 700;
+    pointer-events: none;
+    box-shadow: 0 0 0 1px var(--text);
+}
+
+.pagination-btn.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
+    border-color: var(--border);
+}
+
+.pagination-ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.75rem;
+    height: 2.4rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+}
+
+@media (max-width: 640px) {
+    .pagination-nav {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 1rem;
+    }
+    .pagination-controls {
+        justify-content: center;
+    }
+    .pagination-btn {
+        min-width: 2.1rem;
+        height: 2.1rem;
+        padding: 0 0.65rem;
+        font-size: 0.68rem;
+    }
+}
+

@@ -1,5 +1,6 @@
 import os
 import re
+import math
 import json
 import secrets
 from datetime import datetime
@@ -9,7 +10,8 @@ from flask import request, session, render_template, redirect, url_for, jsonify,
 from database import get_db
 from core.helpers import (
     get_settings_dict, row_to_product, row_to_post, render_markdown_prose,
-    process_post_smart_ads, log_audit_event, build_telegram_product_url
+    process_post_smart_ads, log_audit_event, build_telegram_product_url,
+    compute_pagination_pages
 )
 from core.security import get_current_user, get_current_admin
 
@@ -139,13 +141,15 @@ def register_frontend_routes(app):
         category_filter = request.args.get("category", "").strip()
         type_filter = request.args.get("type", "").strip()
         q = request.args.get("q", "").strip()
-    
+        page_str = request.args.get("page", "1").strip()
+
         conn = get_db()
+        settings = get_settings_dict(conn)
         rows = conn.execute("SELECT * FROM products ORDER BY featured DESC, id ASC").fetchall()
         all_products = [row_to_product(r) for r in rows]
         categories = sorted(list({p["category"] for p in all_products}))
         conn.close()
-    
+
         filtered = all_products
         if category_filter:
             filtered = [p for p in filtered if p["category"].lower() == category_filter.lower()]
@@ -157,15 +161,66 @@ def register_frontend_routes(app):
                 p for p in filtered
                 if ql in p["name"].lower() or ql in p["sku"].lower() or ql in p["short_desc"].lower() or ql in p["category"].lower()
             ]
-    
+
+        try:
+            per_page = int(settings.get("products_per_page", 8))
+            if per_page < 1:
+                per_page = 8
+        except (ValueError, TypeError):
+            per_page = 8
+
+        try:
+            current_page = int(page_str)
+            if current_page < 1:
+                current_page = 1
+        except (ValueError, TypeError):
+            current_page = 1
+
+        total_items = len(filtered)
+        total_pages = max(1, math.ceil(total_items / per_page))
+        if current_page > total_pages:
+            current_page = total_pages
+
+        start_idx = (current_page - 1) * per_page
+        end_idx = start_idx + per_page
+        paginated_products = filtered[start_idx:end_idx]
+
+        start_item = (start_idx + 1) if total_items > 0 else 0
+        end_item = min(end_idx, total_items)
+        page_numbers = compute_pagination_pages(current_page, total_pages)
+
+        def make_page_url(page_num):
+            args = {}
+            if category_filter:
+                args["category"] = category_filter
+            if type_filter:
+                args["type"] = type_filter
+            if q:
+                args["q"] = q
+            if page_num > 1:
+                args["page"] = page_num
+            return url_for("shop", **args)
+
         return render_template(
             "shop.html",
-            products=filtered,
+            products=paginated_products,
             all_count=len(all_products),
+            total_items=total_items,
+            start_item=start_item,
+            end_item=end_item,
             categories=categories,
             current_category=category_filter,
             current_type=type_filter,
             search_query=q,
+            current_page=current_page,
+            total_pages=total_pages,
+            per_page=per_page,
+            has_prev=(current_page > 1),
+            has_next=(current_page < total_pages),
+            prev_page=(current_page - 1),
+            next_page=(current_page + 1),
+            page_numbers=page_numbers,
+            make_page_url=make_page_url,
             page_type="SHOP",
             target_slug="arsenal",
             target_title="Digital Arsenal Catalog"
@@ -242,8 +297,10 @@ def register_frontend_routes(app):
         severity_filter = request.args.get("severity", "").strip().upper()
         category_filter = request.args.get("category", "").strip()
         q = request.args.get("q", "").strip()
-    
+        page_str = request.args.get("page", "1").strip()
+
         conn = get_db()
+        settings = get_settings_dict(conn)
         all_posts = [row_to_post(r) for r in conn.execute("SELECT * FROM posts ORDER BY featured DESC, id DESC").fetchall()]
         products_by_sku = {
             r["sku"]: row_to_product(r)
@@ -251,7 +308,7 @@ def register_frontend_routes(app):
         }
         categories = sorted(list({p["category"] for p in all_posts}))
         conn.close()
-    
+
         filtered = all_posts
         if severity_filter:
             filtered = [p for p in filtered if p["severity"].upper() == severity_filter]
@@ -263,17 +320,69 @@ def register_frontend_routes(app):
                 p for p in filtered
                 if ql in p["title"].lower() or ql in p["summary"].lower() or ql in p["cve_id"].lower() or ql in p["content"].lower()
             ]
-    
-        for p in filtered:
+
+        try:
+            per_page = int(settings.get("journal_per_page", 4))
+            if per_page < 1:
+                per_page = 4
+        except (ValueError, TypeError):
+            per_page = 4
+
+        try:
+            current_page = int(page_str)
+            if current_page < 1:
+                current_page = 1
+        except (ValueError, TypeError):
+            current_page = 1
+
+        total_items = len(filtered)
+        total_pages = max(1, math.ceil(total_items / per_page))
+        if current_page > total_pages:
+            current_page = total_pages
+
+        start_idx = (current_page - 1) * per_page
+        end_idx = start_idx + per_page
+        paginated_posts = filtered[start_idx:end_idx]
+
+        for p in paginated_posts:
             p["linked_products"] = [products_by_sku[s] for s in p["related_sku_list"] if s in products_by_sku]
-    
+
+        start_item = (start_idx + 1) if total_items > 0 else 0
+        end_item = min(end_idx, total_items)
+        page_numbers = compute_pagination_pages(current_page, total_pages)
+
+        def make_page_url(page_num):
+            args = {}
+            if severity_filter:
+                args["severity"] = severity_filter
+            if category_filter:
+                args["category"] = category_filter
+            if q:
+                args["q"] = q
+            if page_num > 1:
+                args["page"] = page_num
+            return url_for("blog", **args)
+
         return render_template(
             "blog.html",
-            posts=filtered,
+            posts=paginated_posts,
+            all_count=len(all_posts),
+            total_items=total_items,
+            start_item=start_item,
+            end_item=end_item,
             categories=categories,
             current_severity=severity_filter,
             current_category=category_filter,
             search_query=q,
+            current_page=current_page,
+            total_pages=total_pages,
+            per_page=per_page,
+            has_prev=(current_page > 1),
+            has_next=(current_page < total_pages),
+            prev_page=(current_page - 1),
+            next_page=(current_page + 1),
+            page_numbers=page_numbers,
+            make_page_url=make_page_url,
             page_type="BLOG_INDEX",
             target_slug="intel",
             target_title="Threat Intelligence Wire"

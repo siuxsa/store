@@ -21,7 +21,11 @@
                 <p style="color: var(--muted); margin: 0.5rem 0 0 0; font-size: 0.95rem; max-width: 680px;" data-theme-bind="journal_subtitle">{{ site_settings.journal_subtitle or '' }}</p>
             </div>
             <span class="meta-mono" style="color: var(--muted); font-size: 0.9rem;">
-                {{ posts|length }} ADVISORIES PUBLISHED
+                {% if total_items and total_items > 0 %}
+                SHOWING {{ start_item }}–{{ end_item }} OF {{ total_items }} ADVISORIES PUBLISHED
+                {% else %}
+                0 OF {{ all_count }} ADVISORIES PUBLISHED
+                {% endif %}
             </span>
         </div>
     </div>
@@ -48,6 +52,7 @@
     </div>
 
     <!-- ARTICLES FEED -->
+    {% if posts %}
     <div style="display: flex; flex-direction: column; gap: 2.5rem;">
         {% for post in posts %}
         <article style="border: 1px solid var(--border); background-color: var(--white); display: flex; flex-direction: column; md:flex-row; overflow: hidden;">
@@ -86,5 +91,55 @@
         </article>
         {% endfor %}
     </div>
+
+    <!-- PAGINATION NAVIGATION CONTROLS -->
+    {% if total_pages and total_pages > 1 %}
+    <nav class="pagination-nav" aria-label="Threat Journal Pages">
+        <div class="pagination-info">
+            PAGE <span style="color:var(--text); font-weight:700;">{{ current_page }}</span> OF {{ total_pages }} · ({{ total_items }} TOTAL)
+        </div>
+        <div class="pagination-controls">
+            <!-- PREVIOUS BUTTON -->
+            {% if has_prev %}
+            <a href="{{ make_page_url(prev_page) }}" class="pagination-btn" aria-label="Previous Page">
+                ← PREV
+            </a>
+            {% else %}
+            <span class="pagination-btn disabled" aria-disabled="true">
+                ← PREV
+            </span>
+            {% endif %}
+
+            <!-- NUMBERED PAGE BUTTONS -->
+            {% for p in page_numbers %}
+                {% if p is none %}
+                <span class="pagination-ellipsis">···</span>
+                {% elif p == current_page %}
+                <span class="pagination-btn active" aria-current="page">{{ p }}</span>
+                {% else %}
+                <a href="{{ make_page_url(p) }}" class="pagination-btn">{{ p }}</a>
+                {% endif %}
+            {% endfor %}
+
+            <!-- NEXT BUTTON -->
+            {% if has_next %}
+            <a href="{{ make_page_url(next_page) }}" class="pagination-btn" aria-label="Next Page">
+                NEXT →
+            </a>
+            {% else %}
+            <span class="pagination-btn disabled" aria-disabled="true">
+                NEXT →
+            </span>
+            {% endif %}
+        </div>
+    </nav>
+    {% endif %}
+    {% else %}
+    <div style="padding: 5rem 0; text-align: center; border: 1px dashed var(--border);">
+        <p class="meta-label" style="margin-bottom: 0.75rem;">NO MATCHING THREAT DISCLOSURES FOUND</p>
+        <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Try modifying your search or severity filters.</p>
+        <a href="{{ url_for('blog') }}" class="btn btn-dark">RESET FILTERS</a>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

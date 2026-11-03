@@ -103,6 +103,27 @@
                             </div>
                         </div>
                     </div>
+                    <!-- CATALOG & JOURNAL PAGINATION ARCHITECTURE -->
+                    <div class="form-group" style="background:rgba(0,0,0,0.25); border:1px solid var(--admin-border); padding:1.15rem; border-radius:4px;">
+                        <label class="form-label" style="color:#00e5ff; font-weight:700;">
+                            PRODUCTS PER PAGE (SHOP / ARSENAL)
+                        </label>
+                        <p style="font-size:11.5px; color:var(--admin-muted); margin-bottom:0.6rem; line-height:1.5;">
+                            Number of security systems displayed per storefront page. Automatic previous/next pagination buttons will activate.
+                        </p>
+                        <input type="number" name="products_per_page" class="form-input" min="1" max="100" value="{{ site_settings.products_per_page or 8 }}" required>
+                    </div>
+
+                    <div class="form-group" style="background:rgba(0,0,0,0.25); border:1px solid var(--admin-border); padding:1.15rem; border-radius:4px;">
+                        <label class="form-label" style="color:#10b981; font-weight:700;">
+                            DISCLOSURES PER PAGE (THREAT JOURNAL)
+                        </label>
+                        <p style="font-size:11.5px; color:var(--admin-muted); margin-bottom:0.6rem; line-height:1.5;">
+                            Number of CVE research advisories displayed per journal page before previous/next buttons appear.
+                        </p>
+                        <input type="number" name="journal_per_page" class="form-input" min="1" max="100" value="{{ site_settings.journal_per_page or 4 }}" required>
+                    </div>
+
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label class="form-label">ANNOUNCEMENT TICKER TEXT</label>
                         <input type="text" name="ticker_text" class="form-input" value="{{ site_settings.ticker_text }}" required>

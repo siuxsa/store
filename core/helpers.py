@@ -754,4 +754,29 @@ def compute_analytics_summary(conn, days=14):
     }
 
 
+def compute_pagination_pages(current_page, total_pages):
+    """
+    Computes a list of page numbers and ellipsis (None)
+    for rendering numbered pagination controls.
+    """
+    if total_pages <= 7:
+        return list(range(1, total_pages + 1))
+    pages = []
+    if current_page <= 4:
+        pages.extend(range(1, 5))
+        pages.append(None)
+        pages.append(total_pages)
+    elif current_page >= total_pages - 3:
+        pages.append(1)
+        pages.append(None)
+        pages.extend(range(total_pages - 3, total_pages + 1))
+    else:
+        pages.append(1)
+        pages.append(None)
+        pages.extend([current_page - 1, current_page, current_page + 1])
+        pages.append(None)
+        pages.append(total_pages)
+    return pages
+
+
 

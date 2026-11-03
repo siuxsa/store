@@ -162,9 +162,11 @@ DEFAULT_SITE_SETTINGS = {
     "shop_eyebrow": "// ARSENAL INVENTORY",
     "shop_title": "DIGITAL ARSENAL.",
     "shop_subtitle": "Commercial security suites, binary analysis frameworks, and verified enterprise seats.",
+    "products_per_page": "8",
     "journal_eyebrow": "// RESEARCH DISCLOSURES & INTEL",
     "journal_title": "THREAT JOURNAL.",
     "journal_subtitle": "Zero-day vulnerability disclosures, offensive security tradecraft, and verified threat research.",
+    "journal_per_page": "4",
 
     # Custom Tool Sourcing / Request Page
     "request_breadcrumb": "CUSTOM SOURCING & TOOL PROCUREMENT",
