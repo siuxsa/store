@@ -1,9 +1,12 @@
 # =================================================================
-# ZERODAY // ARSENAL & INTEL - PYTHON ENVIRONMENT REQUIREMENTS
+# ZERO//FORM — HIGH-ASSURANCE ARSENAL & THREAT INTEL MATRIX
+# PYTHON PRODUCTION ENVIRONMENT REQUIREMENTS
 # =================================================================
-# Install command:
+# Standard installation:
 #   pip install -r requirements.txt
-# (For Debian/Ubuntu/Kali externally managed environments, append: --break-system-packages)
+#
+# On managed Debian/Ubuntu/Kali environments (PEP 668):
+#   pip install -r requirements.txt --break-system-packages
 # =================================================================
 
 # Core Web Application Framework & Security
@@ -15,15 +18,16 @@ itsdangerous>=2.1.2
 click>=8.1.3
 blinker>=1.6.2
 
-# High-Fidelity Markdown Engine (core/helpers.py)
+# Markdown & Technical Prose Engine (core/helpers.py)
 markdown-it-py>=3.0.0
 mdurl>=0.1.2
 
 # Production WSGI Application Servers
 waitress>=3.0.0
-gunicorn>=21.2.0; sys_platform != 'win32'
+gunicorn>=21.2.0; platform_system != "Windows"
 
-# Integration Testing & Automated Verification Suite
+# Automated Testing & Verification Suite
 requests>=2.31.0
 beautifulsoup4>=4.12.0
 soupsieve>=2.5
+
