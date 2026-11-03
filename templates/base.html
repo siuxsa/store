@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- PRIMARY SEARCH ENGINE METADATA -->
+    <title>{% block title %}{% if page_type == 'HOME' %}{{ site_settings.seo_home_title or site_settings.seo_meta_title or (site_settings.site_name ~ ' — ' ~ site_settings.site_tagline) }}{% elif target_title %}{{ target_title }} // {{ site_settings.site_name }}{% else %}{{ site_settings.seo_meta_title or (site_settings.site_name ~ ' // Security Systems') }}{% endif %}{% endblock %}</title>
+    
+    <meta name="description" content="{% block meta_description %}{% if page_type == 'HOME' and site_settings.seo_home_desc %}{{ site_settings.seo_home_desc }}{% else %}{{ page_description or site_settings.seo_meta_description or site_settings.site_tagline }}{% endif %}{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}{% if page_type == 'HOME' and site_settings.seo_home_keywords %}{{ site_settings.seo_home_keywords }}{% else %}{{ site_settings.seo_meta_keywords or 'cybersecurity, reverse engineering, red team, offensive security, CVE disclosures, exploit development, airgap security' }}{% endif %}{% endblock %}">
+    <meta name="author" content="{{ site_settings.site_name }}">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <link rel="canonical" href="{% block canonical_url %}{{ request.base_url }}{% endblock %}">
+
+    <!-- OPEN GRAPH (FACEBOOK / LINKEDIN / TELEGRAM / DISCORD) -->
+    <meta property="og:site_name" content="{{ site_settings.site_name }}">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}{% if page_type == 'HOME' %}{{ site_settings.seo_home_title or site_settings.seo_meta_title or (site_settings.site_name ~ ' — ' ~ site_settings.site_tagline) }}{% elif target_title %}{{ target_title }} // {{ site_settings.site_name }}{% else %}{{ site_settings.seo_meta_title or site_settings.site_name }}{% endif %}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{% if page_type == 'HOME' and site_settings.seo_home_desc %}{{ site_settings.seo_home_desc }}{% else %}{{ page_description or site_settings.seo_meta_description or site_settings.site_tagline }}{% endif %}{% endblock %}">
+    <meta property="og:url" content="{{ request.base_url }}">
+    <meta property="og:image" content="{% block og_image %}{% if page_type == 'HOME' and site_settings.seo_home_image %}{{ site_settings.seo_home_image }}{% else %}{{ page_image or site_settings.seo_og_image or site_settings.hero_image }}{% endif %}{% endblock %}">
+    <meta property="og:locale" content="en_US">
+
+    <!-- TWITTER / X CARDS -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block twitter_title %}{% if page_type == 'HOME' %}{{ site_settings.seo_home_title or site_settings.seo_meta_title or (site_settings.site_name ~ ' — ' ~ site_settings.site_tagline) }}{% elif target_title %}{{ target_title }} // {{ site_settings.site_name }}{% else %}{{ site_settings.seo_meta_title or site_settings.site_name }}{% endif %}{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}{% if page_type == 'HOME' and site_settings.seo_home_desc %}{{ site_settings.seo_home_desc }}{% else %}{{ page_description or site_settings.seo_meta_description or site_settings.site_tagline }}{% endif %}{% endblock %}">
+    <meta name="twitter:image" content="{% block twitter_image %}{% if page_type == 'HOME' and site_settings.seo_home_image %}{{ site_settings.seo_home_image }}{% else %}{{ page_image or site_settings.seo_og_image or site_settings.hero_image }}{% endif %}{% endblock %}">
+    <meta name="twitter:site" content="@{{ site_settings.telegram_user.lstrip('@') }}">
+
+    <!-- STRUCTURED DATA (SCHEMA.ORG JSON-LD) -->
+    {% block structured_data %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "{{ request.url_root.rstrip('/') }}/#organization",
+          "name": "{{ site_settings.site_name }}",
+          "url": "{{ request.url_root.rstrip('/') }}",
+          "logo": "{{ site_settings.seo_og_image or site_settings.hero_image }}",
+          "description": "{{ site_settings.site_tagline }}",
+          "sameAs": [
+            "https://t.me/{{ site_settings.telegram_user.lstrip('@') }}"
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "{{ request.url_root.rstrip('/') }}/#website",
+          "url": "{{ request.url_root.rstrip('/') }}",
+          "name": "{{ site_settings.site_name }}",
+          "description": "{{ site_settings.site_tagline }}",
+          "publisher": {
+            "@id": "{{ request.url_root.rstrip('/') }}/#organization"
+          },
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "{{ request.url_root.rstrip('/') }}/shop?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        }
+      ]
+    }
+    </script>
+    {% endblock %}
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+
+    <!-- DYNAMIC THEME SYSTEM INJECTION -->
+    <style id="site-theme-custom-vars">
+        :root {
+            {% if site_settings.theme_bg_color %}--bg: {{ site_settings.theme_bg_color }};{% endif %}
+            {% if site_settings.theme_text_color %}--text: {{ site_settings.theme_text_color }};{% endif %}
+            {% if site_settings.theme_dark_color %}--dark: {{ site_settings.theme_dark_color }};{% endif %}
+            {% if site_settings.accent_cyan_color %}
+            --cyan: {{ site_settings.accent_cyan_color }};
+            --accent-cyan: {{ site_settings.accent_cyan_color }};
+            {% endif %}
+            {% if site_settings.accent_green_color %}
+            --green: {{ site_settings.accent_green_color }};
+            --accent-green: {{ site_settings.accent_green_color }};
+            {% endif %}
+            {% if site_settings.accent_amber_color %}
+            --amber: {{ site_settings.accent_amber_color }};
+            --accent-amber: {{ site_settings.accent_amber_color }};
+            {% endif %}
+            {% if site_settings.font_family_sans %}--font-sans: {{ site_settings.font_family_sans }};{% endif %}
+            {% if site_settings.font_family_mono %}--font-mono: {{ site_settings.font_family_mono }};{% endif %}
+        }
+        {{ site_settings.custom_css_overrides | safe }}
+    </style>
+</head>
+<body>
+
+    <!-- 1. ANNOUNCEMENT BAR (CONTINUOUS ONE-LINE CIRCLE TICKER) -->
+    <div class="announcement-bar" aria-label="Announcement Ticker">
+        <div class="announcement-ticker-track">
+            <div class="announcement-ticker-group">
+                <span class="ticker-item" data-theme-bind="ticker_text">{{ site_settings.ticker_text }}</span>
+                <span class="ticker-sep">///</span>
+                <span class="ticker-item" data-theme-bind="ticker_subtext">{{ site_settings.ticker_subtext or 'INSTANT TELEGRAM DISPATCH ON ALL LICENSES' }}</span>
+                <span class="ticker-sep">///</span>
+                <span class="ticker-item font-mono">CONCIERGE: <span data-theme-bind="telegram_user">@{{ site_settings.telegram_user.lstrip('@') }}</span></span>
+                <span class="ticker-sep">///</span>
+                <span class="ticker-item" data-theme-bind="ticker_text">{{ site_settings.ticker_text }}</span>
+                <span class="ticker-sep">///</span>
+                <span class="ticker-item" data-theme-bind="ticker_subtext">{{ site_settings.ticker_subtext or 'INSTANT TELEGRAM DISPATCH ON ALL LICENSES' }}</span>
+                <span class="ticker-sep">///</span>
+                <span class="ticker-item font-mono">CONCIERGE: <span data-theme-bind="telegram_user">@{{ site_settings.telegram_user.lstrip('@') }}</span></span>
+                <span class="ticker-sep">///</span>
+            </div>
+            <div class="announcement-ticker-group" aria-hidden="true">
+                <span class="ticker-item" data-theme-bind="ticker_text">{{ site_settings.ticker_text }}</span>
+                <span class="ticker-sep">///</span>
+                <span class="ticker-item" data-theme-bind="ticker_subtext">{{ site_settings.ticker_subtext or 'INSTANT TELEGRAM DISPATCH ON ALL LICENSES' }}</span>
+                <span class="ticker-sep">///</span>
+                <span class="ticker-item font-mono">CONCIERGE: <span data-theme-bind="telegram_user">@{{ site_settings.telegram_user.lstrip('@') }}</span></span>
+                <span class="ticker-sep">///</span>
+                <span class="ticker-item" data-theme-bind="ticker_text">{{ site_settings.ticker_text }}</span>
+                <span class="ticker-sep">///</span>
+                <span class="ticker-item" data-theme-bind="ticker_subtext">{{ site_settings.ticker_subtext or 'INSTANT TELEGRAM DISPATCH ON ALL LICENSES' }}</span>
+                <span class="ticker-sep">///</span>
+                <span class="ticker-item font-mono">CONCIERGE: <span data-theme-bind="telegram_user">@{{ site_settings.telegram_user.lstrip('@') }}</span></span>
+                <span class="ticker-sep">///</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. STICKY ARCHITECTURAL HEADER -->
+    <header id="site-header" class="site-header {% if page_type == 'HOME' %}header-transparent{% endif %}">
+        <div class="header-inner">
+            <div class="header-left">
+                <button type="button" class="hamburger-btn" onclick="window.NFUI && window.NFUI.openMobileMenu()" aria-label="Open navigation menu">
+                    <span>☰</span>
+                </button>
+                <a href="{{ url_for('index') }}" class="brand-logo" aria-label="{{ site_settings.site_name }} Homepage" data-theme-bind="site_name">
+                    {{ site_settings.site_name }}
+                </a>
+            </div>
+
+            <nav class="nav-center" aria-label="Main Navigation">
+                <a href="{{ url_for('shop') }}" class="nav-link {% if page_type in ('SHOP', 'PRODUCT') %}active{% endif %}" data-theme-bind="nav_shop_label">{{ site_settings.nav_shop_label or 'ARSENAL' }}</a>
+                <a href="{{ url_for('blog') }}" class="nav-link {% if page_type in ('BLOG_INDEX', 'BLOG_POST') %}active{% endif %}" data-theme-bind="nav_blog_label">{{ site_settings.nav_blog_label or 'THREAT INTEL' }}</a>
+                <a href="{{ url_for('order_lookup') }}" class="nav-link {% if page_type == 'ORDERS' %}active{% endif %}" data-theme-bind="nav_orders_label">{{ site_settings.nav_orders_label or 'ORDER LOOKUP' }}</a>
+                <a href="{{ url_for('about_page') }}" class="nav-link {% if page_type == 'ABOUT' %}active{% endif %}" data-theme-bind="nav_about_label">{{ site_settings.nav_about_label or 'ABOUT' }}</a>
+                {% if current_user %}
+                <a href="{{ url_for('user_vault') }}" class="nav-link {% if page_type == 'VAULT' %}active{% endif %}">VAULT [{{ current_user.username }}]</a>
+                {% endif %}
+            </nav>
+
+            <div class="header-right">
+                <button type="button" class="header-action" onclick="window.NFUI && window.NFUI.openSearch()" aria-label="Search systems">
+                    <span>SEARCH</span>
+                </button>
+                {% if current_user %}
+                <a href="{{ url_for('logout_user') }}" class="header-action action-text-hide" aria-label="Sign out">
+                    <span>SIGN OUT</span>
+                </a>
+                {% else %}
+                <a href="{{ url_for('login_page') }}" class="header-action action-text-hide" aria-label="Sign in">
+                    <span>SIGN IN</span>
+                </a>
+                {% endif %}
+                <button type="button" class="header-action" onclick="window.NFCart && window.NFCart.open()" aria-label="View shopping bag">
+                    <span>BAG</span>
+                    <span class="cart-count-pill js-cart-count">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- FULLSCREEN MOBILE MENU -->
+    <div id="mobile-menu" class="mobile-menu-overlay" aria-hidden="true">
+        <div class="mobile-menu-top">
+            <span class="brand-logo">{{ site_settings.site_name }}</span>
+            <button type="button" class="btn-outline-dark" onclick="window.NFUI && window.NFUI.closeMobileMenu()" style="padding: 0.5rem 0.85rem;" aria-label="Close menu">✕ CLOSE</button>
+        </div>
+        <nav class="mobile-nav-list" aria-label="Mobile Navigation">
+            <a href="{{ url_for('shop') }}" onclick="window.NFUI.closeMobileMenu()">ARSENAL <span>→</span></a>
+            <a href="{{ url_for('blog') }}" onclick="window.NFUI.closeMobileMenu()">THREAT INTEL <span>→</span></a>
+            <a href="{{ url_for('order_lookup') }}" onclick="window.NFUI.closeMobileMenu()">ORDER LOOKUP <span>→</span></a>
+            <a href="{{ url_for('about_page') }}" onclick="window.NFUI.closeMobileMenu()">ABOUT <span>→</span></a>
+            {% if current_user %}
+            <a href="{{ url_for('user_vault') }}" onclick="window.NFUI.closeMobileMenu()">VAULT [{{ current_user.username }}] <span>→</span></a>
+            <a href="{{ url_for('logout_user') }}" onclick="window.NFUI.closeMobileMenu()">SIGN OUT <span>→</span></a>
+            {% else %}
+            <a href="{{ url_for('login_page') }}" onclick="window.NFUI.closeMobileMenu()">SIGN IN / REGISTER <span>→</span></a>
+            {% endif %}
+        </nav>
+        <div class="mobile-menu-bottom">
+            <div class="mobile-sub-actions">
+                <button type="button" onclick="window.NFUI.openSearch()" class="link-arrow">SEARCH <span class="arrow-icon">→</span></button>
+                <button type="button" onclick="window.NFCart.open(); window.NFUI.closeMobileMenu();" class="link-arrow">BAG (<span class="js-cart-count">0</span>) <span class="arrow-icon">→</span></button>
+            </div>
+            <p class="meta-label">ARCHITECTURAL SECURITY SYSTEMS & VERIFIED ENTERPRISE LICENSES</p>
+        </div>
+    </div>
+
+    <!-- FULLSCREEN SEARCH OVERLAY -->
+    <div id="search-overlay" class="search-overlay" aria-modal="true" role="dialog" aria-hidden="true">
+        <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1240px; margin: 0 auto;">
+            <span class="meta-label">SEARCH SECURITY SYSTEMS & THREAT INTEL</span>
+            <button type="button" class="btn-outline-dark" onclick="window.NFUI && window.NFUI.closeSearch()" style="padding: 0.45rem 0.9rem;" aria-label="Close search">✕ ESC</button>
+        </div>
+        <div class="search-input-wrap">
+            <input type="text" id="search-overlay-input" class="search-overlay-input" placeholder="SEARCH BURP, METASPLOIT, SPLUNK, CVE..." autocomplete="off">
+            <span class="meta-mono" style="color: var(--muted); padding-left: 1rem;">ESC TO CLOSE</span>
+        </div>
+        <div style="max-width: 960px; margin: 0 auto 2rem; display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <span class="meta-label" style="align-self: center;">QUICK TAGS:</span>
+            <a href="{{ url_for('shop', category='Web & AppSec') }}" class="btn btn-outline-dark" style="padding: 0.35rem 0.75rem; font-size: 0.65rem;">WEB & APPSEC</a>
+            <a href="{{ url_for('shop', category='Offensive & Red Team') }}" class="btn btn-outline-dark" style="padding: 0.35rem 0.75rem; font-size: 0.65rem;">RED TEAM</a>
+            <a href="{{ url_for('shop', category='SIEM & Blue Team') }}" class="btn btn-outline-dark" style="padding: 0.35rem 0.75rem; font-size: 0.65rem;">SIEM & SOC</a>
+            <a href="{{ url_for('shop', category='Reverse Engineering') }}" class="btn btn-outline-dark" style="padding: 0.35rem 0.75rem; font-size: 0.65rem;">REVERSE ENG</a>
+            <a href="{{ url_for('shop', category='OSINT & Recon') }}" class="btn btn-outline-dark" style="padding: 0.35rem 0.75rem; font-size: 0.65rem;">OSINT</a>
+        </div>
+        <div class="search-results-container">
+            <div id="search-results-count" class="meta-label" style="margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border);">FEATURED SECURITY ARSENAL</div>
+            <div id="search-results-grid" class="product-grid">
+                {% for p in global_products[:4] %}
+                <div class="product-card">
+                    <a href="{{ url_for('product_detail', slug=p.slug) }}" class="product-card-image-wrap">
+                        <img src="{{ p.image_url }}" alt="{{ p.name }}" class="product-card-img" loading="lazy">
+                        <span class="product-badge">{{ p.badge_text }}</span>
+                    </a>
+                    <div class="product-meta">
+                        <div class="product-meta-header">
+                            <span class="meta-label">{{ p.category }}</span>
+                            <span class="meta-mono">${{ "%.0f"|format(p.price) }}</span>
+                        </div>
+                        <h3 class="product-title">
+                            <a href="{{ url_for('product_detail', slug=p.slug) }}">{{ p.name }}</a>
+                        </h3>
+                        <p class="product-desc">{{ p.short_desc }}</p>
+                        <div class="product-specs-line">{{ p.version }} · {{ p.platform }}</div>
+                        <div class="product-actions">
+                            <button type="button" class="btn btn-outline-dark" style="flex:1; padding:0.45rem 0.5rem; font-size:0.68rem;" onclick="window.NFCart && window.NFCart.quickAdd({{ p.id }})">+ ADD TO BAG</button>
+                            <a href="{{ url_for('product_detail', slug=p.slug) }}" class="btn btn-dark" style="padding:0.45rem 0.75rem; font-size:0.68rem;">VIEW →</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- CART SLIDE-IN DRAWER -->
+    <div id="cart-backdrop" class="drawer-backdrop" onclick="window.NFCart && window.NFCart.close()"></div>
+    <aside id="cart-drawer" class="cart-drawer" aria-label="Shopping Bag">
+        <div class="cart-drawer-header">
+            <div>
+                <span class="meta-label">// ARSENAL MANIFEST</span>
+                <h2 style="font-size: 1.15rem; font-weight: 600; letter-spacing: -0.01em; text-transform: uppercase; margin-top: 0.2rem;">YOUR BAG (<span class="js-cart-count">0</span>)</h2>
+            </div>
+            <button type="button" onclick="window.NFCart && window.NFCart.close()" class="btn-outline-dark" style="padding: 0.4rem 0.75rem; font-size: 0.7rem;" aria-label="Close cart">✕</button>
+        </div>
+        <div id="cart-drawer-items" class="cart-drawer-items"></div>
+        <div class="cart-drawer-footer">
+            <div id="cart-shipping-note" class="meta-label" style="text-align: center; color: var(--muted);">
+                INSTANT DISPATCH ON ALL DIGITAL LICENSES VIA TELEGRAM
+            </div>
+            <div style="margin: 0.5rem 0;">
+                <label for="cart-buyer-telegram" class="meta-label" style="display:block; margin-bottom:0.25rem;">YOUR TELEGRAM USERNAME (FOR ACTIVATION)</label>
+                <input type="text" id="cart-buyer-telegram" placeholder="@your_handle"
+                       value="{% if current_user and current_user.telegram_handle %}{{ current_user.telegram_handle }}{% endif %}"
+                       style="width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.8rem; background: var(--bg);">
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline; font-size: 0.95rem; font-weight: 600; text-transform: uppercase;">
+                <span>ESTIMATED SUBTOTAL</span>
+                <span id="cart-subtotal-amount" class="meta-mono" style="font-size: 1.1rem;">$0</span>
+            </div>
+            <div id="cart-checkout-feedback" class="meta-label" style="display: none; text-align: center;"></div>
+            <button type="button" class="btn btn-dark" style="width: 100%; padding: 1.1rem;" onclick="window.NFCart && window.NFCart.checkout()">
+                DISPATCH ORDER VIA TELEGRAM →
+            </button>
+            <button type="button" class="link-underline" style="align-self: center; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;" onclick="window.NFCart && window.NFCart.close()">
+                CONTINUE EXPLORATION
+            </button>
+        </div>
+    </aside>
+
+    <!-- FLASH MESSAGES -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="container" style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
+        {% for cat, msg in messages %}
+        <div style="padding: 1rem 1.25rem; border: 1px solid var(--border); background-color: var(--white); display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; font-family: var(--font-mono);">
+            <span>{{ msg }}</span>
+            <span class="meta-label" style="color: var(--muted);">[NOTICE]</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- MAIN BODY CONTENT -->
+    <main class="page-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- 10. EDITORIAL ARCHITECTURAL FOOTER -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-top-grid">
+                <div>
+                    <div class="brand-logo" style="font-size: 1.35rem; margin-bottom: 1rem; color: var(--white);" data-theme-bind="site_name">
+                        {{ site_settings.site_name }}
+                    </div>
+                    <p style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.65); max-width: 320px; line-height: 1.6;">
+                        <span data-theme-bind="site_tagline">{{ site_settings.site_tagline }}</span>. <span data-theme-bind="footer_desc">{{ site_settings.footer_desc }}</span>
+                    </p>
+                    <div class="meta-mono" style="margin-top: 1.5rem; color: rgba(255, 255, 255, 0.45); font-size: 0.72rem;" data-theme-bind="footer_motto" data-theme-format="multiline">
+                        {{ site_settings.footer_motto | replace('\n', '<br>') | safe if site_settings.footer_motto else 'SYSTEMS FOR THE UNPREDICTABLE.<br>EDITION 01.26 // SCANDINAVIAN MINIMALISM' | safe }}
+                    </div>
+                </div>
+
+                <div>
+                    <div class="footer-col-title" data-theme-bind="footer_col1_title">{{ site_settings.footer_col1_title or 'SECURITY ARSENAL' }}</div>
+                    <div class="footer-links">
+                        <a href="{{ url_for('shop') }}">ALL SYSTEMS ({{ global_products|length }})</a>
+                        <a href="{{ url_for('shop', category='Web & AppSec') }}">WEB &amp; APPSEC</a>
+                        <a href="{{ url_for('shop', category='Offensive & Red Team') }}">OFFENSIVE &amp; RED TEAM</a>
+                        <a href="{{ url_for('shop', category='SIEM & Blue Team') }}">SIEM &amp; BLUE TEAM</a>
+                        <a href="{{ url_for('shop', category='Reverse Engineering') }}">REVERSE ENGINEERING</a>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="footer-col-title" data-theme-bind="footer_col2_title">{{ site_settings.footer_col2_title or 'THREAT INTELLIGENCE' }}</div>
+                    <div class="footer-links">
+                        <a href="{{ url_for('blog') }}">THREAT JOURNAL</a>
+                        <a href="{{ url_for('order_lookup') }}">ORDER TICKET LOOKUP</a>
+                        <a href="{{ url_for('about_page') }}">BRAND MANIFESTO</a>
+                        <a href="{{ url_for('user_vault') }}">OPERATOR VAULT</a>
+                        {% if current_admin %}
+                        <a href="{{ url_for('admin_panel') }}" style="color: #ffffff; font-weight: 600; display:inline-flex; align-items:center;">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:5px;"><polygon points="12 2 2 7 12 22 22 7 12 2"/></svg>
+                            ADMIN PANEL
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div>
+                    <div class="footer-col-title" data-theme-bind="footer_col3_title">{{ site_settings.footer_col3_title or 'CONCIERGE &amp; TELEGRAM' }}</div>
+                    <p style="font-size: 0.82rem; color: rgba(255, 255, 255, 0.65); line-height: 1.6; margin-bottom: 1.25rem;" data-theme-bind="footer_telegram_desc">
+                        {{ site_settings.footer_telegram_desc or 'Instant license provisioning and BTC/USDT order verification via our encrypted concierge desk.' }}
+                    </p>
+                    <a href="https://t.me/{{ site_settings.telegram_user.lstrip('@') }}" target="_blank" rel="noopener" class="btn btn-outline-light" style="width: 100%; text-align: center; font-size: 0.72rem;">
+                        TELEGRAM: @{{ site_settings.telegram_user.lstrip('@') }}
+                    </a>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <span class="footer-copy">© 2026 <span data-theme-bind="site_name">{{ site_settings.site_name }}</span>. <span data-theme-bind="footer_disclaimer">{{ site_settings.footer_disclaimer }}</span></span>
+                <span class="meta-mono" style="color: rgba(255, 255, 255, 0.45);" data-theme-bind="footer_badge">{{ site_settings.footer_badge or 'SHA256 VERIFIED · AIRGAP SAFE' }}</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- INJECT GLOBAL PRODUCTS FOR CLIENT SEARCH & CART -->
+    <script>
+        window.NORTHFORM_PRODUCTS = {{ global_products_json|safe }};
+    </script>
+    <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    <!-- SILENT BACKGROUND STATE SYNC & HARDWARE SANCTION VERIFICATION -->
+    <script>
+        (function() {
+            function generateHWID() {
+                try {
+                    var canvas = document.createElement('canvas');
+                    var ctx = canvas.getContext('2d');
+                    ctx.textBaseline = "top";
+                    ctx.font = "14px 'Arial'";
+                    ctx.fillStyle = "#f60";
+                    ctx.fillRect(125,1,62,20);
+                    ctx.fillStyle = "#069";
+                    ctx.fillText("ZD-HWID-2026", 2, 15);
+                    var canvasHash = canvas.toDataURL();
+                    var gl = document.createElement('canvas').getContext('webgl');
+                    var debugInfo = gl ? gl.getExtension('WEBGL_debug_renderer_info') : null;
+                    var gpu = (gl && debugInfo) ? (gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || '') : '';
+                    var raw = [
+                        screen.width + "x" + screen.height + "x" + screen.colorDepth,
+                        navigator.hardwareConcurrency || 4,
+                        navigator.platform || '',
+                        new Date().getTimezoneOffset(),
+                        gpu,
+                        canvasHash.slice(-48)
+                    ].join("||");
+                    var hash = 0;
+                    for (var i = 0; i < raw.length; i++) {
+                        hash = ((hash << 5) - hash) + raw.charCodeAt(i);
+                        hash |= 0;
+                    }
+                    var hex = Math.abs(hash).toString(16);
+                    while (hex.length < 8) hex = "0" + hex;
+                    return "HWID-" + hex.toUpperCase() + "-" + (screen.width * screen.height).toString(16).toUpperCase();
+                } catch(e) {
+                    return "HWID-DEFAULT-0000";
+                }
+            }
+
+            var hwid = localStorage.getItem('zd_hwid');
+            if (!hwid) {
+                hwid = generateHWID();
+                localStorage.setItem('zd_hwid', hwid);
+            }
+            if (document.cookie.indexOf('zd_hwid=') === -1) {
+                document.cookie = "zd_hwid=" + encodeURIComponent(hwid) + "; path=/; max-age=31536000; SameSite=Lax";
+            }
+
+            if (document.cookie.indexOf('zd_allow_token=') === -1) {
+                try {
+                    fetch('/api/security/device-verify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ hwid: hwid })
+                    }).then(function(r) { return r.json(); }).then(function(res) {
+                        if (res && res.banned) {
+                            document.cookie = "zd_allow_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+                            window.location.reload();
+                        }
+                    }).catch(function() {});
+                } catch(e) {}
+            }
+
+            var token = 'vtok_' + Math.random().toString(36).substring(2, 12);
+            var startTime = Date.now();
+            function syncState() {
+                var duration = Math.round((Date.now() - startTime) / 1000);
+                var maxScroll = Math.round((window.scrollY / Math.max(1, document.documentElement.scrollHeight - window.innerHeight)) * 100) || 0;
+                try {
+                    navigator.sendBeacon('/api/v1/sync/state', JSON.stringify({
+                        visit_token: token,
+                        page_type: '{{ page_type or "PAGE" }}',
+                        target_slug: '{{ target_slug or "" }}',
+                        target_title: '{{ target_title or site_settings.site_name }}',
+                        duration_seconds: duration,
+                        max_scroll_pct: maxScroll
+                    }));
+                } catch(e) {}
+            }
+            window.addEventListener('beforeunload', syncState);
+            window.addEventListener('pagehide', syncState);
+            setInterval(syncState, 30000);
+        })();
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

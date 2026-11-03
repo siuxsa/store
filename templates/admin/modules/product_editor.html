@@ -1,0 +1,636 @@
+<section id="mod-product-editor" class="admin-module">
+            <!-- TOP STICKY COMMAND BAR -->
+            <div style="background:var(--admin-surface); border:1px solid var(--admin-border); padding:1.25rem 1.75rem; margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+                <div>
+                    <div style="display:flex; align-items:center; gap:0.5rem; font-family:var(--admin-font-mono); font-size:11px; color:var(--admin-muted); margin-bottom:4px;">
+                        <button type="button" onclick="closeProductStudio()" style="background:transparent; border:none; color:#00e5ff; cursor:pointer; font-family:inherit; padding:0; text-transform:uppercase; font-weight:700;">
+                            ← RETURN TO CATALOG
+                        </button>
+                        <span>/</span>
+                        <span id="pse-breadcrumb-title" style="color:#fff;">NEW ARSENAL SYSTEM</span>
+                    </div>
+                    <h2 id="pse-heading-title" style="font-size:19px; font-weight:700; text-transform:uppercase; margin:0; letter-spacing:-0.02em;">
+                        ARSENAL SPECIFICATION STUDIO
+                    </h2>
+                </div>
+                <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
+                    <a id="pse-btn-view-live" href="#" target="_blank" class="btn-admin btn-admin-outline" style="display:none;">
+                        VIEW LIVE STORE PAGE ↗
+                    </a>
+                    <button type="button" onclick="closeProductStudio()" class="btn-admin btn-admin-outline">
+                        CANCEL
+                    </button>
+                    <button type="button" onclick="submitProductStudio(event)" class="btn-admin btn-admin-primary" id="pse-btn-save">
+                        SAVE SYSTEM SPECIFICATIONS →
+                    </button>
+                </div>
+            </div>
+
+            <!-- SUB-NAVIGATION STRIP -->
+            <div class="module-subnav" style="margin-bottom:1.5rem;">
+                <button type="button" class="subnav-btn pse-subnav-btn active" onclick="switchProductStudioTab('specs', this)">
+                    [01] CORE SPECS &amp; PRICING
+                </button>
+                <button type="button" class="subnav-btn pse-subnav-btn" onclick="switchProductStudioTab('media', this)">
+                    [02] MEDIA &amp; COVER ASSET
+                </button>
+                <button type="button" class="subnav-btn pse-subnav-btn" onclick="switchProductStudioTab('tech', this)">
+                    [03] LINE-BY-LINE SPECS &amp; HASH
+                </button>
+                <button type="button" class="subnav-btn pse-subnav-btn" onclick="switchProductStudioTab('manual', this)" style="color:#00e5ff; font-weight:700;">
+                    [04] FULL MARKDOWN MANUAL
+                </button>
+                <button type="button" class="subnav-btn pse-subnav-btn" onclick="switchProductStudioTab('seo', this)">
+                    [05] DEDICATED SEO &amp; SOCIAL CARDS
+                </button>
+                <button type="button" class="subnav-btn pse-subnav-btn" onclick="switchProductStudioTab('ad', this)">
+                    [06] IN-ARTICLE SMART AD BANNER
+                </button>
+                <button type="button" class="subnav-btn pse-subnav-btn" onclick="switchProductStudioTab('faq', this)" style="color:#10b981; font-weight:700;">
+                    [07] PRODUCT FAQ &amp; ACCORDIONS
+                </button>
+                <button type="button" class="subnav-btn pse-subnav-btn" onclick="switchProductStudioTab('preview', this)">
+                    [08] LIVE STORE PREVIEW
+                </button>
+            </div>
+
+            <form id="product-studio-form" onsubmit="submitProductStudio(event)" style="background:var(--admin-surface); border:1px solid var(--admin-border); padding:1.75rem;">
+                <input type="hidden" id="pse-id">
+
+                <!-- TAB 1: CORE SPECS & PRICING -->
+                <div id="pse-tab-specs" class="pse-pane">
+                    <div class="form-grid" style="margin-bottom:1.5rem;">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <span>SYSTEM SKU</span>
+                                <span style="color:var(--admin-muted); font-size:10px;">UNIQUE IDENTIFIER</span>
+                            </label>
+                            <input type="text" id="pse-sku" class="form-input" required placeholder="e.g. LIC-BURP-PRO" style="font-family:var(--admin-font-mono); font-weight:700;" oninput="updateProductPreview();">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">SYSTEM NAME</label>
+                            <input type="text" id="pse-name" class="form-input" required placeholder="e.g. Burp Suite Professional (v2026.10)" oninput="updateProductPreview();">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">URL SLUG (AUTO-GENERATED IF BLANK)</label>
+                            <input type="text" id="pse-slug" class="form-input" placeholder="e.g. burp-suite-professional-license" style="font-family:var(--admin-font-mono);">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">SECURITY CATEGORY</label>
+                            <input type="text" id="pse-category" class="form-input" required placeholder="e.g. Web & AppSec Licenses" oninput="updateProductPreview();">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">PRODUCT TYPE</label>
+                            <select id="pse-type" class="form-select">
+                                <option value="LICENSE_KEY">LICENSE KEY (PROVISIONED)</option>
+                                <option value="BINARY_SUITE">BINARY SUITE (OFFLINE RUNTIME)</option>
+                                <option value="EXPLOIT_TOOLKIT">EXPLOIT TOOLKIT / FRAMEWORK</option>
+                                <option value="ENTERPRISE_SEAT">ENTERPRISE TEAM SEAT</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <span>COMMERCIAL PRICE ($ USD)</span>
+                                <span id="pse-discount-badge" class="status-pill completed" style="font-size:9.5px; display:none;">0% OFF</span>
+                            </label>
+                            <input type="number" step="0.01" id="pse-price" class="form-input" required placeholder="449" oninput="calcProductDiscount(); updateProductPreview();">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">RETAIL STRIKE PRICE ($ USD)</label>
+                            <input type="number" step="0.01" id="pse-retail" class="form-input" placeholder="599" oninput="calcProductDiscount(); updateProductPreview();">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">BUILD VERSION</label>
+                            <input type="text" id="pse-version" class="form-input" placeholder="v2026.10.1" oninput="updateProductPreview();">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">PLATFORM / ARCHITECTURE</label>
+                            <input type="text" id="pse-platform" class="form-input" placeholder="Windows / Linux / macOS (x86_64, aarch64)" oninput="updateProductPreview();">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">LICENSE DURATION / SEATS</label>
+                            <input type="text" id="pse-duration" class="form-input" placeholder="1-Year Enterprise Multi-Seat" oninput="updateProductPreview();">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">INSTANT DELIVERY BADGE TAG</label>
+                            <input type="text" id="pse-badge" class="form-input" placeholder="INSTANT DELIVERY" oninput="updateProductPreview();">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: MEDIA & COVER ASSET -->
+                <div id="pse-tab-media" class="pse-pane" style="display:none;">
+                    <div class="form-group" style="margin-bottom:1.5rem;">
+                        <label class="form-label">PRIMARY SYSTEM COVER IMAGE (URL OR UPLOAD FROM DEVICE)</label>
+                        <div style="display:flex; gap:0.5rem;">
+                            <input type="text" id="pse-image" class="form-input" placeholder="https://images.unsplash.com/photo-..." style="flex:1;" oninput="updateProductCoverPreview(this.value); updateProductPreview();">
+                            <label class="btn-admin btn-admin-outline" style="cursor:pointer; padding:0.6rem 1rem; font-size:11px; white-space:nowrap; display:inline-flex; align-items:center; gap:5px;" title="Upload photo file from your computer">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                <span>UPLOAD FILE</span>
+                                <input type="file" accept="image/*" style="display:none;" onchange="handleImageFileUpload(this, 'pse-cover')">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 1fr 280px; gap:1.5rem; align-items:start;">
+                        <div>
+                            <div style="font-family:var(--admin-font-mono); font-size:11px; color:var(--admin-muted); margin-bottom:0.5rem; text-transform:uppercase;">
+                                // HIGH-RESOLUTION COVER ART PREVIEW
+                            </div>
+                            <div style="height:260px; background:#0c0d0e; border:1px solid var(--admin-border); overflow:hidden; border-radius:4px; position:relative;">
+                                <img id="pse-image-preview" src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=85" alt="Cover Preview" style="width:100%; height:100%; object-fit:cover;">
+                                <div id="pse-cover-overlay-badge" style="position:absolute; top:12px; left:12px; background:rgba(0,0,0,0.8); border:1px solid rgba(255,255,255,0.2); font-family:var(--admin-font-mono); font-size:10px; padding:3px 8px; color:#fff;">
+                                    LIC-BURP-PRO
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style="font-family:var(--admin-font-mono); font-size:11px; color:var(--admin-muted); margin-bottom:0.5rem; text-transform:uppercase;">
+                                // CYBERSECURITY PRESETS
+                            </div>
+                            <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                                <button type="button" class="btn-admin btn-admin-outline" style="justify-content:flex-start; text-align:left; font-size:11px; padding:0.5rem;" onclick="applyProductCoverPreset('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=85')">
+                                    Server Rack Telemetry (Blue)
+                                </button>
+                                <button type="button" class="btn-admin btn-admin-outline" style="justify-content:flex-start; text-align:left; font-size:11px; padding:0.5rem;" onclick="applyProductCoverPreset('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80')">
+                                    Green Code Matrix Stream
+                                </button>
+                                <button type="button" class="btn-admin btn-admin-outline" style="justify-content:flex-start; text-align:left; font-size:11px; padding:0.5rem;" onclick="applyProductCoverPreset('https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=85')">
+                                    Dark Silicon Microarchitecture
+                                </button>
+                                <button type="button" class="btn-admin btn-admin-outline" style="justify-content:flex-start; text-align:left; font-size:11px; padding:0.5rem;" onclick="applyProductCoverPreset('https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1200&q=80')">
+                                    Holographic Encryption Grid
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: TECHNICAL DESCRIPTIONS & HASH -->
+                <div id="pse-tab-tech" class="pse-pane" style="display:none;">
+                    <div class="form-group" style="margin-bottom:1.25rem;">
+                        <label class="form-label">
+                            <span>CRYPTOGRAPHIC SHA-256 HASH VERIFICATION</span>
+                            <span style="color:var(--admin-muted); font-size:10px;">AIRGAP ASSURANCE</span>
+                        </label>
+                        <input type="text" id="pse-sha256" class="form-input" placeholder="e.g. 8f4e2b91a04d3c90e5fa3b82c61099238e83b1dc..." style="font-family:var(--admin-font-mono);">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:1.25rem;">
+                        <label class="form-label">ENCRYPTED ARTIFACT DOWNLOAD URL</label>
+                        <input type="text" id="pse-download-url" class="form-input" placeholder="https://cdn.matrix.security/packages/release-x86_64.tar.gz" style="font-family:var(--admin-font-mono);">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:1.25rem;">
+                        <label class="form-label">SHORT ELEVATOR OVERVIEW (CARD &amp; CATALOG DISPLAY)</label>
+                        <textarea id="pse-desc" rows="3" class="form-textarea" placeholder="Enterprise web security vulnerability scanner engineered for authorized red teams..." oninput="updateProductPreview();"></textarea>
+                    </div>
+
+                    <div style="border-top:1px solid var(--admin-border); margin-top:1.5rem; padding-top:1.25rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+                            <div>
+                                <span style="font-family:var(--admin-font-mono); font-size:12px; font-weight:800; color:#00e5ff; letter-spacing:0.06em; text-transform:uppercase;">
+                                    // CORE SYSTEM SPECIFICATIONS (LINE BY LINE)
+                                </span>
+                                <div style="font-size:11px; color:var(--admin-muted); margin-top:2px;">
+                                    Manage individual bullet items displayed in the "// CORE SYSTEM SPECIFICATIONS" panel on the product page.
+                                </div>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:0.75rem;">
+                                <span class="status-pill completed" style="font-size:9.5px;"><span id="pse-specs-count">0</span> SPECIFICATIONS</span>
+                                <button type="button" onclick="addPseSpecRow()" class="btn-admin btn-admin-outline" style="border-color:#00e5ff; color:#00e5ff; padding:0.35rem 0.75rem; font-size:11px; font-weight:700;">
+                                    + ADD SPECIFICATION ITEM
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="pse-specs-container" style="display:flex; flex-direction:column; gap:0.65rem;">
+                            <!-- Dynamic specification rows -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: FULL MARKDOWN MANUAL & TECHNICAL ARCHITECTURE -->
+                <div id="pse-tab-manual" class="pse-pane" style="display:none;">
+                    <div style="background:rgba(0,229,255,0.03); border:1px solid rgba(0,229,255,0.25); border-radius:4px; padding:1.25rem; margin-bottom:1.25rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.4rem;">
+                            <span style="font-family:var(--admin-font-mono); font-size:12px; font-weight:800; color:#00e5ff; letter-spacing:0.06em; text-transform:uppercase;">
+                                // FULL TECHNICAL DOCUMENTATION &amp; OPERATIONAL ARCHITECTURE
+                            </span>
+                            <span class="status-pill completed" style="font-size:9.5px;">MARKDOWN PROSE ENGINE</span>
+                        </div>
+                        <p style="font-size:12px; color:var(--admin-muted); margin:0; line-height:1.5;">
+                            Compose detailed architectural breakdowns, API integrations, payload capabilities, or airgap deployment manuals. Fully supports GitHub-flavored markdown, code highlighting blocks, alert callouts (<code>[!NOTE]</code>, <code>[!WARNING]</code>, <code>[!TIP]</code>, <code>[!CAUTION]</code>), tables, and lists.
+                        </p>
+                    </div>
+
+                    <!-- COMPLETE DEDICATED MARKDOWN TOOLBAR -->
+                    <div class="md-toolbar-container" style="background:#141618; border:1px solid var(--admin-border); border-bottom:none; border-radius:4px 4px 0 0; padding:8px 12px; display:flex; flex-direction:column; gap:6px;">
+                        <!-- ROW 1: FORMATTING CONTROLS -->
+                        <div style="display:flex; flex-wrap:wrap; gap:4px; align-items:center;">
+                            <!-- Text Styles -->
+                            <div style="display:flex; gap:2px; background:rgba(255,255,255,0.04); padding:2px; border-radius:3px;">
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 7px; font-weight:bold; font-size:11px;" title="Bold (Ctrl+B)" onclick="formatProductMarkdownSelection('bold')">B</button>
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 7px; font-style:italic; font-size:11px;" title="Italic (Ctrl+I)" onclick="formatProductMarkdownSelection('italic')">I</button>
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 7px; text-decoration:line-through; font-size:11px;" title="Strikethrough" onclick="formatProductMarkdownSelection('strike')">S</button>
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 7px; font-family:var(--admin-font-mono); font-size:10.5px;" title="Inline Code" onclick="formatProductMarkdownSelection('code')">&lt;/&gt;</button>
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 7px; font-family:var(--admin-font-mono); font-size:10.5px;" title="Code Block" onclick="formatProductMarkdownSelection('codeblock')">```{ }```</button>
+                            </div>
+
+                            <span style="color:rgba(255,255,255,0.15); margin:0 2px;">|</span>
+
+                            <!-- Headings -->
+                            <div style="display:flex; gap:2px; background:rgba(255,255,255,0.04); padding:2px; border-radius:3px;">
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 6px; font-size:10.5px;" title="Heading 1" onclick="formatProductMarkdownSelection('h1')">H1</button>
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 6px; font-size:10.5px;" title="Heading 2" onclick="formatProductMarkdownSelection('h2')">H2</button>
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 6px; font-size:10.5px;" title="Heading 3" onclick="formatProductMarkdownSelection('h3')">H3</button>
+                            </div>
+
+                            <span style="color:rgba(255,255,255,0.15); margin:0 2px;">|</span>
+
+                            <!-- Structure -->
+                            <div style="display:flex; gap:2px; background:rgba(255,255,255,0.04); padding:2px; border-radius:3px;">
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 7px; font-size:10.5px;" title="Blockquote" onclick="formatProductMarkdownSelection('quote')">Quote</button>
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 7px; font-size:10.5px;" title="Bullet List" onclick="formatProductMarkdownSelection('ul')">• List</button>
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 7px; font-size:10.5px;" title="Numbered List" onclick="formatProductMarkdownSelection('ol')">1. List</button>
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 7px; font-size:10.5px;" title="Markdown Table" onclick="formatProductMarkdownSelection('table')">Table</button>
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 7px; font-size:10.5px;" title="Hyperlink (Ctrl+K)" onclick="formatProductMarkdownSelection('link')">Link</button>
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 7px; font-size:10.5px;" title="Horizontal Rule" onclick="formatProductMarkdownSelection('hr')">HR</button>
+                            </div>
+
+                            <span style="color:rgba(255,255,255,0.15); margin:0 2px;">|</span>
+
+                            <!-- Operational Alerts -->
+                            <div style="display:flex; gap:2px; background:rgba(255,255,255,0.04); padding:2px; border-radius:3px;">
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 8px; font-size:9.5px; color:#f59e0b;" title="GitHub Warning Alert" onclick="formatProductMarkdownSelection('alert-warning')">WARNING</button>
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 8px; font-size:9.5px; color:#00e5ff;" title="GitHub Note Alert" onclick="formatProductMarkdownSelection('alert-note')">NOTE</button>
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 8px; font-size:9.5px; color:#10b981;" title="GitHub Tip Alert" onclick="formatProductMarkdownSelection('alert-tip')">TIP</button>
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 8px; font-size:9.5px; color:#ef4444;" title="GitHub Caution Alert" onclick="formatProductMarkdownSelection('alert-caution')">CAUTION</button>
+                            </div>
+                        </div>
+
+                        <!-- ROW 2: TEMPLATES & VIEWPORT CONTROLS -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; border-top:1px solid rgba(255,255,255,0.06); padding-top:0.4rem; font-family:var(--admin-font-mono); font-size:10px;">
+                            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                                <span style="color:var(--admin-muted); font-size:9.5px;">TEMPLATES:</span>
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:2px 7px; font-size:9.5px; border-color:rgba(0,229,255,0.3); color:#00e5ff;" onclick="loadProductMarkdownTemplate('arch')">
+                                    + ARCHITECTURE &amp; SUBSYSTEMS
+                                </button>
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:2px 7px; font-size:9.5px;" onclick="loadProductMarkdownTemplate('api')">
+                                    + API &amp; SCRIPTING AUTOMATION
+                                </button>
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:2px 7px; font-size:9.5px;" onclick="loadProductMarkdownTemplate('airgap')">
+                                    + AIRGAP &amp; OFFLINE DEPLOYMENT
+                                </button>
+                            </div>
+
+                            <div style="display:flex; align-items:center; gap:4px;">
+                                <button type="button" id="btn-pse-md-mode-split" class="btn-admin btn-admin-outline active" style="padding:2px 8px; font-size:9.5px;" onclick="setProductMarkdownViewMode('split')">SPLIT (50/50)</button>
+                                <button type="button" id="btn-pse-md-mode-editor" class="btn-admin btn-admin-outline" style="padding:2px 8px; font-size:9.5px;" onclick="setProductMarkdownViewMode('editor')">WRITE ONLY</button>
+                                <button type="button" id="btn-pse-md-mode-preview" class="btn-admin btn-admin-outline" style="padding:2px 8px; font-size:9.5px;" onclick="setProductMarkdownViewMode('preview')">PREVIEW ONLY</button>
+                                <button type="button" id="btn-pse-md-fullscreen" class="btn-admin btn-admin-outline" style="padding:2px 8px; font-size:9.5px; color:#00e5ff; font-weight:700;" onclick="toggleProductMarkdownFullscreen()">FULLSCREEN</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- WORKSPACE DUAL-PANE GRID -->
+                    <div id="pse-md-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; transition:all 0.2s ease;">
+                        <!-- LEFT: MARKDOWN SOURCE EDITOR -->
+                        <div id="pse-md-editor-col" style="display:flex; flex-direction:column;">
+                            <div style="position:relative; flex:1;">
+                                <textarea id="pse-description" rows="22" class="form-textarea" placeholder="### 01 · System Architecture &amp; Pipeline&#10;&#10;Compose comprehensive operational documentation for operators..." style="font-family:var(--admin-font-mono); font-size:12.5px; line-height:1.65; height:520px; width:100%; resize:vertical; background:#08090a; border:1px solid var(--admin-border); border-bottom:none; border-radius:0;" oninput="renderProductMarkdownPreviewLive(); updateProductMarkdownStats();" onkeydown="handleProductMarkdownEditorKeydown(event)"></textarea>
+                            </div>
+                            <!-- FOOTER STATS BAR -->
+                            <div style="display:flex; justify-content:space-between; align-items:center; background:#101214; border:1px solid var(--admin-border); padding:6px 12px; font-family:var(--admin-font-mono); font-size:10.5px; color:var(--admin-muted); border-radius:0 0 4px 4px;">
+                                <div style="display:flex; gap:12px; align-items:center;">
+                                    <span>WORDS: <strong id="pse-md-stat-words" style="color:#fff;">0</strong></span>
+                                    <span>CHARS: <strong id="pse-md-stat-chars" style="color:#fff;">0</strong></span>
+                                    <span>LINES: <strong id="pse-md-stat-lines" style="color:#fff;">0</strong></span>
+                                </div>
+                                <div style="display:flex; gap:8px; align-items:center; font-size:9.5px;">
+                                    <span style="color:#00e5ff;">TAB = 2 SPACES</span>
+                                    <span>·</span>
+                                    <span>CTRL+B / CTRL+I / CTRL+K</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT: LIVE HTML RENDER PREVIEW -->
+                        <div id="pse-md-preview-col" style="background:#08090a; border:1px solid var(--admin-border); border-radius:4px; display:flex; flex-direction:column; height:560px;">
+                            <div style="font-family:var(--admin-font-mono); font-size:10px; color:#00e5ff; padding:8px 14px; background:#101214; border-bottom:1px solid var(--admin-border); display:flex; justify-content:space-between; align-items:center;">
+                                <span style="display:inline-flex; align-items:center; gap:6px;">
+                                    <span class="live-pulse"></span>
+                                    REAL-TIME HTML RENDER PREVIEW
+                                </span>
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:2px 6px; font-size:9.5px;" onclick="copyProductRenderedHtml()">
+                                    COPY HTML
+                                </button>
+                            </div>
+                            <div id="pse-live-markdown-preview" style="color:#f0f0f2; font-size:13px; line-height:1.75; padding:1.5rem; overflow-y:auto; flex:1; text-align:justify; text-justify:inter-word;">
+                                <p style="color:var(--admin-muted); font-style:italic;">Type markdown content on the left to see instant live rendering here...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: DEDICATED SEO & SOCIAL CARDS -->
+                <div id="pse-tab-seo" class="pse-pane" style="display:none;">
+                    <!-- GOOGLE SERP SIMULATOR FOR PRODUCT -->
+                    <div class="theme-card-group" style="border-color: rgba(0, 229, 255, 0.3); background: rgba(0,0,0,0.5); margin-bottom:1.5rem;">
+                        <div class="theme-card-title">
+                            <span style="color:#00e5ff;">GOOGLE SERP SNIPPET SIMULATOR (THIS PRODUCT)</span>
+                            <span class="status-pill completed" style="font-size:9.5px;">LIVE PREVIEW</span>
+                        </div>
+                        <div style="background:#202124; border:1px solid #3c4043; border-radius:8px; padding:12px 14px; font-family:Arial, sans-serif;">
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                                <div style="width:16px; height:16px; border-radius:50%; background:#00e5ff; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:bold; color:#000;">Z</div>
+                                <div style="font-size:12px; color:#dadce0; line-height:1.2;">
+                                    <span>{{ site_settings.site_name }}</span>
+                                    <span id="pse-serp-url" style="color:#9aa0a6; font-size:11px; margin-left:4px;">https://matrix.security/product/slug</span>
+                                </div>
+                            </div>
+                            <div id="pse-serp-title" style="color:#8ab4f8; font-size:15px; line-height:1.3; font-weight:400; margin-bottom:4px;">
+                                System Name [SKU] — Enterprise License // ZERO//FORM
+                            </div>
+                            <div id="pse-serp-desc" style="color:#bdc1c6; font-size:12px; line-height:1.45;">
+                                Commercial security suites, binary analysis frameworks, and verified enterprise seats.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:1.25rem;">
+                        <label class="form-label">
+                            <span>DEDICATED SEARCH TITLE (META TITLE)</span>
+                            <span id="pse-count-title" style="color:var(--admin-muted); font-size:10px;"></span>
+                        </label>
+                        <input type="text" id="pse-meta-title" class="form-input" placeholder="Fallback: [Name] ([SKU]) — Enterprise License // {{ site_settings.site_name }}" oninput="updateProductSeoSimulator();">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:1.25rem;">
+                        <label class="form-label">
+                            <span>DEDICATED META DESCRIPTION</span>
+                            <span id="pse-count-desc" style="color:var(--admin-muted); font-size:10px;"></span>
+                        </label>
+                        <textarea id="pse-meta-desc" rows="3" class="form-textarea" placeholder="Fallback: Uses short description automatically..." oninput="updateProductSeoSimulator();"></textarea>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:1.25rem;">
+                        <label class="form-label">DEDICATED SEARCH KEYWORDS (COMMA-SEPARATED)</label>
+                        <input type="text" id="pse-meta-keywords" class="form-input" placeholder="Fallback: [Name], [SKU], [Category], [Platform], cyber security software">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">CUSTOM SOCIAL SHARE IMAGE (OG:IMAGE)</label>
+                        <div style="display:flex; gap:0.5rem;">
+                            <input type="text" id="pse-og-image" class="form-input" placeholder="Fallback: Uses system cover image automatically..." style="flex:1;" oninput="updateProductOgPreview(this.value);">
+                            <label class="btn-admin btn-admin-outline" style="cursor:pointer; padding:0.6rem 1rem; font-size:11px; white-space:nowrap; display:inline-flex; align-items:center; gap:5px;" title="Upload custom photo for Twitter / Telegram unfurl">
+                                <span>UPLOAD</span>
+                                <input type="file" accept="image/*" style="display:none;" onchange="handleImageFileUpload(this, 'pse-seo-og')">
+                            </label>
+                        </div>
+                        <div style="height:110px; max-width:280px; margin-top:0.5rem; background:#0c0d0e; border:1px solid var(--admin-border); overflow:hidden; border-radius:4px;">
+                            <img id="pse-og-preview" src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=85" alt="OG Preview" style="width:100%; height:100%; object-fit:cover;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 5: IN-ARTICLE SMART AD CAMPAIGN -->
+                <div id="pse-tab-ad" class="pse-pane" style="display:none;">
+                    <div style="background:rgba(0,229,255,0.03); border:1px solid rgba(0,229,255,0.25); border-radius:4px; padding:1.25rem; margin-bottom:1.5rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.4rem;">
+                            <span style="font-family:var(--admin-font-mono); font-size:12px; font-weight:800; color:#00e5ff; letter-spacing:0.06em; text-transform:uppercase;">
+                                // IN-ARTICLE SMART AD SYSTEM APPEARANCE &amp; BANNER CUSTOMIZATION
+                            </span>
+                            <span class="status-pill completed" style="font-size:9.5px;">LIVE JOURNAL SIMULATOR</span>
+                        </div>
+                        <p style="font-size:12px; color:var(--admin-muted); margin:0; line-height:1.5;">
+                            When this system is featured as an in-article ad inside Threat Intelligence Journal publications, configure exactly what headline, two-line description, discount tag, CTA button, and background image to present. If fields are left blank, it automatically falls back to standard catalog values.
+                        </p>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:2rem; align-items:start;">
+                        <!-- LEFT COLUMN: CONTROLS -->
+                        <div style="display:flex; flex-direction:column; gap:1.25rem;">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <span>CUSTOM AD HEADLINE</span>
+                                    <span style="color:var(--admin-muted); font-size:10px;">FALLBACK: SYSTEM NAME</span>
+                                </label>
+                                <input type="text" id="pse-ad-headline" class="form-input" placeholder="e.g. AUDIT YOUR PERIMETER WITH BURP SUITE PRO" oninput="updateProductAdPreview();">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <span>TWO-LINE AD DESCRIPTION</span>
+                                    <span style="color:var(--admin-muted); font-size:10px;">SHORT PUNCHY TEASER</span>
+                                </label>
+                                <textarea id="pse-ad-desc" rows="2" class="form-textarea" placeholder="e.g. Industry-standard web vulnerability detection suite with automated crawler and OAST Collaborator integration." oninput="updateProductAdPreview();"></textarea>
+                            </div>
+
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <span>CUSTOM AD BADGE / DISCOUNT TAG</span>
+                                        <span style="color:var(--admin-muted); font-size:10px;">TAG BADGE</span>
+                                    </label>
+                                    <input type="text" id="pse-ad-badge" class="form-input" placeholder="e.g. SAVE 90% OFF or VERIFIED SYSTEM" oninput="updateProductAdPreview();">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <span>CUSTOM CTA BUTTON TEXT</span>
+                                        <span style="color:var(--admin-muted); font-size:10px;">ACTION BUTTON</span>
+                                    </label>
+                                    <input type="text" id="pse-ad-cta" class="form-input" placeholder="ORDER VIA TELEGRAM →" oninput="updateProductAdPreview();">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <span>CUSTOM AD BACKGROUND IMAGE (URL OR DEVICE UPLOAD)</span>
+                                    <span style="color:var(--admin-muted); font-size:10px;">FALLBACK: COVER IMAGE</span>
+                                </label>
+                                <div style="display:flex; gap:0.5rem;">
+                                    <input type="text" id="pse-ad-image" class="form-input" placeholder="https://images.unsplash.com/photo-..." style="flex:1;" oninput="updateProductAdPreview();">
+                                    <label class="btn-admin btn-admin-outline" style="cursor:pointer; padding:0.6rem 1rem; font-size:11px; white-space:nowrap; display:inline-flex; align-items:center; gap:5px;" title="Upload custom high-res banner photo">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                        <span>UPLOAD</span>
+                                        <input type="file" accept="image/*" style="display:none;" onchange="handleImageFileUpload(this, 'pse-ad-bg')">
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div style="display:flex; gap:0.5rem;">
+                                <button type="button" class="btn-admin btn-admin-outline" style="font-size:11px; padding:0.5rem 0.85rem;" onclick="syncAdFromCatalogFields()">
+                                    ⟳ COPY FROM CATALOG FIELDS
+                                </button>
+                                <button type="button" class="btn-admin btn-admin-outline" style="font-size:11px; padding:0.5rem 0.85rem;" onclick="clearAdCustomFields()">
+                                    CLEAR OVERRIDES (USE FALLBACKS)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT COLUMN: LIVE VISUAL SIMULATOR -->
+                        <div>
+                            <div style="font-family:var(--admin-font-mono); font-size:11px; color:var(--admin-muted); margin-bottom:0.75rem; text-transform:uppercase; display:flex; justify-content:space-between; align-items:center;">
+                                <span>// LIVE IN-JOURNAL MIDDLE AD BANNER</span>
+                                <span style="color:#00e5ff; font-weight:700;">100% REALISTIC</span>
+                            </div>
+
+                            <!-- THE SIMULATED INLINE BANNER -->
+                            <div id="pse-sim-ad-container" style="position:relative; border-radius:4px; overflow:hidden; border:1px solid rgba(255,255,255,0.18); min-height:165px; padding:1.25rem 1.45rem; box-shadow:0 8px 30px rgba(0,0,0,0.6);">
+                                <div id="pse-sim-ad-bg" style="position:absolute; inset:0; z-index:0; background-image:url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=85'); background-size:cover; background-position:center; filter:brightness(0.72) contrast(1.05); transition:opacity 0.35s ease;"></div>
+                                <div style="position:absolute; inset:0; z-index:1; background:linear-gradient(90deg, rgba(8,9,11,0.68) 0%, rgba(8,9,11,0.42) 50%, rgba(8,9,11,0.72) 100%); pointer-events:none;"></div>
+                                <div style="position:absolute; top:0; left:0; height:2px; width:45%; background:#00e5ff; opacity:0.85; z-index:3;"></div>
+
+                                <div style="position:relative; z-index:2; display:flex; flex-direction:column; justify-content:space-between; height:100%;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.5rem;">
+                                        <div id="pse-sim-ad-title" style="font-size:1.15rem; font-weight:700; text-transform:uppercase; color:#ffffff; letter-spacing:-0.01em; line-height:1.2; text-shadow:0 1px 4px rgba(0,0,0,0.9), 0 2px 8px rgba(0,0,0,0.85);">
+                                            BURP SUITE PROFESSIONAL (v2026.10)
+                                        </div>
+                                        <span id="pse-sim-ad-badge" class="badge-tag" style="background:#dc2626; color:#ffffff; font-weight:700; border:none; padding:0.25rem 0.65rem; font-size:0.7rem; letter-spacing:0.04em;">
+                                            SAVE 25% OFF
+                                        </span>
+                                    </div>
+
+                                    <p id="pse-sim-ad-desc" style="display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; font-size:0.86rem; line-height:1.45; color:rgba(255,255,255,0.92); margin:0.35rem 0 0.85rem 0; text-shadow:0 1px 3px rgba(0,0,0,0.95);">
+                                        Enterprise web security vulnerability scanner and dynamic proxy suite with automated crawling.
+                                    </p>
+
+                                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem; padding-top:0.5rem; border-top:1px solid rgba(255,255,255,0.2);">
+                                        <div id="pse-sim-ad-price" style="display:flex; align-items:baseline; gap:0.45rem; text-shadow:0 1px 3px rgba(0,0,0,0.9);">
+                                            <span style="font-family:var(--admin-font-mono); text-decoration:line-through; color:rgba(255,255,255,0.55); margin-right:0.45rem; font-size:0.85rem;">$599</span>
+                                            <span style="font-family:var(--admin-font-mono); font-weight:700; font-size:1.2rem; color:#ffffff;">$449</span>
+                                        </div>
+                                        <div style="display:flex; gap:0.5rem; align-items:center;">
+                                            <span id="pse-sim-ad-cta" style="background:#ffffff; color:#0c0d0e; padding:0.45rem 1rem; font-size:0.72rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; font-family:var(--admin-font-mono);">
+                                                ORDER VIA TELEGRAM →
+                                            </span>
+                                            <span style="background:rgba(0,0,0,0.6); color:#ffffff; border:1px solid rgba(255,255,255,0.6); padding:0.45rem 0.85rem; font-size:0.72rem; font-weight:700; font-family:var(--admin-font-mono);">
+                                                + BAG
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="margin-top:0.75rem; font-family:var(--admin-font-mono); font-size:10px; color:var(--admin-muted); line-height:1.5;">
+                                Native in-article ads rotate automatically among candidate products every 12 seconds with progressive visual bar animation.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 6: PRODUCT FAQ & ACCORDIONS -->
+                <div id="pse-tab-faq" class="pse-pane" style="display:none;">
+                    <div style="background:rgba(16,185,129,0.04); border:1px solid rgba(16,185,129,0.3); border-radius:4px; padding:1.25rem; margin-bottom:1.5rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.4rem;">
+                            <span style="font-family:var(--admin-font-mono); font-size:12px; font-weight:800; color:#10b981; letter-spacing:0.06em; text-transform:uppercase;">
+                                // PER-PRODUCT FREQUENTLY ASKED QUESTIONS &amp; ACCORDIONS
+                            </span>
+                            <span class="status-pill completed" style="font-size:9.5px; border-color:#10b981; color:#10b981;">PDP ACCORDION MODULE</span>
+                        </div>
+                        <p style="font-size:12px; color:var(--admin-muted); margin:0; line-height:1.5;">
+                            Configure dedicated question &amp; answer accordions for this specific product's detail page. You can add new questions, edit answers, reorder items, or delete entries. If no FAQ items are present, the page gracefully falls back to default technical security disclosures.
+                        </p>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+                        <div style="font-family:var(--admin-font-mono); font-size:11px; color:#fff; text-transform:uppercase; font-weight:700;">
+                            CONFIGURED FAQ ACCORDIONS (<span id="pse-faq-count">0</span>)
+                        </div>
+                        <button type="button" onclick="addProductStudioFaqRow()" class="btn-admin btn-admin-outline" style="border-color:#10b981; color:#10b981; padding:0.4rem 0.85rem; font-size:11px; font-weight:700;">
+                            + ADD FAQ ITEM
+                        </button>
+                    </div>
+
+                    <div id="pse-faq-container" style="display:flex; flex-direction:column; gap:1.25rem;">
+                        <!-- FAQ rows dynamically injected -->
+                    </div>
+                </div>
+
+                <!-- TAB 7: LIVE STORE PREVIEW -->
+                <div id="pse-tab-preview" class="pse-pane" style="display:none;">
+                    <div style="display:grid; grid-template-columns: 360px 1fr; gap:2rem; align-items:start;">
+                        <div>
+                            <div style="font-family:var(--admin-font-mono); font-size:11px; color:var(--admin-muted); margin-bottom:0.75rem; text-transform:uppercase;">
+                                // SIMULATED CATALOG GRID CARD (/shop)
+                            </div>
+                            <div style="background:#141618; border:1px solid rgba(255,255,255,0.1); border-radius:4px; overflow:hidden;">
+                                <div style="height:180px; position:relative; overflow:hidden;">
+                                    <img id="prev-card-img" src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=85" alt="System" style="width:100%; height:100%; object-fit:cover;">
+                                    <span id="prev-card-badge" style="position:absolute; top:8px; left:8px; background:rgba(0,0,0,0.85); border:1px solid rgba(255,255,255,0.2); font-family:var(--admin-font-mono); font-size:9.5px; color:#fff; padding:2px 7px;">
+                                        INSTANT DELIVERY
+                                    </span>
+                                </div>
+                                <div style="padding:1.25rem;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                                        <span id="prev-card-sku" style="font-family:var(--admin-font-mono); font-size:10px; color:#00e5ff; font-weight:700;">LIC-BURP-PRO</span>
+                                        <span id="prev-card-version" style="font-family:var(--admin-font-mono); font-size:10px; color:var(--admin-muted);">v2026.10</span>
+                                    </div>
+                                    <h4 id="prev-card-name" style="font-size:15px; font-weight:700; color:#fff; margin-bottom:0.5rem;">
+                                        Burp Suite Professional
+                                    </h4>
+                                    <p id="prev-card-desc" style="font-size:12px; color:var(--admin-muted); line-height:1.45; margin-bottom:1rem; height:36px; overflow:hidden;">
+                                        Enterprise web security vulnerability scanner...
+                                    </p>
+                                    <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid rgba(255,255,255,0.06); padding-top:0.75rem;">
+                                        <div>
+                                            <span id="prev-card-price" style="font-size:18px; font-weight:700; color:#fff;">$449</span>
+                                            <span id="prev-card-retail" style="font-size:12px; color:var(--admin-muted); text-decoration:line-through; margin-left:4px;">$599</span>
+                                        </div>
+                                        <span class="status-pill completed" style="font-size:9px;">VERIFIED</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style="font-family:var(--admin-font-mono); font-size:11px; color:var(--admin-muted); margin-bottom:0.75rem; text-transform:uppercase;">
+                                // SIMULATED DETAIL HEADER (/product/<slug>)
+                            </div>
+                            <div style="background:#141618; border:1px solid rgba(255,255,255,0.1); padding:1.5rem; border-radius:4px;">
+                                <div style="font-family:var(--admin-font-mono); font-size:11px; color:var(--admin-muted); margin-bottom:0.5rem;">
+                                    HOME / ARSENAL / <span id="prev-hdr-sku" style="color:#00e5ff;">LIC-BURP-PRO</span>
+                                </div>
+                                <h1 id="prev-hdr-name" style="font-size:24px; font-weight:700; color:#fff; text-transform:uppercase; margin-bottom:0.5rem;">
+                                    Burp Suite Professional (v2026.10)
+                                </h1>
+                                <div style="display:flex; gap:0.5rem; margin-bottom:1rem; flex-wrap:wrap;">
+                                    <span id="prev-hdr-category" class="status-pill">Web &amp; AppSec</span>
+                                    <span id="prev-hdr-platform" class="status-pill">Windows / Linux / macOS</span>
+                                    <span id="prev-hdr-duration" class="status-pill">1-Year Enterprise</span>
+                                </div>
+                                <div style="font-size:22px; font-weight:700; color:#fff; margin-bottom:1rem;">
+                                    <span id="prev-hdr-price">$449.00</span>
+                                    <span id="prev-hdr-retail" style="font-size:14px; color:var(--admin-muted); text-decoration:line-through; margin-left:6px;">$599.00</span>
+                                </div>
+                                <div style="display:inline-block; padding:0.6rem 1.25rem; background:#fff; color:#000; font-family:var(--admin-font-mono); font-size:11px; font-weight:700; text-transform:uppercase;">
+                                    INQUIRE VIA TELEGRAM CONCIERGE →
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--admin-border); margin-top:2rem; padding-top:1.25rem;">
+                    <button type="button" onclick="closeProductStudio()" class="btn-admin btn-admin-outline">
+                        ← RETURN TO INVENTORY TABLE
+                    </button>
+                    <button type="submit" class="btn-admin btn-admin-primary" style="padding:0.75rem 1.75rem; font-size:12px;">
+                        SAVE ALL SYSTEM SPECIFICATIONS →
+                    </button>
+                </div>
+            </form>
+        </section>

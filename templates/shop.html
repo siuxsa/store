@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}{{ site_settings.seo_shop_title or ('Security Arsenal Catalog & System Inventory // ' ~ site_settings.site_name) }}{% endblock %}
+{% block meta_description %}{{ site_settings.seo_shop_desc or site_settings.shop_subtitle or site_settings.seo_meta_description or 'Browse our catalog of verified security systems, binary analysis frameworks, and offensive penetration testing suites.' }}{% endblock %}
+{% block meta_keywords %}{{ site_settings.seo_shop_keywords or site_settings.seo_meta_keywords }}{% endblock %}
+{% block og_title %}{{ site_settings.seo_shop_title or ('Security Arsenal Catalog // ' ~ site_settings.site_name) }}{% endblock %}
+{% block og_description %}{{ site_settings.seo_shop_desc or site_settings.shop_subtitle or site_settings.seo_meta_description or 'Browse our catalog of verified security systems, binary analysis frameworks, and offensive penetration testing suites.' }}{% endblock %}
+{% block og_image %}{{ site_settings.seo_shop_image or site_settings.seo_og_image or site_settings.hero_image }}{% endblock %}
+{% block twitter_title %}{{ site_settings.seo_shop_title or ('Security Arsenal Catalog // ' ~ site_settings.site_name) }}{% endblock %}
+{% block twitter_description %}{{ site_settings.seo_shop_desc or site_settings.shop_subtitle or site_settings.seo_meta_description }}{% endblock %}
+{% block twitter_image %}{{ site_settings.seo_shop_image or site_settings.seo_og_image or site_settings.hero_image }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 3rem; padding-bottom: 5rem;">
+    <!-- PAGE HEADER -->
+    <div style="border-bottom: 1px solid var(--border); padding-bottom: 2rem; margin-bottom: 2.5rem;">
+        <span class="meta-label" data-theme-bind="shop_eyebrow">{{ site_settings.shop_eyebrow or '// ARSENAL INVENTORY' }}</span>
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; margin-top: 0.5rem;">
+            <div>
+                <h1 class="display-lg" style="margin: 0;" data-theme-bind="shop_title">{{ site_settings.shop_title or 'DIGITAL ARSENAL.' }}</h1>
+                <p style="color: var(--muted); margin: 0.5rem 0 0 0; font-size: 0.95rem; max-width: 680px;" data-theme-bind="shop_subtitle">{{ site_settings.shop_subtitle or '' }}</p>
+            </div>
+            <span class="meta-mono" style="color: var(--muted); font-size: 0.9rem;">
+                {{ products|length }} OF {{ all_count }} SYSTEMS AVAILABLE
+            </span>
+        </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border);">
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <a href="{{ url_for('shop') }}" class="btn {% if not current_category %}btn-dark{% else %}btn-outline-dark{% endif %}" style="padding: 0.45rem 0.9rem; font-size: 0.72rem;">
+                ALL
+            </a>
+            {% for cat in categories %}
+            <a href="{{ url_for('shop', category=cat) }}" class="btn {% if current_category == cat %}btn-dark{% else %}btn-outline-dark{% endif %}" style="padding: 0.45rem 0.9rem; font-size: 0.72rem;">
+                {{ cat|upper }}
+            </a>
+            {% endfor %}
+        </div>
+
+        <form method="GET" action="{{ url_for('shop') }}" style="display: flex; gap: 0.5rem;">
+            {% if current_category %}
+            <input type="hidden" name="category" value="{{ current_category }}">
+            {% endif %}
+            <input type="text" name="q" value="{{ search_query or '' }}" placeholder="FILTER ARSENAL..."
+                   style="padding: 0.45rem 0.85rem; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.75rem; background: var(--bg); min-width: 200px;">
+            <button type="submit" class="btn btn-dark" style="padding: 0.45rem 0.85rem; font-size: 0.72rem;">SEARCH</button>
+        </form>
+    </div>
+
+    <!-- PRODUCT CATALOG GRID -->
+    {% if products %}
+    <div class="product-grid">
+        {% for p in products %}
+        <div class="product-card">
+            <a href="{{ url_for('product_detail', slug=p.slug) }}" class="product-card-image-wrap">
+                <img src="{{ p.image_url }}" alt="{{ p.name }}" class="product-card-img" loading="lazy">
+                <span class="product-badge">{{ p.badge_text }}</span>
+            </a>
+            <div class="product-meta">
+                <div class="product-meta-header">
+                    <span class="meta-label">{{ p.category }}</span>
+                    <div>
+                        {% if p.retail_price > p.price %}
+                        <span class="meta-mono" style="text-decoration:line-through; color:var(--muted); font-size:0.8rem; margin-right:0.35rem;">${{ "%.0f"|format(p.retail_price) }}</span>
+                        {% endif %}
+                        <span class="meta-mono" style="font-weight:700;">${{ "%.0f"|format(p.price) }}</span>
+                    </div>
+                </div>
+                <h3 class="product-title">
+                    <a href="{{ url_for('product_detail', slug=p.slug) }}">{{ p.name }}</a>
+                </h3>
+                <p class="product-desc">
+                    {{ p.short_desc }}
+                </p>
+                <div class="product-specs-line">
+                    {{ p.version }} · {{ p.platform }}
+                </div>
+                <div class="product-actions">
+                    <button type="button" class="btn btn-outline-dark" style="flex:1; padding:0.55rem 0.5rem; font-size:0.7rem;" onclick="window.NFCart && window.NFCart.quickAdd({{ p.id }})">+ ADD TO BAG</button>
+                    <a href="{{ url_for('product_detail', slug=p.slug) }}" class="btn btn-dark" style="padding:0.55rem 0.85rem; font-size:0.7rem;">VIEW →</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="padding: 5rem 0; text-align: center; border: 1px dashed var(--border);">
+        <p class="meta-label" style="margin-bottom: 0.75rem;">NO MATCHING SECURITY SYSTEMS FOUND</p>
+        <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Try modifying your query or category filters.</p>
+        <a href="{{ url_for('shop') }}" class="btn btn-dark">RESET FILTERS</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

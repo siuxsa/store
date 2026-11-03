@@ -1,0 +1,142 @@
+<div id="modal-post" class="admin-modal">
+        <div class="admin-modal-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; padding-bottom:0.75rem; border-bottom:1px solid var(--admin-border);">
+                <h3 id="post-modal-title" style="font-size:16px; font-weight:700; text-transform:uppercase;">ADVISORY DRAFT</h3>
+                <button type="button" onclick="closeModal('modal-post')" class="btn-admin btn-admin-outline" style="padding:0.25rem 0.6rem; display:inline-flex; align-items:center;">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <form onsubmit="submitPost(event)" style="display:flex; flex-direction:column; gap:1.25rem;">
+                <input type="hidden" id="post-id">
+                <input type="hidden" id="post-slug">
+                <div class="form-grid">
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label class="form-label">ADVISORY TITLE</label>
+                        <input type="text" id="post-title" class="form-input" required placeholder="CVE-2026-8841: OAuth2 Token Smuggling">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">CVE / TAG</label>
+                        <input type="text" id="post-cve" class="form-input" placeholder="CVE-2026-8841">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">CVSS SCORE</label>
+                        <input type="text" id="post-cvss" class="form-input" placeholder="9.8">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">SEVERITY</label>
+                        <select id="post-severity" class="form-select">
+                            <option value="CRITICAL">CRITICAL</option>
+                            <option value="HIGH">HIGH</option>
+                            <option value="MEDIUM">MEDIUM</option>
+                            <option value="LOW">LOW</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">CATEGORY</label>
+                        <input type="text" id="post-category" class="form-input" placeholder="Cloud Infrastructure">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">COVER IMAGE URL</label>
+                    <div style="display:flex; gap:0.5rem;">
+                        <input type="text" id="post-image" class="form-input" placeholder="https://images.unsplash.com/photo-..." style="flex:1;">
+                        <label class="btn-admin btn-admin-outline" style="cursor:pointer; padding:0.5rem 0.85rem; font-size:10px; white-space:nowrap; display:inline-flex; align-items:center; gap:4px;" title="Upload picture from your device">
+                            <span>UPLOAD</span>
+                            <input type="file" accept="image/*" style="display:none;" onchange="handleImageFileUpload(this, 'post')">
+                        </label>
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">LINKED ARSENAL SKUS (COMMA-SEPARATED)</label>
+                        <input type="text" id="post-skus" class="form-input" placeholder="LIC-BURP-PRO,LIC-MSF-PRO">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">READ TIME</label>
+                        <input type="text" id="post-read-time" class="form-input" placeholder="7 MIN READ">
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">IN-ARTICLE AD COUNT</label>
+                        <select id="post-ad-count" class="form-select">
+                            <option value="1">1 AD (RECOMMENDED)</option>
+                            <option value="2">2 ADS</option>
+                            <option value="3">3 ADS</option>
+                            <option value="4">4 ADS</option>
+                            <option value="0">0 (DISABLED)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">AD PLACEMENT STRATEGY</label>
+                        <select id="post-ad-placement" class="form-select">
+                            <option value="MIDDLE">MIDDLE (50% CENTER)</option>
+                            <option value="DISTRIBUTED">DISTRIBUTED (EVENLY SPACED)</option>
+                            <option value="PARAGRAPH_INTERVAL">PARAGRAPH INTERVAL</option>
+                            <option value="MANUAL">MANUAL SHORTCODES ONLY</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">PARAGRAPH INTERVAL (IF INTERVAL SELECTED)</label>
+                    <select id="post-ad-interval" class="form-select">
+                        <option value="3">EVERY 3 PARAGRAPHS</option>
+                        <option value="4" selected>EVERY 4 PARAGRAPHS</option>
+                        <option value="5">EVERY 5 PARAGRAPHS</option>
+                        <option value="6">EVERY 6 PARAGRAPHS</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">SMART AD PITCH (CALLOUT TEXT)</label>
+                    <input type="text" id="post-ad-pitch" class="form-input" placeholder="Verify your cloud perimeter with our audited toolkit...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">SUMMARY</label>
+                    <textarea id="post-summary" rows="2" class="form-textarea" placeholder="Brief technical summary..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">FULL CONTENT (MARKDOWN)</label>
+                    <textarea id="post-content" rows="6" class="form-textarea" placeholder="### Vulnerability Analysis..."></textarea>
+                </div>
+
+                <!-- DEDICATED THREAT INTEL SEO & SOCIAL METADATA -->
+                <div style="border-top:1px solid var(--admin-border); margin-top:0.75rem; padding-top:1rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                        <span style="font-family:var(--admin-font-mono); font-size:11px; font-weight:700; color:#00e5ff; letter-spacing:0.06em; text-transform:uppercase;">
+                            // DEDICATED ADVISORY SEO &amp; SOCIAL SHARE
+                        </span>
+                        <span style="font-family:var(--admin-font-mono); font-size:9.5px; color:var(--admin-muted);">
+                            AUTO-FALLBACK IF LEFT BLANK
+                        </span>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0.75rem;">
+                        <label class="form-label">DEDICATED SEARCH TITLE (META TITLE)</label>
+                        <input type="text" id="post-meta-title" class="form-input" placeholder="Default: [Title] [[CVE]] // ZERO//FORM Threat Research">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0.75rem;">
+                        <label class="form-label">DEDICATED META DESCRIPTION</label>
+                        <textarea id="post-meta-desc" rows="2" class="form-textarea" placeholder="Default: Uses advisory summary automatically..."></textarea>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0.75rem;">
+                        <label class="form-label">DEDICATED KEYWORDS (COMMA-SEPARATED)</label>
+                        <input type="text" id="post-meta-keywords" class="form-input" placeholder="Default: [CVE], [Title], [Category], zero-day disclosure, CVE research">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">CUSTOM SOCIAL SHARE IMAGE (OG:IMAGE)</label>
+                        <div style="display:flex; gap:0.5rem;">
+                            <input type="text" id="post-og-image" class="form-input" placeholder="Default: Uses advisory cover image automatically..." style="flex:1;">
+                            <label class="btn-admin btn-admin-outline" style="cursor:pointer; padding:0.5rem 0.85rem; font-size:10px; white-space:nowrap; display:inline-flex; align-items:center; gap:4px;" title="Upload picture directly from your device">
+                                <span>UPLOAD</span>
+                                <input type="file" accept="image/*" style="display:none;" onchange="handleImageFileUpload(this, 'post-og')">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1rem;">
+                    <button type="button" onclick="closeModal('modal-post')" class="btn-admin btn-admin-outline">CANCEL</button>
+                    <button type="submit" class="btn-admin btn-admin-primary">PUBLISH ADVISORY →</button>
+                </div>
+            </form>
+        </div>
+    </div>

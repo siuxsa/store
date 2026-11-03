@@ -1,0 +1,93 @@
+<section id="mod-curation-posts" class="admin-module">
+    <div class="module-header">
+        <div>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <h2 class="module-title">HOMEPAGE 4-JOURNAL SHOWCASE CURATION</h2>
+                <span class="badge-tag" style="background:#10b981; color:#000; font-weight:800; font-size:10px; padding:2px 8px;">ADMIN ONLY</span>
+            </div>
+            <p style="font-size:12px; color:var(--admin-muted); margin-top:2px;">
+                Designate the exact 4 threat intelligence journal advisories displayed on the storefront homepage. Adjust serial order (UP / DOWN) or swap articles.
+            </p>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+            <button type="button" class="btn-admin btn-admin-outline" onclick="switchFeature('journal', 'dispatches')">
+                ← BACK TO DISPATCHES
+            </button>
+            <button type="button" class="btn-admin btn-admin-primary" onclick="openPostStudio()">
+                + DRAFT NEW IN STUDIO
+            </button>
+            <button type="button" class="btn-admin btn-admin-primary" style="background:#10b981; color:#000; font-weight:700; display:inline-flex; align-items:center;" onclick="saveDirectHomeCuration()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" style="margin-right:5px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                SAVE 4-JOURNAL SHOWCASE
+            </button>
+        </div>
+    </div>
+
+    <!-- WORKFLOW HELPER BANNER -->
+    <div style="background:rgba(16,185,129,0.035); border:1px solid rgba(16,185,129,0.25); padding:0.85rem 1rem; border-radius:3px; margin-bottom:1.5rem; font-family:var(--admin-font-mono); font-size:11px; line-height:1.65;">
+        <div style="font-weight:700; color:#10b981; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span>HOW TO MANAGE 4-JOURNAL HOMEPAGE SHOWCASE SLOTS</span>
+        </div>
+        <div style="color:#d1d5db;">
+            • <strong>Replace / Add:</strong> Click <span style="background:rgba(239,68,68,0.25); color:#ef4444; padding:1px 5px; border-radius:2px; font-weight:700;">REMOVE</span> on any slot to vacate it, then select a new advisory from the dropdown.<br>
+            • <strong>Reorder Positions:</strong> Use <strong>UP</strong> and <strong>DOWN</strong> to move advisories between Serial 01, 02, 03, and 04.<br>
+            • <strong>Deploy:</strong> Click <strong>SAVE 4-JOURNAL SHOWCASE</strong> to persist live to the public homepage storefront.
+        </div>
+    </div>
+
+    <!-- 4 SLOTS GRID -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1rem; margin-bottom:1.5rem;">
+        {% for s in [1, 2, 3, 4] %}
+        {% set current_val = site_settings.get('home_featured_post_' ~ s) or '' %}
+        <div class="curate-slot-box" id="curate-post-box-{{ s }}" style="background:var(--admin-surface); border:1px solid var(--admin-border); padding:1rem; border-radius:4px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                <span style="background:{% if s == 1 %}#10b981{% else %}rgba(255,255,255,0.1){% endif %}; color:{% if s == 1 %}#000{% else %}#fff{% endif %}; font-family:var(--admin-font-mono); font-size:10px; font-weight:800; padding:2px 7px; border-radius:2px;">
+                    SERIAL 0{{ s }}{% if s == 1 %} · LEAD ADVISORY{% endif %}
+                </span>
+                <div style="display:flex; gap:4px;">
+                    <button type="button" class="btn-admin btn-admin-outline" style="padding:2px 7px; font-size:10px;" onclick="movePostSlot({{ s }}, -1)" title="Move up" {% if s == 1 %}disabled style="opacity:0.3; cursor:not-allowed;"{% endif %}>UP</button>
+                    <button type="button" class="btn-admin btn-admin-outline" style="padding:2px 7px; font-size:10px;" onclick="movePostSlot({{ s }}, 1)" title="Move down" {% if s == 4 %}disabled style="opacity:0.3; cursor:not-allowed;"{% endif %}>DOWN</button>
+                    <button type="button" class="btn-admin btn-admin-danger" style="padding:2px 7px; font-size:10px;" onclick="removePostSlot({{ s }})" title="Remove item">REMOVE</button>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:0.5rem;">
+                <select name="home_featured_post_{{ s }}" id="curate-post-slot-{{ s }}" class="form-input theme-field" onchange="onCuratePostChange({{ s }}, this.value); if(typeof onThemeFieldInput === 'function') onThemeFieldInput(this.name, this.value)">
+                    <option value="">-- SELECT JOURNAL ADVISORY FOR SERIAL 0{{ s }} --</option>
+                    {% for post in posts %}
+                    <option value="{{ post.id }}" {% if current_val == (post.id|string) or current_val == post.slug %}selected{% endif %}>
+                        [{{ post.cve_id or 'RESEARCH' }}] {{ post.title }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Live preview card -->
+            <div id="curate-post-preview-{{ s }}" class="curate-mini-preview" style="display:none; align-items:center; gap:10px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); padding:8px 10px; border-radius:3px;">
+                <img id="curate-post-img-{{ s }}" src="" alt="Thumbnail" style="width:42px; height:32px; object-fit:cover; border-radius:2px; border:1px solid rgba(255,255,255,0.1);">
+                <div style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                    <div id="curate-post-name-{{ s }}" style="font-size:11.5px; font-weight:600; color:#fff; overflow:hidden; text-overflow:ellipsis;"></div>
+                    <div style="font-family:var(--admin-font-mono); font-size:10px; color:var(--admin-muted);">
+                        <span id="curate-post-cve-{{ s }}" style="color:#10b981; font-weight:700;"></span> · <span id="curate-post-author-{{ s }}"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vacant slot empty badge -->
+            <div id="curate-post-empty-{{ s }}" class="curate-empty-badge" style="display:none; padding:10px 12px; background:rgba(255,255,255,0.015); border:1px dashed rgba(16,185,129,0.35); border-radius:3px; font-family:var(--admin-font-mono); font-size:10px; color:#10b981; align-items:center; justify-content:space-between;">
+                <span>+ SERIAL 0{{ s }} VACANT</span>
+                <span style="font-size:9px; background:rgba(16,185,129,0.1); padding:1px 5px; border-radius:2px;">EMPTY</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; padding-top:1rem; border-top:1px solid var(--admin-border);">
+        <div id="curate-post-save-status" style="font-family:var(--admin-font-mono); font-size:12px;"></div>
+        <button type="button" class="btn-admin btn-admin-primary" style="background:#10b981; color:#000; font-weight:700; display:inline-flex; align-items:center;" onclick="saveDirectHomeCuration()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" style="margin-right:5px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            SAVE &amp; DEPLOY 4-JOURNAL SHOWCASE
+        </button>
+    </div>
+</section>

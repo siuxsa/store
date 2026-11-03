@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}{{ site_settings.seo_about_title or ('Brand Architecture & Security Manifesto // ' ~ site_settings.site_name) }}{% endblock %}
+{% block meta_description %}{{ site_settings.seo_about_desc or site_settings.about_desc or site_settings.seo_meta_description or 'Engineered for extreme environments. Scandinavian architectural minimalism meeting zero-tolerance offensive security.' }}{% endblock %}
+{% block meta_keywords %}{{ site_settings.seo_about_keywords or site_settings.seo_meta_keywords }}{% endblock %}
+{% block og_title %}{{ site_settings.seo_about_title or ('About & System Manifesto // ' ~ site_settings.site_name) }}{% endblock %}
+{% block og_description %}{{ site_settings.seo_about_desc or site_settings.about_desc or site_settings.seo_meta_description or 'Engineered for extreme environments. Scandinavian architectural minimalism meeting zero-tolerance offensive security.' }}{% endblock %}
+{% block og_image %}{{ site_settings.seo_about_image or site_settings.about_banner_image or site_settings.seo_og_image or site_settings.hero_image }}{% endblock %}
+{% block twitter_title %}{{ site_settings.seo_about_title or ('About & System Manifesto // ' ~ site_settings.site_name) }}{% endblock %}
+{% block twitter_description %}{{ site_settings.seo_about_desc or site_settings.about_desc or site_settings.seo_meta_description }}{% endblock %}
+{% block twitter_image %}{{ site_settings.seo_about_image or site_settings.about_banner_image or site_settings.seo_og_image or site_settings.hero_image }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 3rem; padding-bottom: 6rem;">
+
+    <!-- 1. BREADCRUMBS -->
+    <nav class="breadcrumb-nav" aria-label="Breadcrumbs" style="margin-bottom: 2rem; font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);">
+        <a href="{{ url_for('index') }}" style="color: var(--muted); text-decoration: none;">HOME</a>
+        <span style="margin: 0 0.5rem; color: rgba(17,17,17,0.3);">/</span>
+        <span style="color: var(--text); font-weight: 600;">ABOUT &amp; SYSTEM MANIFESTO</span>
+    </nav>
+
+    <!-- 2. FULL-WIDTH EDITORIAL PAGE HEADER STRIP -->
+    <div style="border-bottom: 1px solid var(--border); padding-bottom: 2.5rem; margin-bottom: 3.5rem;">
+        <span class="meta-label" data-theme-bind="about_eyebrow">{{ site_settings.about_eyebrow }}</span>
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 2rem; margin-top: 1rem;">
+            <h1 class="display-lg" style="margin: 0; font-size: clamp(2.4rem, 5vw, 4.2rem); line-height: 1.08; letter-spacing: -0.03em; text-transform: uppercase;" data-theme-bind="about_title" data-theme-format="multiline">
+                {{ site_settings.about_title | replace('\n', '<br>') | safe }}
+            </h1>
+            <div class="meta-mono" style="font-size: 0.88rem; color: var(--muted); max-width: 520px; line-height: 1.65;" data-theme-bind="about_desc">
+                {{ site_settings.about_desc }}
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. FULL-WIDTH HERO EDITORIAL BANNER -->
+    <div style="position: relative; width: 100%; height: clamp(280px, 35vw, 460px); border: 1px solid var(--border); overflow: hidden; background: var(--dark); margin-bottom: 4rem;">
+        <img src="{{ site_settings.about_banner_image }}" alt="Architectural Cyber Operations Stage" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.82; display: block;" data-theme-bind="about_banner_image">
+        <div style="position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to top, rgba(16,16,16,0.92) 0%, rgba(16,16,16,0.3) 60%, transparent 100%);"></div>
+        <div style="position: absolute; bottom: 2rem; left: clamp(1.5rem, 4vw, 3rem); right: clamp(1.5rem, 4vw, 3rem); display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <span class="badge-tag" style="background: rgba(243,242,238,0.95); color: var(--text); font-weight: 700; margin-bottom: 0.5rem; display: inline-block;" data-theme-bind="about_banner_badge">{{ site_settings.about_banner_badge }}</span>
+                <div style="font-size: clamp(1.2rem, 2.5vw, 1.8rem); font-weight: 700; color: var(--white); text-transform: uppercase; letter-spacing: -0.01em;" data-theme-bind="about_banner_title">
+                    {{ site_settings.about_banner_title }}
+                </div>
+            </div>
+            <span class="meta-mono" style="color: rgba(255,255,255,0.75); font-size: 0.78rem;" data-theme-bind="about_banner_meta">{{ site_settings.about_banner_meta or 'EST. 2026 // ZERO-DAY MATRIX' }}</span>
+        </div>
+    </div>
+
+    <!-- 4. THREE-COLUMN ARCHITECTURAL MANIFESTO GRID -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 2rem; margin-bottom: 4rem;">
+        
+        <!-- CARD 01 -->
+        <div style="border: 1px solid var(--border); background: var(--white); padding: clamp(2rem, 3.5vw, 3rem); display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <span class="meta-label" style="display: block; margin-bottom: 1rem;" data-theme-bind="about_tenet1_eyebrow">{{ site_settings.about_tenet1_eyebrow }}</span>
+                <h2 style="font-size: 1.45rem; font-weight: 700; text-transform: uppercase; letter-spacing: -0.01em; margin-bottom: 1.25rem;" data-theme-bind="about_tenet1_title">
+                    {{ site_settings.about_tenet1_title }}
+                </h2>
+                <p style="font-size: 0.95rem; color: var(--muted); line-height: 1.7; margin-bottom: 1.25rem;" data-theme-bind="about_tenet1_desc">
+                    {{ site_settings.about_tenet1_desc }}
+                </p>
+            </div>
+            <div style="margin-top: 2rem; padding-top: 1.25rem; border-top: 1px solid var(--border);" class="meta-mono">
+                <span style="font-size: 0.75rem; color: var(--text); font-weight: 700;" data-theme-bind="about_tenet1_tag">{{ site_settings.about_tenet1_tag }}</span>
+            </div>
+        </div>
+
+        <!-- CARD 02 -->
+        <div style="border: 1px solid var(--border); background: var(--white); padding: clamp(2rem, 3.5vw, 3rem); display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <span class="meta-label" style="display: block; margin-bottom: 1rem;" data-theme-bind="about_tenet2_eyebrow">{{ site_settings.about_tenet2_eyebrow }}</span>
+                <h2 style="font-size: 1.45rem; font-weight: 700; text-transform: uppercase; letter-spacing: -0.01em; margin-bottom: 1.25rem;" data-theme-bind="about_tenet2_title">
+                    {{ site_settings.about_tenet2_title }}
+                </h2>
+                <p style="font-size: 0.95rem; color: var(--muted); line-height: 1.7; margin-bottom: 1.25rem;" data-theme-bind="about_tenet2_desc">
+                    {{ site_settings.about_tenet2_desc }}
+                </p>
+                <div style="background: var(--bg-alt); padding: 1rem 1.25rem; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.75rem; color: var(--text); margin-top: 1rem; line-height: 1.6;">
+                    // STANDARD RELEASE MANIFEST<br>
+                    SHA256: 8f4e2b91a04d7c12e9f01a8b7c6d5e4f3a2b1c...<br>
+                    STATUS: SIGNED &amp; DEPLOYMENT-READY
+                </div>
+            </div>
+            <div style="margin-top: 2rem; padding-top: 1.25rem; border-top: 1px solid var(--border);" class="meta-mono">
+                <span style="font-size: 0.75rem; color: var(--text); font-weight: 700;" data-theme-bind="about_tenet2_tag">{{ site_settings.about_tenet2_tag }}</span>
+            </div>
+        </div>
+
+        <!-- CARD 03 -->
+        <div style="border: 1px solid var(--border); background: var(--white); padding: clamp(2rem, 3.5vw, 3rem); display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <span class="meta-label" style="display: block; margin-bottom: 1rem;" data-theme-bind="about_tenet3_eyebrow">{{ site_settings.about_tenet3_eyebrow }}</span>
+                <h2 style="font-size: 1.45rem; font-weight: 700; text-transform: uppercase; letter-spacing: -0.01em; margin-bottom: 1.25rem;" data-theme-bind="about_tenet3_title">
+                    {{ site_settings.about_tenet3_title }}
+                </h2>
+                <p style="font-size: 0.95rem; color: var(--muted); line-height: 1.7; margin-bottom: 1.25rem;" data-theme-bind="about_tenet3_desc">
+                    {{ site_settings.about_tenet3_desc }}
+                </p>
+            </div>
+            <div style="margin-top: 2rem; padding-top: 1.25rem; border-top: 1px solid var(--border);" class="meta-mono">
+                <span style="font-size: 0.75rem; color: var(--text); font-weight: 700;" data-theme-bind="about_tenet3_tag">{{ site_settings.about_tenet3_tag }}</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 5. FOUR-COLUMN SPECIFICATIONS & CORE CAPABILITIES STRIP -->
+    <div style="border: 1px solid var(--border); background: var(--bg-alt); padding: 3rem 2.5rem; margin-bottom: 4rem;">
+        <span class="meta-label" style="display: block; margin-bottom: 1.5rem;" data-theme-bind="about_metrics_eyebrow">{{ site_settings.about_metrics_eyebrow or '// OPERATIONAL METRICS & COMPLIANCE STANDARDS' }}</span>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 2rem;">
+            <div>
+                <div class="meta-mono" style="font-size: 1.75rem; font-weight: 700; margin-bottom: 0.35rem;" data-theme-bind="about_metric1_val">{{ site_settings.about_metric1_val or '100%' }}</div>
+                <div style="font-weight: 700; text-transform: uppercase; font-size: 0.85rem; margin-bottom: 0.35rem;" data-theme-bind="about_metric1_title">{{ site_settings.about_metric1_title or 'AIRGAP SAFE BINARIES' }}</div>
+                <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.5; margin: 0;" data-theme-bind="about_metric1_desc">
+                    {{ site_settings.about_metric1_desc or 'Complete offline execution capability with zero mandatory cloud beaconing or telemetry.' }}
+                </p>
+            </div>
+            <div>
+                <div class="meta-mono" style="font-size: 1.75rem; font-weight: 700; margin-bottom: 0.35rem;" data-theme-bind="about_metric2_val">{{ site_settings.about_metric2_val or '< 5 MIN' }}</div>
+                <div style="font-weight: 700; text-transform: uppercase; font-size: 0.85rem; margin-bottom: 0.35rem;" data-theme-bind="about_metric2_title">{{ site_settings.about_metric2_title or 'DISPATCH SLA' }}</div>
+                <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.5; margin: 0;" data-theme-bind="about_metric2_desc">
+                    {{ site_settings.about_metric2_desc or 'Direct ticket provisioning via Telegram concierge with verified download links.' }}
+                </p>
+            </div>
+            <div>
+                <div class="meta-mono" style="font-size: 1.75rem; font-weight: 700; margin-bottom: 0.35rem;" data-theme-bind="about_metric3_val">{{ site_settings.about_metric3_val or 'SHA-256' }}</div>
+                <div style="font-weight: 700; text-transform: uppercase; font-size: 0.85rem; margin-bottom: 0.35rem;" data-theme-bind="about_metric3_title">{{ site_settings.about_metric3_title or 'PGP INTEGRITY ASSURANCE' }}</div>
+                <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.5; margin: 0;" data-theme-bind="about_metric3_desc">
+                    {{ site_settings.about_metric3_desc or 'Cryptographically hashed and validated manifests for audit reproduction.' }}
+                </p>
+            </div>
+            <div>
+                <div class="meta-mono" style="font-size: 1.75rem; font-weight: 700; margin-bottom: 0.35rem;" data-theme-bind="about_metric4_val">{{ site_settings.about_metric4_val or 'PERPETUAL' }}</div>
+                <div style="font-weight: 700; text-transform: uppercase; font-size: 0.85rem; margin-bottom: 0.35rem;" data-theme-bind="about_metric4_title">{{ site_settings.about_metric4_title or 'STANDALONE LICENSING' }}</div>
+                <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.5; margin: 0;" data-theme-bind="about_metric4_desc">
+                    {{ site_settings.about_metric4_desc or 'Permanent seat allocations and unrestricted local installations for red teams.' }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. BOTTOM CALL TO ACTION STRIP -->
+    <div style="border: 1px solid var(--border); background: var(--white); padding: clamp(2rem, 4vw, 3.5rem); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;">
+        <div>
+            <span class="meta-label" style="display: block; margin-bottom: 0.5rem;" data-theme-bind="about_cta_eyebrow">{{ site_settings.about_cta_eyebrow or '// EXPLORE ZERO//FORM DEPLOYMENTS' }}</span>
+            <h3 style="font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 700; text-transform: uppercase; margin: 0 0 0.5rem 0;" data-theme-bind="about_cta_title">
+                {{ site_settings.about_cta_title or 'READY TO AUDIT OUR ARSENAL?' }}
+            </h3>
+            <p style="font-size: 0.95rem; color: var(--muted); margin: 0; max-width: 600px;" data-theme-bind="about_cta_desc">
+                {{ site_settings.about_cta_desc or 'Inspect enterprise reverse engineering suites, web security licenses, and red team platforms in our catalog.' }}
+            </p>
+        </div>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <a href="{{ url_for('shop') }}" class="btn btn-dark" style="padding: 0.9rem 1.85rem; font-size: 0.78rem;">
+                <span data-theme-bind="about_cta_btn1">{{ site_settings.about_cta_btn1 or 'EXPLORE ARSENAL →' }}</span>
+            </a>
+            <a href="{{ url_for('blog') }}" class="btn btn-outline-dark" style="padding: 0.9rem 1.85rem; font-size: 0.78rem;">
+                <span data-theme-bind="about_cta_btn2">{{ site_settings.about_cta_btn2 or 'THREAT JOURNAL →' }}</span>
+            </a>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

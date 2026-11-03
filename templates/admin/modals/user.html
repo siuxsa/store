@@ -1,0 +1,37 @@
+<div id="modal-user" class="admin-modal">
+        <div class="admin-modal-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; padding-bottom:0.75rem; border-bottom:1px solid var(--admin-border);">
+                <h3 id="user-modal-title" style="font-size:16px; font-weight:700; text-transform:uppercase;">EDIT OPERATOR ACCESS</h3>
+                <button type="button" onclick="closeModal('modal-user')" class="btn-admin btn-admin-outline" style="padding:0.25rem 0.6rem; display:inline-flex; align-items:center;">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <form onsubmit="submitUser(event)" style="display:flex; flex-direction:column; gap:1.25rem;">
+                <input type="hidden" id="user-id">
+                <div class="form-group">
+                    <label class="form-label">CALLSIGN / USERNAME</label>
+                    <input type="text" id="user-username" class="form-input" disabled style="opacity:0.7;">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">ROLE CLASSIFICATION (SINGLE IN-BUILT ADMIN MODEL)</label>
+                    <input type="text" id="user-role-display" class="form-input" disabled style="opacity:0.75; font-weight:700;">
+                    <input type="hidden" id="user-role" value="CUSTOMER">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">ACCOUNT STATUS</label>
+                    <select id="user-active" class="form-select">
+                        <option value="1">ACTIVE (PERMITTED)</option>
+                        <option value="0">DISABLED (ACCESS REVOKED)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">RESET PASSWORD (LEAVE BLANK TO KEEP UNCHANGED)</label>
+                    <input type="password" id="user-new-password" class="form-input" placeholder="Enter new password...">
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1rem;">
+                    <button type="button" onclick="closeModal('modal-user')" class="btn-admin btn-admin-outline">CANCEL</button>
+                    <button type="submit" class="btn-admin btn-admin-primary">UPDATE OPERATOR →</button>
+                </div>
+            </form>
+        </div>
+    </div>

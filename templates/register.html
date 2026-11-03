@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="padding-top: 5rem; padding-bottom: 7rem; max-width: 480px;">
+    <div style="border: 1px solid var(--border); background-color: var(--white); padding: 2.75rem 2.25rem;">
+        <div style="border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; margin-bottom: 2rem;">
+            <span class="meta-label">// NEW OPERATOR PROVISIONING</span>
+            <h1 class="display-lg" style="font-size: 1.85rem; margin-top: 0.5rem;">REGISTER.</h1>
+            <p style="font-size: 0.85rem; color: var(--muted); margin-top: 0.35rem;">
+                Create a verified customer vault account to track orders and unlock software licenses.
+            </p>
+        </div>
+
+        {% if error %}
+        <div style="padding: 0.85rem 1rem; border: 1px solid #c33; background: #fff5f5; color: #c33; font-size: 0.82rem; margin-bottom: 1.5rem;" class="meta-mono">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('register_page') }}" style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+            <div>
+                <label for="username" class="meta-label" style="display: block; margin-bottom: 0.35rem;">USERNAME</label>
+                <input type="text" id="username" name="username" required autocomplete="username"
+                       placeholder="e.g. security_auditor"
+                       style="width: 100%; padding: 0.75rem 0.9rem; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.85rem; background: var(--bg);">
+            </div>
+
+            <div>
+                <label for="email" class="meta-label" style="display: block; margin-bottom: 0.35rem;">EMAIL ADDRESS</label>
+                <input type="email" id="email" name="email" required autocomplete="email"
+                       placeholder="auditor@organization.org"
+                       style="width: 100%; padding: 0.75rem 0.9rem; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.85rem; background: var(--bg);">
+            </div>
+
+            <div>
+                <label for="telegram_handle" class="meta-label" style="display: block; margin-bottom: 0.35rem;">TELEGRAM USERNAME (OPTIONAL)</label>
+                <input type="text" id="telegram_handle" name="telegram_handle" autocomplete="off"
+                       placeholder="@your_telegram"
+                       style="width: 100%; padding: 0.75rem 0.9rem; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.85rem; background: var(--bg);">
+            </div>
+
+            <div>
+                <label for="password" class="meta-label" style="display: block; margin-bottom: 0.35rem;">PASSWORD</label>
+                <input type="password" id="password" name="password" required autocomplete="new-password"
+                       placeholder="••••••••••••"
+                       style="width: 100%; padding: 0.75rem 0.9rem; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.85rem; background: var(--bg);">
+            </div>
+
+            <div>
+                <label for="confirm_password" class="meta-label" style="display: block; margin-bottom: 0.35rem;">CONFIRM PASSWORD</label>
+                <input type="password" id="confirm_password" name="confirm_password" required autocomplete="new-password"
+                       placeholder="••••••••••••"
+                       style="width: 100%; padding: 0.75rem 0.9rem; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.85rem; background: var(--bg);">
+            </div>
+
+            <button type="submit" class="btn btn-dark" style="width: 100%; padding: 1rem; margin-top: 0.5rem; font-size: 0.8rem;">
+                INITIALIZE OPERATOR ACCOUNT →
+            </button>
+        </form>
+
+        <div style="border-top: 1px solid var(--border); padding-top: 1.5rem; margin-top: 2rem; text-align: center;">
+            <p style="font-size: 0.82rem; color: var(--muted); margin-bottom: 0.75rem;">
+                Already registered?
+            </p>
+            <a href="{{ url_for('login_page') }}" class="link-underline" style="font-size: 0.75rem; text-transform: uppercase;">
+                SIGN IN TO VAULT →
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

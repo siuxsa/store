@@ -1,0 +1,555 @@
+<section id="mod-post-editor" class="admin-module">
+            <!-- TOP STICKY COMMAND BAR -->
+            <div style="background:var(--admin-surface); border:1px solid var(--admin-border); padding:1.25rem 1.75rem; margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+                <div>
+                    <div style="display:flex; align-items:center; gap:0.5rem; font-family:var(--admin-font-mono); font-size:11px; color:var(--admin-muted); margin-bottom:4px;">
+                        <button type="button" onclick="closePostStudio()" style="background:transparent; border:none; color:#00e5ff; cursor:pointer; font-family:inherit; padding:0; text-transform:uppercase; font-weight:700;">
+                            ← RETURN TO INTEL REPOSITORY
+                        </button>
+                        <span>/</span>
+                        <span id="jse-breadcrumb-title" style="color:#fff;">DRAFT ADVISORY</span>
+                    </div>
+                    <h2 id="jse-heading-title" style="font-size:19px; font-weight:700; text-transform:uppercase; margin:0; letter-spacing:-0.02em;">
+                        THREAT INTEL ADVISORY STUDIO
+                    </h2>
+                </div>
+                <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
+                    <a id="jse-btn-view-live" href="#" target="_blank" class="btn-admin btn-admin-outline" style="display:none;">
+                        VIEW LIVE ARTICLE ↗
+                    </a>
+                    <button type="button" onclick="closePostStudio()" class="btn-admin btn-admin-outline">
+                        CANCEL
+                    </button>
+                    <button type="button" onclick="submitPostStudio(event)" class="btn-admin btn-admin-primary" id="jse-btn-save">
+                        PUBLISH / SAVE ADVISORY →
+                    </button>
+                </div>
+            </div>
+
+            <!-- SUB-NAVIGATION STRIP -->
+            <div class="module-subnav" style="margin-bottom:1.5rem;">
+                <button type="button" class="subnav-btn jse-subnav-btn active" onclick="switchPostStudioTab('specs', this)">
+                    [01] RESEARCH &amp; CVE SPECS
+                </button>
+                <button type="button" class="subnav-btn jse-subnav-btn" onclick="switchPostStudioTab('media', this)">
+                    [02] BANNER &amp; COVER MEDIA
+                </button>
+                <button type="button" class="subnav-btn jse-subnav-btn" onclick="switchPostStudioTab('markdown', this)">
+                    [03] TECHNICAL MARKDOWN STUDIO
+                </button>
+                <button type="button" class="subnav-btn jse-subnav-btn" onclick="switchPostStudioTab('monetize', this)">
+                    [04] SMART MONETIZATION &amp; SKUS
+                </button>
+                <button type="button" class="subnav-btn jse-subnav-btn" onclick="switchPostStudioTab('seo', this)" style="color:#00e5ff; font-weight:700;">
+                    [05] DEDICATED SEO &amp; SOCIAL CARDS
+                </button>
+                <button type="button" class="subnav-btn jse-subnav-btn" onclick="switchPostStudioTab('preview', this)">
+                    [06] LIVE ADVISORY PREVIEW
+                </button>
+            </div>
+
+            <form id="post-studio-form" onsubmit="submitPostStudio(event)" style="background:var(--admin-surface); border:1px solid var(--admin-border); padding:1.75rem;">
+                <input type="hidden" id="jse-id">
+                <input type="hidden" id="jse-slug">
+
+                <!-- TAB 1: RESEARCH & CVE SPECS -->
+                <div id="jse-tab-specs" class="jse-pane">
+                    <div class="form-grid" style="margin-bottom:1.5rem;">
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label class="form-label">
+                                <span>ADVISORY RESEARCH TITLE</span>
+                                <span style="color:var(--admin-muted); font-size:10px;">PRIMARY HEADLINE</span>
+                            </label>
+                            <input type="text" id="jse-title" class="form-input" required placeholder="e.g. CVE-2026-3199: Linux Kernel eBPF Verification Bypass &amp; Privilege Escalation" oninput="updatePostPreview();">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">CVE IDENTIFIER / RESEARCH TAG</label>
+                            <input type="text" id="jse-cve" class="form-input" placeholder="e.g. CVE-2026-3199" style="font-family:var(--admin-font-mono); font-weight:700;" oninput="updatePostPreview();">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">CVSS 3.1 BASE SCORE</label>
+                            <input type="text" id="jse-cvss" class="form-input" placeholder="e.g. 9.8" style="font-family:var(--admin-font-mono);" oninput="updatePostPreview();">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">SEVERITY LEVEL</label>
+                            <select id="jse-severity" class="form-select" onchange="updatePostPreview();">
+                                <option value="CRITICAL">CRITICAL (SEV-1 · REMOTE EXPLOIT)</option>
+                                <option value="HIGH">HIGH (SEV-2 · PRIVILEGE ESCALATION)</option>
+                                <option value="MEDIUM">MEDIUM (SEV-3 · INFORMATION DISCLOSURE)</option>
+                                <option value="LOW">LOW (SEV-4 · LOCAL HARDENING)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">RESEARCH CATEGORY</label>
+                            <input type="text" id="jse-category" class="form-input" placeholder="e.g. Zero-Day Advisories" oninput="updatePostPreview();">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">AUTHOR / RESEARCH LAB UNIT</label>
+                            <input type="text" id="jse-author" class="form-input" placeholder="ZERO//FORM RESEARCH LAB" oninput="updatePostPreview();">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">ESTIMATED READING DURATION</label>
+                            <input type="text" id="jse-read-time" class="form-input" placeholder="8 MIN READ" oninput="updatePostPreview();">
+                        </div>
+
+                        <div class="form-group" style="grid-column: 1 / -1; display:flex; align-items:center; gap:0.5rem; padding-top:0.5rem;">
+                            <input type="checkbox" id="jse-featured" style="width:18px; height:18px; accent-color:#00e5ff;">
+                            <label for="jse-featured" style="font-family:var(--admin-font-mono); font-size:12px; cursor:pointer; color:#fff;">
+                                PIN AS FEATURED ADVISORY (HOMEPAGE &amp; TOP OF THREAT JOURNAL)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: BANNER & COVER MEDIA -->
+                <div id="jse-tab-media" class="jse-pane" style="display:none;">
+                    <div class="form-group" style="margin-bottom:1.5rem;">
+                        <label class="form-label">ADVISORY COVER HERO BANNER (URL OR UPLOAD DIRECTLY)</label>
+                        <div style="display:flex; gap:0.5rem;">
+                            <input type="text" id="jse-image" class="form-input" placeholder="https://images.unsplash.com/photo-..." style="flex:1;" oninput="updatePostCoverPreview(this.value); updatePostPreview();">
+                            <label class="btn-admin btn-admin-outline" style="cursor:pointer; padding:0.6rem 1rem; font-size:11px; white-space:nowrap; display:inline-flex; align-items:center; gap:5px;" title="Upload photo file from your device">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                <span>UPLOAD FILE</span>
+                                <input type="file" accept="image/*" style="display:none;" onchange="handleImageFileUpload(this, 'jse-banner')">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 1fr 280px; gap:1.5rem; align-items:start;">
+                        <div>
+                            <div style="font-family:var(--admin-font-mono); font-size:11px; color:var(--admin-muted); margin-bottom:0.5rem; text-transform:uppercase;">
+                                // EDITORIAL WIDESCREEN BANNER PREVIEW
+                            </div>
+                            <div style="height:260px; background:#0c0d0e; border:1px solid var(--admin-border); overflow:hidden; border-radius:4px; position:relative;">
+                                <img id="jse-image-preview" src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1600&q=85" alt="Banner Preview" style="width:100%; height:100%; object-fit:cover;">
+                                <div id="jse-cover-overlay-cve" style="position:absolute; top:12px; left:12px; background:rgba(0,0,0,0.85); border:1px solid rgba(255,255,255,0.25); font-family:var(--admin-font-mono); font-size:11px; font-weight:700; padding:3px 9px; color:#ef4444;">
+                                    CVE-2026-3199
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style="font-family:var(--admin-font-mono); font-size:11px; color:var(--admin-muted); margin-bottom:0.5rem; text-transform:uppercase;">
+                                // THREAT ART PRESETS
+                            </div>
+                            <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                                <button type="button" class="btn-admin btn-admin-outline" style="justify-content:flex-start; text-align:left; font-size:11px; padding:0.5rem;" onclick="applyPostCoverPreset('https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1600&q=85')">
+                                    Dark Server Array Rack
+                                </button>
+                                <button type="button" class="btn-admin btn-admin-outline" style="justify-content:flex-start; text-align:left; font-size:11px; padding:0.5rem;" onclick="applyPostCoverPreset('https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1600&q=80')">
+                                    Cyber Data Wave Grid
+                                </button>
+                                <button type="button" class="btn-admin btn-admin-outline" style="justify-content:flex-start; text-align:left; font-size:11px; padding:0.5rem;" onclick="applyPostCoverPreset('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1600&q=80')">
+                                    Green Terminal Buffer
+                                </button>
+                                <button type="button" class="btn-admin btn-admin-outline" style="justify-content:flex-start; text-align:left; font-size:11px; padding:0.5rem;" onclick="applyPostCoverPreset('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1600&q=85')">
+                                    Blue Quantum Telemetry
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: TECHNICAL MARKDOWN STUDIO -->
+                <div id="jse-tab-markdown" class="jse-pane" style="display:none;">
+                    
+                    <!-- EXECUTIVE SUMMARY CARD -->
+                    <div class="form-group" style="margin-bottom:1.25rem; background:rgba(255,255,255,0.015); border:1px solid var(--admin-border); padding:1rem; border-radius:4px;">
+                        <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
+                            <span>EXECUTIVE VULNERABILITY SUMMARY (CALLOUT PULL-QUOTE)</span>
+                            <span id="jse-summary-count" style="color:var(--admin-muted); font-size:10px; font-family:var(--admin-font-mono);">0 CHARS</span>
+                        </label>
+                        <textarea id="jse-summary" rows="3" class="form-textarea" placeholder="Critical flaw in the BPF verifier logic allowing privilege escalation to ring-0 kernel authority..." oninput="updatePostPreview(); updateSummaryCharCount();"></textarea>
+                        <div style="font-family:var(--admin-font-mono); font-size:10px; color:var(--admin-muted); margin-top:4px;">
+                            Displayed as the highlighted executive briefing banner on the journal disclosure page and in Google search snippets.
+                        </div>
+                    </div>
+
+                    <!-- FULL MARKDOWN STUDIO WORKSPACE -->
+                    <div id="jse-md-studio-box" style="background:var(--admin-surface); border:1px solid var(--admin-border); border-radius:4px; padding:1.25rem;">
+                        
+                        <!-- MAIN TOOLBAR -->
+                        <div style="background:#0c0d0e; border:1px solid var(--admin-border); padding:0.6rem 0.75rem; border-radius:3px; margin-bottom:0.75rem; display:flex; flex-direction:column; gap:0.5rem;">
+                            
+                            <!-- ROW 1: PRIMARY MARKDOWN FORMATTING BUTTONS -->
+                            <div style="display:flex; flex-wrap:wrap; gap:4px; align-items:center; font-family:var(--admin-font-mono);">
+                                <!-- Typography Group -->
+                                <div style="display:flex; gap:2px; background:rgba(255,255,255,0.04); padding:2px; border-radius:3px;">
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 8px; font-weight:800; font-size:11px;" title="Bold (Ctrl+B) — Wraps selected text in **" onclick="formatMarkdownSelection('bold')">
+                                        <strong>B</strong>
+                                    </button>
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 8px; font-style:italic; font-size:11px;" title="Italic (Ctrl+I) — Wraps selected text in *" onclick="formatMarkdownSelection('italic')">
+                                        <em>I</em>
+                                    </button>
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 8px; text-decoration:line-through; font-size:11px;" title="Strikethrough — Wraps selected text in ~~" onclick="formatMarkdownSelection('strike')">
+                                        S
+                                    </button>
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 8px; font-size:10.5px; color:#00e5ff;" title="Inline Code — Wraps selected text in `" onclick="formatMarkdownSelection('code')">
+                                        &lt;/&gt;
+                                    </button>
+                                </div>
+
+                                <span style="color:rgba(255,255,255,0.15); margin:0 2px;">|</span>
+
+                                <!-- Headings Group -->
+                                <div style="display:flex; gap:2px; background:rgba(255,255,255,0.04); padding:2px; border-radius:3px;">
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 8px; font-size:10.5px; font-weight:700;" title="Heading 1 (#)" onclick="formatMarkdownSelection('h1')">H1</button>
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 8px; font-size:10.5px; font-weight:700;" title="Heading 2 (##)" onclick="formatMarkdownSelection('h2')">H2</button>
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 8px; font-size:10.5px; font-weight:700;" title="Heading 3 (###)" onclick="formatMarkdownSelection('h3')">H3</button>
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 8px; font-size:10.5px; font-weight:700;" title="Heading 4 (####)" onclick="formatMarkdownSelection('h4')">H4</button>
+                                </div>
+
+                                <span style="color:rgba(255,255,255,0.15); margin:0 2px;">|</span>
+
+                                <!-- Lists & Quotes -->
+                                <div style="display:flex; gap:2px; background:rgba(255,255,255,0.04); padding:2px; border-radius:3px;">
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 8px; font-size:10px;" title="Bullet List (-)" onclick="formatMarkdownSelection('ul')">• LIST</button>
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 8px; font-size:10px;" title="Numbered List (1.)" onclick="formatMarkdownSelection('ol')">1. LIST</button>
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 8px; font-size:10px;" title="Task / Checklist (- [ ])" onclick="formatMarkdownSelection('task')">TASK</button>
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 8px; font-size:10px;" title="Quote Block (>)" onclick="formatMarkdownSelection('quote')">QUOTE</button>
+                                </div>
+
+                                <span style="color:rgba(255,255,255,0.15); margin:0 2px;">|</span>
+
+                                <!-- Inserts & Code Blocks -->
+                                <div style="display:flex; gap:2px; background:rgba(255,255,255,0.04); padding:2px; border-radius:3px;">
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 8px; font-size:10px; color:#10b981; font-weight:700;" title="Terminal Code Block (```bash)" onclick="formatMarkdownSelection('codeblock', 'bash')">
+                                        ``` CODE BLOCK
+                                    </button>
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 8px; font-size:10px;" title="Hyperlink (Ctrl+K) — [text](url)" onclick="formatMarkdownSelection('link')">
+                                        LINK
+                                    </button>
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 8px; font-size:10px;" title="Image Asset — ![alt](url)" onclick="formatMarkdownSelection('image')">
+                                        IMAGE
+                                    </button>
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 8px; font-size:10px;" title="Technical Markdown Table" onclick="formatMarkdownSelection('table')">
+                                        TABLE
+                                    </button>
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 8px; font-size:10px;" title="Divider (---)" onclick="formatMarkdownSelection('hr')">
+                                        HR
+                                    </button>
+                                </div>
+
+                                <span style="color:rgba(255,255,255,0.15); margin:0 2px;">|</span>
+
+                                <!-- In-Article Smart Ad Banner Dropper -->
+                                <div style="display:flex; gap:2px; background:rgba(0,229,255,0.08); border:1px solid rgba(0,229,255,0.25); padding:2px; border-radius:3px;">
+                                    <button type="button" class="btn-admin" style="padding:3px 9px; font-size:10px; background:#00e5ff; color:#0c0d0e; font-weight:800; border:none; display:inline-flex; align-items:center; gap:4px; border-radius:2px;" title="Insert In-Article Smart Ad Banner Shortcode [ad] at cursor position" onclick="insertSmartAdShortcode()">
+                                        + INSERT AD BANNER
+                                    </button>
+                                </div>
+
+                                <span style="color:rgba(255,255,255,0.15); margin:0 2px;">|</span>
+
+                                <!-- Operational Callouts -->
+                                <div style="display:flex; gap:2px; background:rgba(255,255,255,0.04); padding:2px; border-radius:3px;">
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 8px; font-size:9.5px; color:#f59e0b;" title="GitHub Warning Callout" onclick="formatMarkdownSelection('alert-warning')">
+                                        WARNING
+                                    </button>
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 8px; font-size:9.5px; color:#00e5ff;" title="GitHub Note Callout" onclick="formatMarkdownSelection('alert-note')">
+                                        NOTE
+                                    </button>
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 8px; font-size:9.5px; color:#10b981;" title="GitHub Tip Callout" onclick="formatMarkdownSelection('alert-tip')">
+                                        TIP
+                                    </button>
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 8px; font-size:9.5px; color:#ef4444;" title="Pill Status Badge" onclick="formatMarkdownSelection('pill')">
+                                        [PILL]
+                                    </button>
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:3px 7px; font-size:9.5px; color:var(--admin-muted);" title="Strip formatting from selected text" onclick="formatMarkdownSelection('clear')">
+                                        CLEAR
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- ROW 2: TEMPLATES & VIEWPORT CONTROLS -->
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; border-top:1px solid rgba(255,255,255,0.06); padding-top:0.4rem; font-family:var(--admin-font-mono); font-size:10px;">
+                                <!-- Quick Template Starters -->
+                                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                                    <span style="color:var(--admin-muted); font-size:9.5px;">TEMPLATES:</span>
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:2px 7px; font-size:9.5px; border-color:rgba(0,229,255,0.3); color:#00e5ff;" onclick="loadMarkdownTemplate('cve')">
+                                        + CVE VULNERABILITY ADVISORY
+                                    </button>
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:2px 7px; font-size:9.5px;" onclick="loadMarkdownTemplate('re')">
+                                        + REVERSE ENG DISASSEMBLY
+                                    </button>
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:2px 7px; font-size:9.5px;" onclick="loadMarkdownTemplate('incident')">
+                                        + INCIDENT RESPONSE DEBRIEF
+                                    </button>
+                                </div>
+
+                                <!-- View Layout Buttons -->
+                                <div style="display:flex; align-items:center; gap:4px;">
+                                    <button type="button" id="btn-md-mode-split" class="btn-admin btn-admin-outline active" style="padding:2px 8px; font-size:9.5px;" onclick="setMarkdownViewMode('split')">
+                                        SPLIT (50/50)
+                                    </button>
+                                    <button type="button" id="btn-md-mode-editor" class="btn-admin btn-admin-outline" style="padding:2px 8px; font-size:9.5px;" onclick="setMarkdownViewMode('editor')">
+                                        WRITE ONLY
+                                    </button>
+                                    <button type="button" id="btn-md-mode-preview" class="btn-admin btn-admin-outline" style="padding:2px 8px; font-size:9.5px;" onclick="setMarkdownViewMode('preview')">
+                                        PREVIEW ONLY
+                                    </button>
+                                    <button type="button" id="btn-md-fullscreen" class="btn-admin btn-admin-outline" style="padding:2px 8px; font-size:9.5px; color:#00e5ff; font-weight:700;" onclick="toggleMarkdownFullscreen()">
+                                        FULLSCREEN
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- WORKSPACE DUAL-PANE GRID -->
+                        <div id="jse-md-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; transition:all 0.2s ease;">
+                            
+                            <!-- LEFT: MARKDOWN SOURCE EDITOR -->
+                            <div id="jse-md-editor-col" style="display:flex; flex-direction:column;">
+                                <div style="position:relative; flex:1;">
+                                    <textarea id="jse-content" rows="22" class="form-textarea" placeholder="### 01 · Vulnerability Breakdown&#10;&#10;Select any text and click the buttons above to format (Bold, Italic, Code, Links, Headings, Tables, Alerts)..." style="font-family:var(--admin-font-mono); font-size:12.5px; line-height:1.65; height:520px; width:100%; resize:vertical; background:#08090a; border:1px solid var(--admin-border); border-bottom:none; border-radius:4px 4px 0 0;" oninput="renderMarkdownPreviewLive(); updatePostPreview(); updateMarkdownStats();" onkeydown="handleMarkdownEditorKeydown(event)"></textarea>
+                                </div>
+                                
+                                <!-- FOOTER STATS BAR -->
+                                <div style="display:flex; justify-content:space-between; align-items:center; background:#101214; border:1px solid var(--admin-border); padding:6px 12px; font-family:var(--admin-font-mono); font-size:10.5px; color:var(--admin-muted); border-radius:0 0 4px 4px;">
+                                    <div style="display:flex; gap:12px; align-items:center;">
+                                        <span>WORDS: <strong id="md-stat-words" style="color:#fff;">0</strong></span>
+                                        <span>CHARS: <strong id="md-stat-chars" style="color:#fff;">0</strong></span>
+                                        <span>LINES: <strong id="md-stat-lines" style="color:#fff;">0</strong></span>
+                                        <span>READ TIME: <strong id="md-stat-readtime" style="color:#00e5ff;">0 MIN READ</strong></span>
+                                    </div>
+                                    <div style="display:flex; gap:8px; align-items:center; font-size:9.5px;">
+                                        <span style="color:#00e5ff;">TAB = 2 SPACES</span>
+                                        <span>·</span>
+                                        <span>CTRL+B / CTRL+I / CTRL+K</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- RIGHT: HIGH-FIDELITY LIVE HTML RENDER PREVIEW -->
+                            <div id="jse-md-preview-col" style="background:#08090a; border:1px solid var(--admin-border); border-radius:4px; display:flex; flex-direction:column; height:560px;">
+                                <div style="font-family:var(--admin-font-mono); font-size:10px; color:#00e5ff; padding:8px 14px; background:#101214; border-bottom:1px solid var(--admin-border); display:flex; justify-content:space-between; align-items:center;">
+                                    <span style="display:inline-flex; align-items:center; gap:6px;">
+                                        <span class="live-pulse"></span>
+                                        REAL-TIME HTML RENDER PREVIEW
+                                    </span>
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:2px 6px; font-size:9.5px;" onclick="copyRenderedHtml()">
+                                        COPY HTML
+                                    </button>
+                                </div>
+                                <div id="jse-live-markdown-preview" style="color:#f0f0f2; font-size:13px; line-height:1.75; padding:1.5rem; overflow-y:auto; flex:1; text-align:justify; text-justify:inter-word;">
+                                    <p style="color:var(--admin-muted); font-style:italic;">Type or select markdown content on the left to see instant live rendering here...</p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: SMART MONETIZATION & ARSENAL SKUS -->
+                <div id="jse-tab-monetize" class="jse-pane" style="display:none;">
+                    <div class="form-group" style="margin-bottom:1.5rem;">
+                        <label class="form-label">
+                            <span>LINKED ARSENAL SYSTEM SKUS (COMMA-SEPARATED)</span>
+                            <span style="color:var(--admin-muted); font-size:10px;">SMART AD INJECTION</span>
+                        </label>
+                        <input type="text" id="jse-skus" class="form-input" placeholder="e.g. LIC-BURP-PRO,LIC-MSF-PRO" style="font-family:var(--admin-font-mono); font-weight:700;" oninput="updatePostPreview();">
+                    </div>
+
+                    <!-- CLICKABLE CATALOG CHIPS -->
+                    <div style="margin-bottom:1.5rem; padding:1rem; background:rgba(255,255,255,0.02); border:1px solid var(--admin-border); border-radius:4px;">
+                        <div style="font-family:var(--admin-font-mono); font-size:11px; color:#00e5ff; font-weight:700; margin-bottom:0.5rem; text-transform:uppercase;">
+                            // ONE-CLICK CATALOG PRODUCT LINKER (CLICK TO ATTACH/DETACH)
+                        </div>
+                        <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                            {% for p in products %}
+                            <button type="button" class="btn-admin btn-admin-outline" style="font-size:10.5px; padding:4px 8px; font-family:var(--admin-font-mono);" onclick="toggleLinkedSku('{{ p.sku }}')">
+                                + {{ p.sku }} ({{ p.name[:22] }}...)
+                            </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="form-grid" style="margin-bottom:1.5rem;">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <span>TOTAL IN-ARTICLE MIDDLE ADS TO DISPLAY</span>
+                                <span style="color:#00e5ff; font-size:10px;">FREQUENCY</span>
+                            </label>
+                            <select id="jse-ad-count" class="form-select" onchange="updatePostPreview();">
+                                <option value="1">1 AD (RECOMMENDED — CENTER ARTICLE BANNER)</option>
+                                <option value="2">2 ADS (MULTI-SECTION BALANCED COVERAGE)</option>
+                                <option value="3">3 ADS (DEEP TECHNICAL DEBRIEFS)</option>
+                                <option value="4">4 ADS (MAXIMUM AUDIENCE SATURATION)</option>
+                                <option value="0">0 ADS (SUPPRESS ALL IN-ARTICLE ADS)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <span>WHERE TO SHOW ADS (PLACEMENT STRATEGY)</span>
+                                <span style="color:#00e5ff; font-size:10px;">POSITIONING</span>
+                            </label>
+                            <select id="jse-ad-placement" class="form-select" onchange="togglePlacementIntervalView(); updatePostPreview();">
+                                <option value="MIDDLE">MIDDLE — Center of Article (50% midpoint)</option>
+                                <option value="DISTRIBUTED">DISTRIBUTED — Balanced across paragraphs (e.g. 1/3, 2/3)</option>
+                                <option value="PARAGRAPH_INTERVAL">PARAGRAPH INTERVAL — Show ad every N paragraphs</option>
+                                <option value="MANUAL">MANUAL ONLY — Only where [ad] shortcodes exist</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="jse-interval-group" style="display:none;">
+                            <label class="form-label">
+                                <span>PARAGRAPH INTERVAL FREQUENCY</span>
+                                <span style="color:var(--admin-muted); font-size:10px;">SPACING</span>
+                            </label>
+                            <select id="jse-ad-interval" class="form-select" onchange="updatePostPreview();">
+                                <option value="3">EVERY 3 PARAGRAPHS</option>
+                                <option value="4" selected>EVERY 4 PARAGRAPHS (OPTIMAL)</option>
+                                <option value="5">EVERY 5 PARAGRAPHS</option>
+                                <option value="6">EVERY 6 PARAGRAPHS</option>
+                                <option value="8">EVERY 8 PARAGRAPHS</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <span>GLOBAL AD VISIBILITY MODE</span>
+                                <span style="color:var(--admin-muted); font-size:10px;">SYSTEM OVERRIDE</span>
+                            </label>
+                            <select id="jse-ad-mode" class="form-select" onchange="updatePostPreview();">
+                                <option value="ALL">ALL (MID-ARTICLE ADS &amp; SIDEBAR CALLOUT)</option>
+                                <option value="INLINE_AUTO">INLINE ONLY (MID-ARTICLE ADS ONLY)</option>
+                                <option value="SIDEBAR_ONLY">SIDEBAR ONLY (NO INLINE PROSE ADS)</option>
+                                <option value="NONE">DISABLED (NO ADS SHOWN ANYWHERE)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">CUSTOM SMART AD CALLOUT PITCH</label>
+                        <input type="text" id="jse-ad-pitch" class="form-input" placeholder="Audit your perimeter against this zero-day using verified Burp Suite Pro licenses..." oninput="updatePostPreview();">
+                    </div>
+                </div>
+
+                <!-- TAB 5: DEDICATED SEO & SOCIAL CARDS -->
+                <div id="jse-tab-seo" class="jse-pane" style="display:none;">
+                    <!-- GOOGLE SERP SIMULATOR FOR ADVISORY -->
+                    <div class="theme-card-group" style="border-color: rgba(0, 229, 255, 0.3); background: rgba(0,0,0,0.5); margin-bottom:1.5rem;">
+                        <div class="theme-card-title">
+                            <span style="color:#00e5ff;">GOOGLE SERP SNIPPET SIMULATOR (THIS ADVISORY)</span>
+                            <span class="status-pill completed" style="font-size:9.5px;">LIVE PREVIEW</span>
+                        </div>
+                        <div style="background:#202124; border:1px solid #3c4043; border-radius:8px; padding:12px 14px; font-family:Arial, sans-serif;">
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                                <div style="width:16px; height:16px; border-radius:50%; background:#ef4444; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:bold; color:#fff;">!</div>
+                                <div style="font-size:12px; color:#dadce0; line-height:1.2;">
+                                    <span>{{ site_settings.site_name }} Threat Research</span>
+                                    <span id="jse-serp-url" style="color:#9aa0a6; font-size:11px; margin-left:4px;">https://matrix.security/journal/cve-slug</span>
+                                </div>
+                            </div>
+                            <div id="jse-serp-title" style="color:#8ab4f8; font-size:15px; line-height:1.3; font-weight:400; margin-bottom:4px;">
+                                Advisory Title [CVE] // ZERO//FORM Threat Research
+                            </div>
+                            <div id="jse-serp-desc" style="color:#bdc1c6; font-size:12px; line-height:1.45;">
+                                Brief technical vulnerability analysis and PoC exploit mitigation details...
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:1.25rem;">
+                        <label class="form-label">
+                            <span>DEDICATED SEARCH TITLE (META TITLE)</span>
+                            <span id="jse-count-title" style="color:var(--admin-muted); font-size:10px;"></span>
+                        </label>
+                        <input type="text" id="jse-meta-title" class="form-input" placeholder="Fallback: [Title] [[CVE]] // {{ site_settings.site_name }} Threat Research" oninput="updatePostSeoSimulator();">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:1.25rem;">
+                        <label class="form-label">
+                            <span>DEDICATED META DESCRIPTION</span>
+                            <span id="jse-count-desc" style="color:var(--admin-muted); font-size:10px;"></span>
+                        </label>
+                        <textarea id="jse-meta-desc" rows="3" class="form-textarea" placeholder="Fallback: Uses executive summary automatically..." oninput="updatePostSeoSimulator();"></textarea>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:1.25rem;">
+                        <label class="form-label">DEDICATED CVE SEARCH KEYWORDS (COMMA-SEPARATED)</label>
+                        <input type="text" id="jse-meta-keywords" class="form-input" placeholder="Fallback: [CVE], [Title], [Category], zero-day disclosure, CVE research">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">CUSTOM SOCIAL SHARE IMAGE (OG:IMAGE)</label>
+                        <div style="display:flex; gap:0.5rem;">
+                            <input type="text" id="jse-og-image" class="form-input" placeholder="Fallback: Uses advisory cover banner automatically..." style="flex:1;" oninput="updatePostOgPreview(this.value);">
+                            <label class="btn-admin btn-admin-outline" style="cursor:pointer; padding:0.6rem 1rem; font-size:11px; white-space:nowrap; display:inline-flex; align-items:center; gap:5px;" title="Upload custom photo for Twitter / Telegram unfurl">
+                                <span>UPLOAD</span>
+                                <input type="file" accept="image/*" style="display:none;" onchange="handleImageFileUpload(this, 'jse-seo-og')">
+                            </label>
+                        </div>
+                        <div style="height:110px; max-width:280px; margin-top:0.5rem; background:#0c0d0e; border:1px solid var(--admin-border); overflow:hidden; border-radius:4px;">
+                            <img id="jse-og-preview" src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1600&q=85" alt="OG Preview" style="width:100%; height:100%; object-fit:cover;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 6: LIVE ADVISORY PREVIEW -->
+                <div id="jse-tab-preview" class="jse-pane" style="display:none;">
+                    <div style="max-width:880px; margin:0 auto; background:#101214; border:1px solid var(--admin-border); border-radius:4px; overflow:hidden;">
+                        <!-- BANNER PREVIEW -->
+                        <div style="height:220px; position:relative; overflow:hidden;">
+                            <img id="prev-art-banner" src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1600&q=85" alt="Banner" style="width:100%; height:100%; object-fit:cover;">
+                            <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(16,18,20,1) 0%, rgba(16,18,20,0.4) 60%, transparent 100%);"></div>
+                            <div style="position:absolute; bottom:16px; left:20px; display:flex; gap:8px;">
+                                <span id="prev-art-cve" style="background:#ef4444; color:#fff; font-family:var(--admin-font-mono); font-size:10px; font-weight:700; padding:2px 8px;">
+                                    CVE-2026-3199
+                                </span>
+                                <span id="prev-art-cvss" style="background:#000; border:1px solid rgba(255,255,255,0.2); color:#fff; font-family:var(--admin-font-mono); font-size:10px; padding:2px 8px;">
+                                    CVSS 9.8
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- BODY PREVIEW -->
+                        <div style="padding:2rem;">
+                            <div style="font-family:var(--admin-font-mono); font-size:11px; color:var(--admin-muted); margin-bottom:0.75rem;">
+                                RESEARCH DISCLOSURE // <span id="prev-art-category" style="color:#00e5ff;">ZERO-DAY ADVISORIES</span>
+                            </div>
+                            <h1 id="prev-art-title" style="font-size:26px; font-weight:700; color:#fff; line-height:1.2; margin-bottom:1rem;">
+                                Advisory Title
+                            </h1>
+
+                            <div style="padding:1rem; border-left:3px solid #00e5ff; background:rgba(0,229,255,0.04); margin-bottom:1.5rem;">
+                                <p id="prev-art-summary" style="font-size:13px; color:#d0d2d6; line-height:1.65; margin:0; text-align:justify; text-justify:inter-word;">
+                                    Executive summary appears here...
+                                </p>
+                            </div>
+
+                            <!-- MOCK SMART AD BOX -->
+                            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(0,229,255,0.3); padding:1rem 1.25rem; margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+                                <div>
+                                    <span style="font-family:var(--admin-font-mono); font-size:9.5px; color:#00e5ff; font-weight:700;">// CONTEXTUAL ARSENAL DEPLOYMENT</span>
+                                    <h4 id="prev-art-ad-pitch" style="font-size:13px; color:#fff; margin-top:2px;">Audit your perimeter with verified licenses</h4>
+                                </div>
+                                <span style="font-family:var(--admin-font-mono); font-size:10px; background:#fff; color:#000; padding:4px 10px; font-weight:700;">
+                                    VIEW LINKED SYSTEMS →
+                                </span>
+                            </div>
+
+                            <div id="prev-art-content-sample" style="color:var(--admin-muted); font-size:12.5px; line-height:1.7;">
+                                Full technical markdown analysis executes here with verified cryptographic references.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--admin-border); margin-top:2rem; padding-top:1.25rem;">
+                    <button type="button" onclick="closePostStudio()" class="btn-admin btn-admin-outline">
+                        ← RETURN TO INTEL REPOSITORY
+                    </button>
+                    <button type="submit" class="btn-admin btn-admin-primary" style="padding:0.75rem 1.75rem; font-size:12px;">
+                        PUBLISH ALL ADVISORY SPECIFICATIONS →
+                    </button>
+                </div>
+            </form>
+        </section>

@@ -1,0 +1,59 @@
+<section id="mod-settings" class="admin-module">
+            <div class="module-header">
+                <div>
+                    <h2 class="module-title">SYSTEM BRANDING &amp; CONCIERGE CONFIGURATION</h2>
+                    <p style="font-size:12px; color:var(--admin-muted); margin-top:2px;">
+                        Update brand identity, ticker text, and Telegram support channels.
+                    </p>
+                </div>
+            </div>
+
+            <form id="settings-form" onsubmit="saveSettings(event)" style="background:var(--admin-surface); border:1px solid var(--admin-border); padding:2rem;">
+                <div class="form-grid" style="margin-bottom:1.5rem;">
+                    <div class="form-group">
+                        <label class="form-label">SITE BRAND NAME</label>
+                        <input type="text" name="site_name" class="form-input" value="{{ site_settings.site_name }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">TELEGRAM CONCIERGE HANDLE</label>
+                        <input type="text" name="telegram_user" class="form-input" value="{{ site_settings.telegram_user }}" required>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label class="form-label">SITE TAGLINE</label>
+                        <input type="text" name="site_tagline" class="form-input" value="{{ site_settings.site_tagline }}" required>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label class="form-label">ANNOUNCEMENT TICKER TEXT</label>
+                        <input type="text" name="ticker_text" class="form-input" value="{{ site_settings.ticker_text }}" required>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label class="form-label">LEGAL / COMPLIANCE DISCLAIMER</label>
+                        <textarea name="footer_disclaimer" rows="2" class="form-textarea">{{ site_settings.footer_disclaimer }}</textarea>
+                    </div>
+
+                    <!-- DEDICATED SEO & METADATA CALLOUT BANNER -->
+                    <div style="grid-column: 1 / -1; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--admin-border);">
+                        <div style="background:rgba(0,229,255,0.035); border:1px solid rgba(0,229,255,0.25); padding:1.25rem; border-radius:4px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+                            <div>
+                                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                                    <h4 style="font-size:13px; font-weight:700; color:#00e5ff; letter-spacing:0.06em; text-transform:uppercase; display:inline-flex; align-items:center;">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="2.3" style="margin-right:6px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                        DEDICATED SEO &amp; SOCIAL METADATA STUDIO
+                                    </h4>
+                                    <span class="status-pill completed" style="font-size:9.5px;">DEDICATED SUBTAB</span>
+                                </div>
+                                <p style="font-size:11.5px; color:var(--admin-muted); max-width:650px; line-height:1.5;">
+                                    Google SERP snippets, OpenGraph social share cards, per-page meta titles, and Schema.org structured data are centrally managed in the dedicated <strong>[SEO &amp; METADATA STUDIO]</strong> subtab.
+                                </p>
+                            </div>
+                            <button type="button" class="btn-admin btn-admin-primary" onclick="switchSubtab('system', 'seo')" style="background:#00e5ff; color:#000; font-weight:700; white-space:nowrap;">
+                                OPEN SEO &amp; METADATA STUDIO →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn-admin btn-admin-primary">
+                    SAVE SYSTEM CONFIGURATION →
+                </button>
+            </form>
+        </section>

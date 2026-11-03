@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RESTRICTED // ADMIN COMMAND GATEWAY · ZERO//FORM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0c0d0e;
+            --surface: #141618;
+            --surface-elevated: #1a1c1f;
+            --border: rgba(255, 255, 255, 0.1);
+            --border-focus: rgba(255, 255, 255, 0.35);
+            --text: #f0f0f2;
+            --muted: #8c9096;
+            --accent: #ffffff;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --danger: #ef4444;
+            --success: #22c55e;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-sans);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1.25rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Subtle ambient grid pattern */
+        body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 480px;
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            padding: clamp(2rem, 5vw, 3rem);
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        }
+
+        .auth-header {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .system-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            padding: 0.35rem 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .system-pill::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: #ef4444;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+
+        .auth-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+            color: var(--text);
+            margin-bottom: 0.4rem;
+        }
+
+        .auth-subtitle {
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .alert-error {
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 0.85rem 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            margin-bottom: 1.75rem;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: flex;
+            justify-content: space-between;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            background-color: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-input:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 1px var(--border-focus);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background-color: var(--accent);
+            color: var(--bg);
+            border: none;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 0.82rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: opacity 0.2s ease, transform 0.1s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.92;
+        }
+
+        .btn-submit:active {
+            transform: translateY(1px);
+        }
+
+        .btn-quickfill {
+            width: 100%;
+            margin-top: 1rem;
+            padding: 0.65rem;
+            background: transparent;
+            border: 1px dashed var(--border);
+            color: var(--muted);
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-quickfill:hover {
+            border-color: var(--border-focus);
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .telemetry-strip {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--muted);
+        }
+
+        .telemetry-row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .telemetry-val {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 1.75rem;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: var(--text);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="auth-container">
+        <!-- HEADER -->
+        <div class="auth-header">
+            <div class="system-pill">
+                RESTRICTED GATEWAY // LEVEL-4 CLEARANCE
+            </div>
+            <h1 class="auth-title">ADMIN MATRIX.</h1>
+            <p class="auth-subtitle">
+                ZERO//FORM CENTRAL SYSTEM MANAGEMENT &amp; TELEMETRY CONSOLE
+            </p>
+        </div>
+
+        {% if error %}
+        <div class="alert-error">
+            [ACCESS DENIED] {{ error }}
+        </div>
+        {% endif %}
+
+        <!-- ADMIN LOGIN FORM -->
+        <form method="POST" action="{{ url_for('admin_login_page') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            {% if next_url %}
+            <input type="hidden" name="next" value="{{ next_url }}">
+            {% endif %}
+
+            <div class="form-group">
+                <label for="admin_identifier" class="form-label">
+                    <span>OPERATOR CALLSIGN</span>
+                    <span>LEVEL 4</span>
+                </label>
+                <input type="text" id="admin_identifier" name="identifier" required autocomplete="username"
+                       placeholder="admin or admin@zerodaymatrix.io" value="{{ default_identifier or 'admin' }}"
+                       class="form-input">
+            </div>
+
+            <div class="form-group">
+                <label for="admin_password" class="form-label">
+                    <span>SECURITY PASSPHRASE</span>
+                    <span>ENCRYPTED</span>
+                </label>
+                <input type="password" id="admin_password" name="password" required autocomplete="current-password"
+                       placeholder="••••••••••••" value="{{ default_password or 'Admin@2026' }}"
+                       class="form-input">
+            </div>
+
+            <button type="submit" class="btn-submit">
+                AUTHENTICATE &amp; LAUNCH DASHBOARD →
+            </button>
+
+            <button type="button" class="btn-quickfill" onclick="quickFillAdmin()">
+                ⚡ LOAD DEFAULT ADMIN CREDENTIALS (admin / Admin@2026)
+            </button>
+        </form>
+
+        <!-- SECURITY TELEMETRY -->
+        <div class="telemetry-strip">
+            <div class="telemetry-row">
+                <span>SECURITY ENCLAVE</span>
+                <span class="telemetry-val">ACTIVE (PORT 5000)</span>
+            </div>
+            <div class="telemetry-row">
+                <span>SESSION ENCRYPTION</span>
+                <span class="telemetry-val">AES-256-GCM / SHA-256</span>
+            </div>
+            <div class="telemetry-row">
+                <span>DIRECT DESTINATION</span>
+                <span class="telemetry-val" style="color: #22c55e;">/admin (DASHBOARD)</span>
+            </div>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="{{ url_for('index') }}" class="back-link">
+                ← RETURN TO PUBLIC STORE
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function quickFillAdmin() {
+            document.getElementById('admin_identifier').value = 'admin';
+            document.getElementById('admin_password').value = 'Admin@2026';
+        }
+    </script>
+
+</body>
+</html>

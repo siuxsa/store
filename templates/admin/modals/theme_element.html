@@ -1,0 +1,88 @@
+<div id="modal-theme-element" class="admin-modal">
+        <div class="admin-modal-box" style="width: 92vw; max-width: 980px; height: auto; min-height: unset; max-height: 85vh; border: 1px solid #00e5ff; box-shadow: 0 24px 90px rgba(0,0,0,0.95), 0 0 25px rgba(0,229,255,0.25); padding: 1.75rem 2.25rem; background: #101214; border-radius: 4px;">
+            
+            <!-- MODAL HEADER -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; padding-bottom:1rem; border-bottom:1px solid var(--admin-border);">
+                <div>
+                    <div style="font-family:var(--admin-font-mono); font-size:11px; font-weight:700; color:#00e5ff; letter-spacing:0.12em; text-transform:uppercase; display:flex; align-items:center; gap:8px;" id="quick-edit-context">
+                        <span class="live-pulse" style="background:#00e5ff; box-shadow:0 0 10px #00e5ff; width:8px; height:8px;"></span>
+                        INSPECT &amp; EDIT ELEMENT
+                    </div>
+                    <h2 id="quick-edit-title" style="font-family:var(--admin-font-mono); font-size:22px; font-weight:800; text-transform:uppercase; margin-top:4px; margin-bottom:0; color:#ffffff; letter-spacing:-0.01em; line-height:1.2;">
+                        ELEMENT EDITOR
+                    </h2>
+                </div>
+                <button type="button" onclick="closeModal('modal-theme-element')" class="btn-admin btn-admin-outline" style="width:34px; height:34px; display:flex; align-items:center; justify-content:center; padding:0;" aria-label="Close modal">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+
+            <!-- MODAL FORM BODY -->
+            <form onsubmit="submitQuickEdit(event)" style="display:flex; flex-direction:column; gap:1.25rem;">
+                <input type="hidden" id="quick-edit-field-key">
+                <input type="hidden" id="quick-edit-field-type">
+
+                <!-- SINGLE LINE TEXT INPUT -->
+                <div id="quick-edit-input-wrap" class="form-group" style="display:none; margin-bottom:0;">
+                    <label class="form-label" id="quick-edit-input-label" style="font-size:11.5px; font-weight:700; letter-spacing:0.08em; margin-bottom:0.5rem;">ELEMENT TEXT</label>
+                    <input type="text" id="quick-edit-input" class="form-input" style="font-size:16px; padding:0.85rem 1.15rem; font-family:var(--admin-font-mono); line-height:1.5; background:#0c0d0e; width:100%; border:1px solid var(--admin-border-focus);" oninput="onQuickEditFieldInput(this.value)">
+                </div>
+
+                <!-- MULTILINE TEXTAREA -->
+                <div id="quick-edit-textarea-wrap" class="form-group" style="display:none; margin-bottom:0;">
+                    <label class="form-label" id="quick-edit-textarea-label" style="font-size:11.5px; font-weight:700; letter-spacing:0.08em; margin-bottom:0.5rem;">ELEMENT CONTENT (MULTILINE)</label>
+                    <textarea id="quick-edit-textarea" rows="4" class="form-textarea" style="font-size:15px; line-height:1.6; padding:0.95rem 1.15rem; min-height:120px; font-family:var(--admin-font-mono); background:#0c0d0e; resize:vertical; width:100%; border:1px solid var(--admin-border-focus);" oninput="onQuickEditFieldInput(this.value)"></textarea>
+                    <div style="font-family:var(--admin-font-mono); font-size:10.5px; color:var(--admin-muted); margin-top:6px;">
+                        Line breaks will render cleanly as visual breaks on the live storefront.
+                    </div>
+                </div>
+
+                <!-- IMAGE URL & PREVIEW SPLIT LAYOUT -->
+                <div id="quick-edit-image-wrap" class="form-group" style="display:none; margin-bottom:0;">
+                    <div style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 1.5rem; align-items: start;">
+                        <div>
+                            <label class="form-label" id="quick-edit-image-label" style="font-size:11.5px; font-weight:700; letter-spacing:0.08em; margin-bottom:0.5rem;">IMAGE ASSET URL</label>
+                            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <input type="text" id="quick-edit-image-url" class="form-input" style="font-size:14px; padding:0.75rem 1rem; font-family:var(--admin-font-mono); background:#0c0d0e; flex:1;" oninput="onQuickEditImageInput(this.value)">
+                                <label class="btn-admin btn-admin-primary" style="cursor: pointer; padding: 0.75rem 1rem; font-size: 11px; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;" title="Upload picture from your device">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                    <span id="quick-edit-upload-text">UPLOAD FILE</span>
+                                    <input type="file" accept="image/*" style="display: none;" onchange="handleImageFileUpload(this, 'quick-edit')">
+                                </label>
+                            </div>
+                            
+                            <div style="font-family:var(--admin-font-mono); font-size:10.5px; color:var(--admin-muted); margin-top:0.75rem; margin-bottom:0.4rem;">
+                                QUICK KEY-ART PRESETS:
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem;">
+                                <button type="button" class="theme-preset-btn" style="text-align:left; padding:0.45rem 0.65rem; font-size:10.5px;" onclick="applyQuickEditPreset('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=2200&q=90')">OPS COMMAND</button>
+                                <button type="button" class="theme-preset-btn" style="text-align:left; padding:0.45rem 0.65rem; font-size:10.5px;" onclick="applyQuickEditPreset('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=2200&q=90')">BINARY MATRIX</button>
+                                <button type="button" class="theme-preset-btn" style="text-align:left; padding:0.45rem 0.65rem; font-size:10.5px;" onclick="applyQuickEditPreset('https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=2200&q=90')">SERVER AIRGAP</button>
+                                <button type="button" class="theme-preset-btn" style="text-align:left; padding:0.45rem 0.65rem; font-size:10.5px;" onclick="applyQuickEditPreset('https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=2200&q=90')">RED TELEMETRY</button>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                                <label class="form-label" style="font-size:11.5px; font-weight:700; letter-spacing:0.08em; margin:0;">IMAGE PREVIEW</label>
+                                <span id="quick-edit-upload-status" style="font-family:var(--admin-font-mono); font-size:10px; color:#00e5ff; display:none;">UPLOADING...</span>
+                            </div>
+                            <div class="theme-img-preview-box" style="height:160px; margin:0; border:1px solid var(--admin-border); background:#000; border-radius:2px; position:relative; overflow:hidden;">
+                                <img id="quick-edit-img-preview" src="" alt="Element Image Preview" style="width:100%; height:100%; object-fit:cover;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL FOOTER ACTIONS -->
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem; padding-top:1rem; border-top:1px solid var(--admin-border); flex-wrap:wrap; gap:1rem;">
+                    <span style="font-family:var(--admin-font-mono); font-size:11px; color:var(--admin-accent-green); display:inline-flex; align-items:center; gap:6px;">
+                        <span class="live-pulse"></span> LIVE PREVIEW SYNCED
+                    </span>
+                    <div style="display:flex; gap:0.65rem;">
+                        <button type="button" onclick="closeModal('modal-theme-element')" class="btn-admin btn-admin-outline" style="padding:0.55rem 1.25rem; font-size:11.5px;">CANCEL</button>
+                        <button type="submit" id="btn-quick-edit-save" class="btn-admin btn-admin-primary" style="padding:0.55rem 1.6rem; font-size:12px; font-weight:700;">APPLY &amp; SAVE →</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
