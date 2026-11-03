@@ -1,172 +1,206 @@
-# ZERODAY // ARSENAL & INTEL
-> **Neon Threat Matrix (Indigo & Lime) Digital Cybersecurity Store, Threat Intelligence Portal & Full Telemetry Analytics Suite**
+# ZERO//FORM — Architectural Cybersecurity Arsenal & Threat Intelligence Matrix
+> **Scandinavian Minimalist & High-Assurance Digital Security Store, Threat Intelligence Journal, Custom Tool Procurement Desk & Telemetry Command Matrix**
 
 ---
 
-## 1. Executive Summary & Vision
-**ZERODAY // ARSENAL & INTEL** is a complete cybersecurity e-commerce and intelligence platform featuring:
-1. **Digital Cybersecurity Storefront:** Selling **100% Digital Security Products**:
-   - **Enterprise & Pro Software Licenses:** *Burp Suite Professional*, *Metasploit Pro*, *Splunk Enterprise Security*, *Maltego XL*, *Cobalt Strike / Red Team Frameworks*, *Acunetix / Invicti*, *Nessus Professional*, *Shodan Enterprise API*.
-   - **Downloadable Tools, Scripts & Research Bundles:** Custom offensive/defensive scripts, OSINT automation suites, wordlists, YARA/Sigma rule packs, and standalone binaries (with SHA-256 checksum verification).
-   - **Telegram-Direct Checkout Flow:** Buyers select products or add them to their cart, generate a unique **Order Reference ID (`ORD-XXXXX`)**, and complete payment & instant license/download delivery directly via **Telegram (`@YourHandle`)** with pre-filled one-click message links.
-2. **Threat Intelligence Wire (Cybersecurity News & Blog) with Smart Native Product Ads:**
-   - Zero-day advisories, CVE breakdowns, and practical tool tutorials.
-   - **Smart Native Product Ad Engine:** Blog articles seamlessly embed **Contextual Tool Callouts (`[product:SKU]`), Auto-Injected Mid-Article Cards, Sticky Sidebar Toolboxes, and End-of-Post Bundles** that match the topic of the post and convert readers into Telegram buyers.
-3. **Full Real-Time Website Telemetry, Graphs & Behavioral Analytics Engine:**
-   - First-party client + server telemetry tracker (`Beacon API` + heartbeat timer) that records **every page visit, unique visitor session, exact dwell time (seconds stayed on each product or blog post), scroll depth %, smart-ad impressions vs. clicks (CTR), cart additions, and Telegram checkout clicks**—visualized with interactive Indigo & Neon Lime graphs in the Admin Panel.
-4. **100% Customizable Command Center (`/admin`):**
-   - Full control over all site settings, Telegram handles, products, orders, a rich customizable Blog + Smart-Ad Studio, and the **Visual Analytics & Telemetry Dashboard**.
+## 1. Executive Summary & Platform Overview
+
+**ZERO//FORM** is an enterprise-grade digital cybersecurity e-commerce, threat intelligence, and custom tool sourcing platform. Built with Scandinavian architectural minimalism, high-assurance security principles, and strict airgap compliance, it serves security researchers, red teams, penetration testers, and enterprise security operations centers (SOC).
+
+### Core Platform Capabilities
+1. **Digital Arsenal Storefront (`/shop`):**
+   - **Enterprise Security Licenses & Toolkits:** Commercial binary analysis platforms (*IDA Pro*, *Ghidra Enterprise*, *Binary Ninja*), red team C2 suites (*Cobalt Strike*, *Metasploit Pro*), web application scanners (*Burp Suite Pro*, *Caido*, *Acunetix*), SIEM platforms (*Splunk Enterprise*, *Nessus Pro*), and private threat intelligence feeds.
+   - **Downloadable Packages & Cryptographic Proofs:** Offline installation archives, exploit proof-of-concepts, and audit scripts published with reproducible **SHA-256 integrity checksums**.
+   - **Instant Telegram Concierge Dispatch:** Frictionless checkout generating a unique order ticket (`#ORD-XXXXX`) dispatched to an encrypted Telegram concierge desk with automated cart manifests.
+
+2. **Custom Sourcing & Procurement Desk (`/request`):**
+   - **Unlisted Asset Intake:** Dedicated procurement portal for operators seeking zero-days, enterprise license seats, reverse-engineering suites, hardware implants, or custom C2 development not listed in the public catalog.
+   - **Encrypted Intake Pipeline:** Submits operational requirements, budget allocations ($1k to $20k+), urgency tiers (Standard, High, Immediate), and encrypted contact channels, generating procurement tickets (`#REQ-XXXXX`).
+   - **Admin Broker Queue:** Complete intake lifecycle management in the admin dashboard (`PENDING`, `SOURCING`, `ALLOCATED`, `DELIVERED`, `CANCELLED`) with internal broker notes and escrow tracking.
+
+3. **Threat Intelligence Journal (`/journal`):**
+   - **Vulnerability Disclosures & CVE Advisories:** High-fidelity technical research, binary dissection, and practical exploitation walk-throughs.
+   - **Smart Native Ad Engine:** Injects contextual tool shortcodes (`[product:SKU]`), mid-article recommendation cards, sticky sidebar toolboxes, and end-of-post deployment bundles.
+   - **Login-Gated & Moderated Reader Comments:** Authenticated operator commenting with an administrative moderation queue (`PENDING`, `APPROVED`, `REJECTED`) keeping discussions professional and verified.
+
+4. **Operator Security Vault (`/vault`):**
+   - **Client License Enclave:** Dedicated portal where authenticated operators access activated software licenses, provisioned license keys, copy-to-clipboard tokens, offline download links, and order transaction history.
+   - **API Token Provisioning:** Generates secure `X-API-Token` credentials for automated license provisioning and telemetry sync.
+
+5. **Visual Inspect Studio & Multi-Studio Admin Panel (`/admin`):**
+   - **Visual Inspect Studio:** Interactive point-and-click live storefront inspector with responsive viewport toggles (Desktop 1280px, Tablet 768px, Mobile 390px).
+   - **Text-Based Content Studio:** Comprehensive form-based copy editor for headlines, descriptions, timeline steps, hero banners, and brand manifestos across all routes.
+   - **Dedicated SEO & Metadata Studio:** Real-time Google SERP simulator, OpenGraph card previews, per-page meta titles, and Schema.org structured data.
+   - **Brand Logo & Browser Favicon Studio:** Live upload and preview support for SVG, PNG, WebP, and ICO assets.
+   - **Telemetry & Data Management System:** Decoupled analytics dashboard with independent export (JSON/CSV) and purge controls isolated from core website data.
 
 ---
 
-## 2. Visual Design System: "Neon Threat Matrix" (Indigo & Lime Palette)
-Built directly from your **Neon Threat Matrix (Indigo & Lime Cybersecurity Firm)** color palette:
+## 2. Visual Identity: "Nordic Minimalist Cyberpunk"
 
-### Exact Color Palette Tokens
-| Swatch | Token | Hex Code | Usage |
+ZERO//FORM operates at the convergence of Scandinavian architectural minimalism and zero-tolerance offensive security engineering.
+
+### Color Palette Tokens
+| Swatch | Token | Hex Code | Purpose |
 | :--- | :--- | :--- | :--- |
-| **1. Deep Abyssal Indigo** | `--bg-primary` | `#17153D` | Main background, terminal backdrop, deep header/footer canvas |
-| **2. Royal Cyber Indigo** | `--bg-surface` | `#2F2B75` | Product cards, blog panels, analytics chart cards, modals, sidebar widgets |
-| **3. Electric Acid Lime** | `--accent-lime` | `#90E31F` | **Primary Accent:** "Buy via Telegram" CTAs, active tabs, discount badges, primary graph line, smart ad borders |
-| **4. Cyber Volt Highlighter**| `--accent-volt` | `#C7FF5E` | Button hover states, glowing highlights, price tags, secondary graph line, active telemetry pulse |
-| **5. Ghost Ice White** | `--text-primary` | `#F2F4FF` | Crisp high-contrast headings, body text, specification readouts |
-| **Supporting Muted Indigo**| `--text-muted` | `#A5A3C8` | Secondary metadata, timestamps, crossed-out retail prices, axis labels |
-| **Indigo Grid Border** | `--border-matrix`| `#433E96` | Structural `1px solid` card & grid lines (turns `#90E31F` on hover) |
-
-### Typography & UI Elements
-- **Headings & Display:** Bold geometric uppercase sans-serif (`Space Grotesk` / `Inter`) in Ghost Ice White (`#F2F4FF`) with Electric Acid Lime (`#90E31F`) highlights.
-- **Technical Data & Prices:** Monospace (`JetBrains Mono` / `Fira Code`) for versions, SKU codes, CVE IDs, SHA-256 hashes, license durations, and prices.
-- **Tactical Matrix Styling:** Deep Indigo (`#17153D`) background with Royal Indigo (`#2F2B75`) cards, crisp `1px solid` borders that glow Acid Lime (`#90E31F`) on hover, and high-visibility Cyber Volt (`#C7FF5E`) buttons with dark `#17153D` bold text for maximum contrast and readability.
+| **Obsidian Core** | `--bg` | `#0c0d0e` | Deep canvas, terminal backdrops, root background |
+| **Surface Dark** | `--surface` | `#141618` | Cards, article containers, modal backdrops |
+| **Surface Elevated** | `--surface-elevated`| `#1a1c1f` | Hover overlays, active inspection panels |
+| **Electric Cyan** | `--accent-cyan` | `#00e5ff` | Primary tactical accent, highlights, live pulses |
+| **Emerald Terminal** | `--accent-green`| `#10b981` | Verification badges, activated licenses, success states |
+| **Amber Warning** | `--accent-amber`| `#f59e0b` | High urgency badges, escrow indicators |
+| **Crimson Alert** | `--accent-red` | `#ef4444` | Critical CVE tags, access denied, purge buttons |
+| **Ghost White** | `--text` | `#f0f0f2` | Primary typography, headers, high-contrast labels |
+| **Matrix Muted** | `--muted` | `#8c9096` | Technical sublabels, timestamps, secondary metadata |
+| **Tactical Border** | `--border` | `rgba(255, 255, 255, 0.1)` | Structural 1px division lines |
 
 ---
 
 ## 3. System Architecture & Tech Stack
 
-### Technology Stack
-- **Backend:** **Python 3** (`Flask` with `Jinja2` templates + JSON REST API + Telemetry Ingestion API)
-- **Database:** **SQLite3** (`cyber.db` using Python's built-in `sqlite3` module)
-- **Frontend Styling:** **Tailwind CSS** + **Custom Raw CSS** (`static/css/style.css` implementing the exact `#17153D` / `#2F2B75` / `#90E31F` / `#C7FF5E` / `#F2F4FF` Neon Threat Matrix theme)
-- **Frontend Interactivity & Charts:** **Vanilla ES6+ JavaScript** (`static/js/main.js` & `static/js/admin.js`) + **Interactive HTML5 Canvas Graphs** styled in Acid Lime (`#90E31F`) and Cyber Volt (`#C7FF5E`).
-
-### System Architecture Diagram
 ```mermaid
 flowchart TD
-    subgraph Client ["User Browser (Neon Threat Matrix Indigo & Lime UI)"]
-        Store["Browse Licenses & Tools"]
-        Blog["Read News + Smart Native Product Ads"]
-        Tracker["JS Telemetry Agent (Dwell Time, Scroll %, Ad Clicks, Session)"]
-        TG["Telegram App / Web (t.me/...)"]
+    subgraph Client ["Client Interface (Storefront, Vault & Studios)"]
+        Public["Storefront (/shop, /journal, /about)"]
+        RequestDesk["Custom Tool Procurement (/request)"]
+        Vault["Operator Vault (/vault)"]
+        TelemetryAgent["First-Party Telemetry & Dwell-Time Agent"]
+        AdminUI["Command Center (/admin - Visual, Text, SEO, Orders)"]
     end
 
-    subgraph Server ["Python Backend + SQLite"]
-        Parser["Smart Ad Shortcode & Auto-Match Engine"]
-        API["REST API (/api/*)"]
-        TelemetryAPI["Telemetry Ingestion (/api/telemetry/*)"]
-        DB[("SQLite3 (cyber.db)")]
-        Admin["Full Admin Studio & Analytics Graphs (/admin)"]
+    subgraph Server ["Python 3 Flask Backend"]
+        Routing["Application Router (Blueprint/Route Modules)"]
+        AuthModule["RBAC & Session Security (PBKDF2-SHA256)"]
+        SmartAds["Smart Native Ad Shortcode Parser"]
+        AdminAPI["Admin REST APIs (Theme, SEO, Catalog, Data)"]
+        TelemetryIngest["Telemetry Ingestion & Radar Stream"]
+        UploadEngine["Media & Asset Upload Engine (.ico, .svg, .webp)"]
     end
 
-    Store & Blog --> Tracker
-    Tracker -->|"Heartbeat every 5s + navigator.sendBeacon"| TelemetryAPI
-    TelemetryAPI -->|"Store Visits, Duration, Scroll %, Events"| DB
-    Blog -->|"Click Smart Ad"| Store
-    Store -->|"Checkout via Telegram"| API --> TG
-    Admin <-->|"Query Aggregated Graphs & Edit Everything"| DB
+    subgraph Storage ["SQLite3 High-Performance Database (cyber.db)"]
+        DBCore[("Users, Products, Posts, Comments, Reviews, Orders, Tool Requests")]
+        DBSettings[("Dynamic System & Visual Theme Settings")]
+        DBAnalytics[("Analytics Pageviews, Events, Dwell Time")]
+        DBAudit[("Immutable Security Audit Logs")]
+    end
+
+    subgraph External ["External Communication"]
+        TelegramDesk["Encrypted Telegram Concierge Desk (@Handle)"]
+    end
+
+    Public & RequestDesk & Vault --> TelemetryAgent
+    TelemetryAgent -->|"Heartbeat ping (5s) + sendBeacon"| TelemetryIngest
+    Public -->|"Cart Checkout"| Routing --> TelegramDesk
+    RequestDesk -->|"Submit Sourcing Brief"| Routing --> DBCore
+    AdminUI <-->|"Live API Management"| AdminAPI
+    Routing <--> Storage
+    AdminAPI <--> Storage
 ```
 
----
-
-## 4. Complete Feature Breakdown
-
-### Module A: Digital Arsenal (Licenses & Downloadable Tools Store)
-1. **Product Categories:**
-   - `Web & AppSec Licenses` (*Burp Suite Pro*, *Acunetix*, *Invicti*, *Caido Pro*)
-   - `Red Team & Exploitation` (*Metasploit Pro*, *Cobalt Strike*, *C2 Frameworks*)
-   - `SIEM & Blue Team` (*Splunk Enterprise Security*, *Nessus Pro*, *Elastic Security*)
-   - `OSINT & Recon Licenses` (*Maltego XL*, *Shodan Enterprise API*)
-   - `Downloadable Tools & Scripts` (Custom Python/Go exploit kits, recon binaries, wordlists, free direct downloads + paid tools unlocked via Telegram)
-2. **Product Metadata & Technical Badges:**
-   - **Delivery Type Badge:** `ENTERPRISE LICENSE`, `PRO SUBSCRIPTION`, `DOWNLOADABLE TOOL`, `FREE DIRECT DOWNLOAD`.
-   - **Price Anchoring:** Displays **Official Retail Price** (crossed out, e.g., ~~$4,750/yr~~) vs. **Our Price** (e.g., `$199` in `#C7FF5E`) + automatic **`SAVE 95%`** badge in `#90E31F`.
-   - **Technical Specs:** Version (`v2026.x`), License Duration (`1-Year / Lifetime`), Supported OS (`Windows / Linux / macOS`), and `SHA-256` checksum.
-3. **Telegram Checkout & Order Ticket System:**
-   - **Instant 1-Click "Buy via Telegram"** button on every product card, product page, and blog smart-ad.
-   - **Multi-Item Cart -> Telegram Order Ticket:** Generates `#ORD-XXXXX` and opens `https://t.me/<your_telegram>?text=...` with a formatted list of items and total price.
-   - **Order Vault (`/orders`):** Customers can look up `#ORD-XXXXX` to view their unlocked license key or download link once Admin marks it fulfilled.
+### Technology Highlights
+- **Backend Framework:** Python 3 with Flask, Werkzeug security, and Jinja2 templating.
+- **Persistence:** SQLite3 (`cyber.db`) with WAL mode, foreign keys, and atomic transactions.
+- **Frontend Layer:** Semantic HTML5, CSS custom properties, vanilla ES6+ JavaScript modules.
+- **Security Engineering:** PBKDF2 password hashing, secure session cookies, CSRF protection, sanitized admin gateway (zero credential leaks), and strict input validation.
+- **Telemetry System:** Non-blocking first-party beaconing tracking dwell time, scroll percentage, and conversions without third-party tracking scripts.
 
 ---
 
-### Module B: Threat Intelligence Blog & "Smart Native Product Ad" Engine
-1. **Inline Contextual Native Ad (`[product:SKU]` shortcode or 1-click Admin insert):**
-   - Renders a sleek **Royal Indigo (`#2F2B75`) + Neon Lime (`#90E31F`) Tactical Tool Callout Box** inside the article with version, features, retail savings, and 1-click **`BUY ON TELEGRAM`** / **`ADD TO CART`**.
-2. **Auto-Injected Mid-Article Native Ad Banner:**
-   - Automatically places a native **"RECOMMENDED ARSENAL FOR THIS CVE"** card halfway through the article if enabled.
-3. **Sticky Sidebar "Lab Arsenal & Countermeasures" Widget:**
-   - Stays visible while reading on desktop, showing 1–3 linked products with instant Telegram purchase buttons.
-4. **End-of-Article "Deploy This Setup" Bundle Card:**
-   - Displays all tools mentioned in the article with a custom CTA headline per post.
+## 4. Complete Module Guide
+
+### Module 1: Digital Arsenal & E-Commerce (`/shop`, `/product/<slug>`)
+- **Product Categorization:** Web & AppSec, Offensive & Red Team, SIEM & Blue Team, Reverse Engineering, OSINT & Recon, Downloadable Tools.
+- **Technical Integrity Badges:** Product type (`LICENSE_KEY`, `DOWNLOADABLE_TOOL`, `FREE_TOOL`), version strings, supported OS platforms, SHA-256 integrity hashes, and retail savings calculation.
+- **Cart & Concierge Checkout:** Drawer cart modal supporting multi-item selection with instant Telegram dispatch pre-formatting order reference tickets.
+- **Customer Reviews Studio:** Product reviews with verified deployment badges, star ratings, and custom editorial curation controls.
+
+### Module 2: Custom Tool Sourcing & Procurement (`/request`)
+- **Intake Desk:** Public procurement form allowing operators to request unlisted tools, enterprise licenses, zero-days, and custom payloads.
+- **Ticket Generation:** Automatically assigns unique reference tickets (`#REQ-XXXXX`).
+- **Admin Intake Queue (`ADMIN` → `ORDERS` → `CUSTOM TOOL REQUESTS`):**
+  - Live filtering by status (`PENDING`, `SOURCING`, `ALLOCATED`, `DELIVERED`, `CANCELLED`).
+  - Modal editor to update status, append internal broker notes, and view contact handles.
+  - Permanent deletion and audit logging.
+- **Full Studio Editability:** All headlines, form card labels, timeline protocol steps, and concierge cards on `/request` are fully editable via Text, Visual, and SEO studios.
+
+### Module 3: Threat Intelligence Journal & Moderated Comments (`/journal`)
+- **Dispatches & CVE Advisories:** Markdown and HTML rendering of security disclosures, severity ratings (`CRITICAL`, `HIGH`, `MEDIUM`, `INFO`), and CVSS scores.
+- **Smart Product Ads:** Dynamic shortcodes (`[product:SKU]`), automated midpoint recommendation cards, and sticky sidebar countermeasure toolboxes.
+- **Login-Gated Reader Comments:**
+  - Unauthenticated visitors see an authentication requirement gate.
+  - Authenticated operators submit comments that enter an administrative moderation queue (`PENDING`).
+  - Master Admin can approve, reject, or permanently purge comments. Only approved comments render on public dispatches.
+
+### Module 4: Operator Vault (`/vault`)
+- **License Provisioning:** Lists all fulfilled orders with unmasked cryptographic license keys, copy-to-clipboard helpers, and direct download links.
+- **Transaction History:** Real-time log of previous order tickets with direct concierge link support.
+- **API Access:** Generates unique operator tokens for programmatic license synchronization.
+
+### Module 5: Visual Inspect Studio (`ADMIN` → `THEMES` → `VISUAL INSPECT MODE`)
+- **Responsive Viewport Canvas:** Emulates Desktop (1280px), Tablet (768px), and Mobile (390px) inside an interactive sandboxed canvas.
+- **Route Switcher:** 1-click navigation between `/` (Home), `/about` (Manifesto), `/shop` (Arsenal), `/journal` (Threat Intel), and `/request` (Tool Procurement).
+- **Point-and-Click Inspector:** Clicking any element with `data-theme-bind` on the canvas opens an instant quick-edit popup that updates the live DOM in real time.
+
+### Module 6: Text-Based Content Studio (`ADMIN` → `THEMES` → `TEXT-BASED EDIT MODE`)
+- **Dedicated Subtabs:**
+  - `[01] HOME PAGE CONTENT`: Hero headlines, elevator descriptions, key art banners, category banner strip, and curated product/journal serials.
+  - `[02] ABOUT & MANIFESTO`: Tenet blocks, compliance metrics, key art banner, and bottom CTAs.
+  - `[03] DIGITAL ARSENAL (SHOP)`: Shop eyebrows, catalog headline, and subtitles.
+  - `[04] THREAT JOURNAL`: Disclosure alert badge, headline, and editorial subtitle.
+  - `[05] CUSTOM TOOL REQUEST PAGE`: Protocol dispatch banner, form headings, 3-phase timeline protocol steps, and concierge card copy.
+  - `[06] GLOBAL SHELL & BRANDING`: Brand callsign, tagline, ticker announcements, logo upload, browser favicon upload, and compliance disclaimer.
+  - `[07] TYPOGRAPHY, PALETTE & CSS`: 11 custom color tokens, font family configuration, and custom CSS override injection.
+
+### Module 7: Dedicated SEO & Social Metadata Studio (`ADMIN` → `SEO & METADATA`)
+- **Real-Time Simulators:** Live Google Search SERP simulator and OpenGraph social share card preview.
+- **Per-Page Granular SEO:** Meta titles, meta descriptions, search keywords, and social OG images for Global Defaults, Home (`/`), About (`/about`), Shop (`/shop`), Threat Journal (`/journal`), and Custom Tool Request (`/request`).
+- **Live Character Counters:** Real-time validation badges ensuring optimal title (< 60 chars) and description (< 160 chars) length.
+
+### Module 8: Favicon & Brand Logo Management
+- **Site Brand Logo:** Upload vector SVG, PNG, or WebP logos with live preview. Replaces text brand across header, mobile slide-out menu, and footer.
+- **Browser Tab Favicon:** Upload `.ico`, `.png`, `.svg`, or `.webp` files with live browser tab mockup. Automatically updates `<link rel="icon">`, `<link rel="apple-touch-icon">`, and the `/favicon.ico` redirection endpoint.
+
+### Module 9: Telemetry & Data Management System (`ADMIN` → `SETTINGS`)
+- **Decoupled Architecture:** Telemetry tracking is completely decoupled from core website data.
+- **Real-Time Readout:** Live pageviews, tracking events, unique visitor entities, and physical database file footprint.
+- **Safe Export & Purge Tools:** Export tracking records to JSON or CSV. Purge telemetry records or vacuum the database without ever touching products, orders, user accounts, comments, or reviews.
 
 ---
 
-### Module C: Full Website Telemetry, Dwell-Time & Graph Analytics Engine
-Every visitor interaction is automatically tracked and visualized inside the **Admin Analytics Command Center**:
-
-#### 1. How the Client-Side + Server-Side Tracker Works
-- **Visitor & Session Fingerprinting:** Assigns an anonymous session ID (`sid`) and visitor ID (`vid`), capturing Device Type (`Desktop` / `Mobile` / `Tablet`), OS (`Linux`, `Windows`, `macOS`, `Android`, `iOS`), and Referrer source (`Direct`, `Telegram`, `Search`, `Internal Blog Ad`).
-- **Exact Dwell Time (Time Stayed on Page) & Scroll Depth Tracker:**
-  - Tracks active time on the page in seconds (pausing when the tab is hidden so numbers are 100% accurate) and sends periodic heartbeats + a final `navigator.sendBeacon` payload when the user leaves or navigates away.
-  - Records **Maximum Scroll Depth (`0%` to `100%`)** so you know if readers actually finish reading a blog post or stop halfway.
-- **Event & Funnel Tracking:**
-  - Logs `PAGE_VIEW` (Home, Store, Product Detail, Blog List, Blog Post), `SMART_AD_IMPRESSION`, `SMART_AD_CLICK` (which blog post drove the click and which product was clicked), `ADD_TO_CART`, `FREE_DOWNLOAD`, and `TELEGRAM_BUY_CLICK`.
-
-#### 2. Interactive Graphs & Metrics in Admin (`/admin` -> Analytics Tab)
-1. **Top KPI Cards (Real-Time Summary):**
-   - **Live Active Visitors Online Right Now** (active within last 60s with `#90E31F` neon pulse)
-   - **Total Page Views & Unique Visitors**
-   - **Average Time Stayed on Site (Dwell Time)** (split by Product Avg Stay vs. Blog Avg Stay)
-   - **Blog vs. Product Traffic Split Ratio**
-   - **Smart Ad Click-Through Rate (CTR %)** & **Telegram Checkout Conversion Rate (%)**
-2. **Graph 1 — Traffic Timeline (Multi-Line Time-Series Chart):**
-   - Compares **Product Views** (`#90E31F` Acid Lime), **Blog Views** (`#C7FF5E` Cyber Volt), and **Telegram Checkout Clicks** (`#F2F4FF` Ice White) over time.
-3. **Graph 2 — Product Engagement & Dwell Time Bar Chart:**
-   - Side-by-side comparison of **Top Products by Views**, **Average Time Stayed on Each Product (Seconds)**, and **Telegram Buy Clicks**.
-4. **Graph 3 — Blog Post Performance, Read Completion & Smart Ad Conversions:**
-   - Visual breakdown of **Blog Views**, **Average Read Time Stayed (Seconds)**, **Average Scroll Depth (%)**, and **How Many Product Ad Clicks Each Blog Post Generated**.
-5. **Graph 4 — Conversion Funnel & Traffic/OS Breakdown:**
-   - **Funnel Chart:** `Total Visitors` $\rightarrow$ `Product / Blog Viewers` $\rightarrow$ `Smart Ad / Cart Clicks` $\rightarrow$ `Telegram Order Generated` $\rightarrow$ `Completed Sales`.
-   - **OS & Device Breakdown:** Know if your audience visits from `Kali/Linux`, `Windows`, `macOS`, or `Mobile`.
-6. **Detailed Per-Item Analytics Table & Live Activity Feed:**
-   - **Product-by-Product Table:** SKU, Total Views, Unique Visitors, **Avg Time Stayed (sec)**, Cart Adds, Telegram Clicks, Conversion %.
-   - **Blog-by-Blog Table:** Post Title, Total Views, **Avg Time Stayed (sec)**, **Avg Scroll Depth %**, Smart Ad Impressions, Smart Ad Clicks, Ad CTR %.
-   - **Live Visitor Stream:** Real-time log of the latest 50 visitor sessions showing what page they visited, how many seconds they stayed, how far they scrolled, and what they clicked.
-
----
-
-### Module D: Fully Customizable Command Center (`/admin`)
-1. **Analytics & Telemetry Dashboard Tab:** Full visual graphs, dwell-time metrics, blog-to-product conversion stats, and live visitor stream.
-2. **Global Site & Telegram Settings Tab:** Edit Site Name, Hero Title/Subtitle, Top Breaking Ticker text, **Telegram `@username`**, Telegram Channel URL, custom Telegram message template, and Admin Password.
-3. **Customizable Blog Studio & Smart Ad Builder Tab:** Full post editor with formatting toolbar, 1-click `[product:SKU]` Smart Ad insertion, custom ad pitch per post, severity/CVE badges, and live preview.
-4. **Digital Arsenal (Products & Licenses) Manager Tab:** Add, edit, duplicate, or delete any license or downloadable tool, retail vs. store price, specs, SHA-256 hash, and download links.
-5. **Telegram Orders & License Fulfillment Tab:** Manage `#ORD-XXXXX` tickets, mark completed, and attach license keys / download links.
-
----
-
-## 5. Database Schema (SQLite3)
+## 5. Database Schema Reference
 
 ```mermaid
 erDiagram
+    USERS ||--o{ ORDERS : places
+    USERS ||--o{ POST_COMMENTS : writes
+    USERS ||--o{ TOOL_REQUESTS : submits
+    PRODUCTS ||--o{ REVIEWS : receives
+    POSTS ||--o{ POST_COMMENTS : receives
+
+    USERS {
+        int id PK
+        string username UK
+        string email UK
+        string password_hash
+        string role "ADMIN | OPERATOR"
+        string telegram_handle
+        string api_token UK
+        boolean is_active
+        datetime created_at
+    }
+
     SETTINGS {
-        string key PK "site_name, telegram_user, telegram_channel, ticker_text, hero_title..."
+        string key PK
         string value
     }
 
     PRODUCTS {
         int id PK
-        string sku UK "e.g., LIC-BURP-PRO"
-        string name "e.g., Burp Suite Professional"
+        string sku UK
+        string name
         string slug UK
-        string category "Web AppSec | Red Team | SIEM | OSINT | Downloadable Tools"
-        string product_type "LICENSE_KEY | DOWNLOADABLE_TOOL | FREE_TOOL"
+        string category
+        string product_type
         float price
         float retail_price
         string version
@@ -187,27 +221,73 @@ erDiagram
         string title
         string slug UK
         string category
-        string severity "CRITICAL | HIGH | MEDIUM | INFO"
+        string severity
         string cve_id
         string cvss_score
         string author
         string read_time
         string summary
-        text content "HTML/Markdown + [product:SKU] smart ad shortcodes"
+        text content
         string related_skus
-        string ad_mode "ALL | SIDEBAR_ONLY | INLINE_AUTO | NONE"
+        string ad_mode
         string ad_custom_pitch
         boolean featured
         int views
         datetime published_at
     }
 
+    POST_COMMENTS {
+        int id PK
+        int post_id FK
+        int user_id FK
+        string author_name
+        string author_role
+        text content
+        string status "PENDING | APPROVED | REJECTED"
+        string ip_address
+        datetime created_at
+    }
+
+    REVIEWS {
+        int id PK
+        int product_id FK
+        string product_sku
+        string author_name
+        string author_role
+        string author_org
+        int rating
+        string title
+        text content
+        string verified_badge
+        boolean featured_manifesto
+        datetime created_at
+    }
+
+    TOOL_REQUESTS {
+        int id PK
+        string request_id UK
+        int user_id FK
+        string tool_name
+        string category
+        string contact_telegram
+        string contact_email
+        string preferred_contact
+        string urgency
+        string budget_range
+        text technical_specs
+        string status "PENDING | SOURCING | ALLOCATED | DELIVERED | CANCELLED"
+        text admin_notes
+        string ip_address
+        datetime created_at
+        datetime updated_at
+    }
+
     ORDERS {
         int id PK
-        string order_number UK "e.g., ORD-73910"
+        string order_number UK
         string buyer_telegram
         float total_amount
-        string status "PENDING_TELEGRAM | COMPLETED | CANCELLED"
+        string status
         text items_json
         text fulfilled_license_info
         datetime created_at
@@ -215,17 +295,17 @@ erDiagram
 
     ANALYTICS_PAGEVIEWS {
         int id PK
-        string visit_token UK "Unique ID per page load for heartbeat updates"
-        string visitor_id "Persistent anonymous visitor ID"
-        string session_id "Browser session ID"
-        string page_type "HOME | SHOP | PRODUCT | BLOG_INDEX | BLOG_POST | ORDERS"
-        string target_slug "Product slug or Blog slug"
-        string target_title "Human readable Product or Blog title"
-        int duration_seconds "Exact time stayed on page (updated via heartbeat/beacon)"
-        int max_scroll_pct "0 to 100 scroll depth percentage"
-        string referrer "Traffic source or internal blog path"
-        string device_type "Desktop | Mobile | Tablet"
-        string os_name "Linux | Windows | macOS | Android | iOS"
+        string visit_token UK
+        string visitor_id
+        string session_id
+        string page_type
+        string target_slug
+        string target_title
+        int duration_seconds
+        int max_scroll_pct
+        string referrer
+        string device_type
+        string os_name
         datetime created_at
         datetime last_ping_at
     }
@@ -234,69 +314,170 @@ erDiagram
         int id PK
         string visitor_id
         string session_id
-        string event_type "SMART_AD_IMPRESSION | SMART_AD_CLICK | ADD_TO_CART | TELEGRAM_BUY_CLICK | FREE_DOWNLOAD"
-        string source_page "e.g., /intel/cve-2026-burp-guide"
-        string target_sku "e.g., LIC-BURP-PRO"
-        string meta_info "Placement type e.g. INLINE_AD | SIDEBAR_AD | PRODUCT_PAGE"
+        string event_type
+        string source_page
+        string target_sku
+        string meta_info
+        datetime created_at
+    }
+
+    AUDIT_LOGS {
+        int id PK
+        int admin_id
+        string admin_username
+        string action
+        string details
+        string ip_address
         datetime created_at
     }
 ```
 
 ---
 
-## 6. Project Directory Structure
+## 6. Directory Structure
 
 ```text
 /home/siuxsa/cyber/
-├── README.md                  # Full Architecture, Design & Telemetry Blueprint
-├── app.py                     # Python Flask Backend (SSR, Smart Ad Engine, Telemetry API, Admin API)
-├── database.py                # SQLite3 Schema + Seed Data (Products, Blog Posts, Realistic Historical Analytics)
-├── cyber.db                   # SQLite3 Database (auto-created)
-├── requirements.txt           # Python dependencies
-├── wsgi.py                    # Production WSGI Server Entrypoint (Gunicorn, Waitress, uWSGI)
+├── README.md                          # Full Architecture, Engineering & Operational Blueprint
+├── app.py                             # Core Flask Application & Bootstrap Engine
+├── database.py                        # SQLite3 Schema Migrations & Initial Seed Data
+├── cyber.db                           # Primary SQLite3 Database
+├── requirements.txt                   # Production Python Dependencies
+├── wsgi.py                            # Production WSGI Server Entrypoint
+├── core/
+│   ├── config.py                      # System Configuration, Allowed Extensions, Default Schema
+│   ├── helpers.py                     # Markdown Processor, Smart Ads Engine, Audit Logger
+│   └── security.py                    # Session Management, Authentication Guards, RBAC
+├── routes/
+│   ├── __init__.py                    # Central Route Registration Gateway
+│   ├── frontend.py                    # Public Storefront, Catalog, Journal, Custom Request Desk
+│   ├── auth.py                        # Operator Vault Auth, Registration, Sanitized Admin Login
+│   ├── orders.py                      # Checkout API, Cart Processing, Telemetry Ingestion
+│   └── admin/
+│       ├── panel.py                   # Master Admin Dashboard Controller
+│       ├── products.py                # Arsenal Catalog Management APIs
+│       ├── posts.py                   # Threat Intelligence & Smart Ad Editor APIs
+│       ├── comments.py                # Reader Comments Moderation APIs
+│       ├── reviews.py                 # Customer Reviews CRUD & Home Curation APIs
+│       ├── tool_requests.py           # Custom Tool Sourcing Intake Management APIs
+│       ├── settings.py                # System Settings, Data Management & Telemetry Purge APIs
+│       ├── theme.py                   # Theme Colors, Media Uploads, Home Curation APIs
+│       ├── users.py                   # Operator Account Management APIs
+│       └── audit.py                   # Immutable Audit Log Viewer APIs
 ├── static/
 │   ├── css/
-│   │   └── style.css          # Neon Threat Matrix (Indigo & Lime) Raw CSS + Graph Styles
+│   │   ├── style.css                  # Nordic Cyberpunk Core Design System
+│   │   ├── responsive.css             # Viewport Layouts & Media Queries
+│   │   └── admin.css                  # Modular Admin Command Center Styles
 │   ├── js/
-│   │   ├── main.js            # Store, Cart, Telegram Order Generator & Live Telemetry Heartbeat Agent
-│   │   └── admin.js           # Admin Studio, Blog Smart-Ad Editor & Interactive Canvas Graphs
-│   └── downloads/             # Sample downloadable tool scripts/archives
-└── templates/
-    ├── base.html              # Customizable global header, live ticker, Telegram CTA, cart drawer
-    ├── index.html             # Customizable Hero + Featured Licenses + Breaking Intel Feed
-    ├── shop.html              # Digital Arsenal Catalog (Licenses & Downloadable Tools)
-    ├── product_detail.html    # Full Spec Sheet, Retail Savings, SHA-256 & Telegram Buy
-    ├── blog.html              # Threat Intelligence Wire with Severity/CVE filters
-    ├── post_detail.html       # Article Reader + Smart Inline/Sidebar/Mid-Post Native Product Ads
-    ├── request_tool.html      # Custom Tool Sourcing & Procurement Request Desk
-    └── admin.html             # Full Command Center (Visual Analytics Graphs, Settings, Products, Blog & Orders)
+│   │   ├── main.js                    # Storefront Interactivity, Search & Mobile Nav
+│   │   ├── cart.js                    # Slide-Out Cart Drawer & Telegram Dispatch
+│   │   ├── telemetry.js               # First-Party Dwell Time & Scroll Beaconing
+│   │   └── admin/
+│   │       ├── admin_core.js          # Tab Switching, Toasts & Global Helpers
+│   │       ├── admin_analytics.js     # Live Telemetry Charts & Visitor Radar Stream
+│   │       ├── admin_orders.js        # Order Fulfillment & Key Provisioning
+│   │       ├── admin_tool_requests.js # Custom Tool Sourcing Intake Queue Controller
+│   │       ├── admin_products.js      # Product Catalog Studio
+│   │       ├── admin_posts.js         # Journal Editor, Markdown Preview & Smart Ads
+│   │       ├── admin_comments.js      # Comment Moderation Controller
+│   │       ├── admin_reviews.js       # Verified Reviews CRUD
+│   │       ├── admin_curation.js      # Homepage Curated Product & Journal Selector
+│   │       ├── admin_settings.js      # Branding, Logo/Favicon Upload, Telemetry Purge
+│   │       ├── admin_themes.js        # Visual Inspect Studio & Text Content Studio
+│   │       └── admin_users.js         # Account & Role Management
+│   └── uploads/                       # Verified Uploaded Media, Logos & Favicons
+├── templates/
+│   ├── base.html                      # Global Storefront Shell, Navigation, Header, Footer
+│   ├── index.html                     # Minimalist Hero, Curated Serials, Category Strip
+│   ├── shop.html                      # Digital Arsenal Catalog with Category Filters
+│   ├── product_detail.html            # Spec Sheet, SHA-256 Proof, Telegram Checkout
+│   ├── blog.html                      # Threat Intelligence Wire
+│   ├── post_detail.html               # Dispatch Reader, Smart Ads, Login-Gated Comments
+│   ├── request_tool.html              # Custom Tool Sourcing & Procurement Desk
+│   ├── vault.html                     # Operator Vault, Unlocked Licenses, API Tokens
+│   ├── login.html                     # Customer Authentication Page
+│   ├── register.html                  # Customer Registration Page
+│   ├── admin_login.html               # Sanitized Admin Login Gateway (Zero Leaks)
+│   ├── admin.html                     # Master Admin Command Matrix
+│   └── admin/
+│       ├── modals/                    # Modals for Products, Posts, Reviews, Requests, Themes
+│       └── modules/                   # Submodules for Analytics, Catalog, Journal, Orders, SEO, etc.
+└── scratch/                           # Automated Verification & Integration Test Suites
 ```
 
 ---
 
-## 7. Quickstart & Production WSGI Deployment
+## 7. Quickstart & Deployment Guide
 
-### Step 1: Install Dependencies
+### Prerequisites
+- Python 3.10+
+- SQLite3
+
+### Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone <repository_url>
+   cd cyber
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Initialize Database:**
+   The SQLite database (`cyber.db`) is automatically initialized and seeded on first run with default catalog items, dispatches, settings, and an initial master administrator account.
+
+4. **Launch Application:**
+
+   **Development Mode:**
+   ```bash
+   python3 app.py
+   ```
+   Server will start on `http://127.0.0.1:5000`.
+
+   **Production WSGI (Gunicorn - Linux):**
+   ```bash
+   gunicorn -w 4 -b 0.0.0.0:5000 wsgi:app
+   ```
+
+   **Production WSGI (Waitress - Cross-Platform):**
+   ```bash
+   python3 wsgi.py
+   ```
+
+---
+
+## 8. Verification & Test Suites
+
+The codebase includes an extensive suite of automated integration and security regression tests located in `scratch/`:
+
 ```bash
-pip install -r requirements.txt
-# (On Debian/Kali/Ubuntu system python: pip install -r requirements.txt --break-system-packages)
+# 1. Admin Login Security & Zero-Credential Leak Verification
+python3 scratch/test_admin_login_security.py
+
+# 2. Browser Tab Favicon & Brand Logo Update Suite
+python3 scratch/test_favicon_and_logo.py
+
+# 3. Custom Tool Procurement Pipeline & Order Lookup Transition Suite
+python3 scratch/test_tool_requests.py
+
+# 4. Request Page Multi-Studio Admin Editability Suite
+python3 scratch/test_request_page_admin_editing.py
+
+# 5. Full Comprehensive Feature Verification Suite (Comments, Themes, Catalog, Reviews, Checkout)
+python3 scratch/test_comprehensive_manual_features.py
 ```
 
-### Step 2: Run Application
+All suites execute cleanly with a 100% pass rate.
 
-**Production (Gunicorn - Linux):**
-```bash
-gunicorn -w 4 -b 0.0.0.0:5000 wsgi:app
-```
+---
 
-**Production (Waitress - Cross-Platform):**
-```bash
-python3 wsgi.py
-# Or: waitress-serve --host=0.0.0.0 --port=5000 wsgi:app
-```
+## 9. Security & Compliance Declarations
 
-**Development:**
-```bash
-python3 app.py
-```
-
+- **Zero Credential Exposure:** Login gateways load with clean, unpopulated inputs, zero client-side credential scripts, and strict server-side authentication validation.
+- **Airgap & Offline Execution:** Digital tool distributions include verified cryptographic SHA-256 hashes for operational reproduction on isolated, non-beaconing networks.
+- **Strict Data Decoupling:** Visitor telemetry and tracking records are physically and logically segregated from customer accounts, orders, reviews, and editorial content.
+- **Audit Provenance:** Administrative actions (theme updates, product modifications, status transitions, purges) are permanently recorded in the immutable `audit_logs` table.
