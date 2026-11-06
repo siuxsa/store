@@ -96,6 +96,7 @@ def init_db():
         download_url TEXT NOT NULL DEFAULT '',
         badge_text TEXT NOT NULL DEFAULT 'INSTANT DELIVERY',
         status TEXT NOT NULL DEFAULT 'PUBLISHED',
+        custom_js TEXT NOT NULL DEFAULT '',
         featured INTEGER NOT NULL DEFAULT 0,
         views_count INTEGER NOT NULL DEFAULT 0,
         created_at TEXT NOT NULL
@@ -121,6 +122,7 @@ def init_db():
         ad_custom_pitch TEXT NOT NULL DEFAULT '',
         featured INTEGER NOT NULL DEFAULT 0,
         status TEXT NOT NULL DEFAULT 'PUBLISHED',
+        custom_js TEXT NOT NULL DEFAULT '',
         views INTEGER NOT NULL DEFAULT 0,
         published_at TEXT NOT NULL,
         image_url TEXT NOT NULL DEFAULT ''
@@ -157,10 +159,16 @@ def init_db():
     )
     """)
 
-    # Ensure user_id column exists if upgrading from an older orders table
+    # Ensure user_id and delivery columns exist on orders table
     order_cols = [r["name"] for r in cur.execute("PRAGMA table_info(orders)").fetchall()]
     if "user_id" not in order_cols:
         cur.execute("ALTER TABLE orders ADD COLUMN user_id INTEGER;")
+    if "delivery_links_json" not in order_cols:
+        cur.execute("ALTER TABLE orders ADD COLUMN delivery_links_json TEXT NOT NULL DEFAULT '[]';")
+    if "delivery_message" not in order_cols:
+        cur.execute("ALTER TABLE orders ADD COLUMN delivery_message TEXT NOT NULL DEFAULT '';")
+    if "fulfilled_at" not in order_cols:
+        cur.execute("ALTER TABLE orders ADD COLUMN fulfilled_at TEXT NOT NULL DEFAULT '';")
 
     # Ensure device_hwid and last_ip exist on users table
     user_cols = [r["name"] for r in cur.execute("PRAGMA table_info(users)").fetchall()]
@@ -197,6 +205,29 @@ def init_db():
         cur.execute("ALTER TABLE products ADD COLUMN description TEXT NOT NULL DEFAULT '';")
     if "status" not in prod_cols:
         cur.execute("ALTER TABLE products ADD COLUMN status TEXT NOT NULL DEFAULT 'PUBLISHED';")
+    if "custom_js" not in prod_cols:
+        cur.execute("ALTER TABLE products ADD COLUMN custom_js TEXT NOT NULL DEFAULT '';")
+    if "delivery_links_json" not in prod_cols:
+        cur.execute("ALTER TABLE products ADD COLUMN delivery_links_json TEXT NOT NULL DEFAULT '[]';")
+    if "delivery_message" not in prod_cols:
+        cur.execute("ALTER TABLE products ADD COLUMN delivery_message TEXT NOT NULL DEFAULT '';")
+
+    # Migrate legacy download_url into delivery_links_json if empty
+    for pr in cur.execute("SELECT id, name, sku, version, download_url, delivery_links_json, delivery_message FROM products").fetchall():
+        dl_url = (pr["download_url"] or "").strip()
+        dl_json = (pr["delivery_links_json"] or "").strip()
+        dl_msg = (pr["delivery_message"] or "").strip()
+        new_json = dl_json
+        if (not dl_json or dl_json == "[]") and dl_url:
+            new_json = json.dumps([{"label": f"{pr['name']} ({pr['version']})", "url": dl_url}])
+        new_msg = dl_msg
+        if not dl_msg:
+            new_msg = f"Thank you for your purchase of {pr['name']} ({pr['sku']}). Your download link(s) and license details are ready below."
+        if new_json != dl_json or new_msg != dl_msg:
+            cur.execute(
+                "UPDATE products SET delivery_links_json = ?, delivery_message = ? WHERE id = ?",
+                (new_json or "[]", new_msg, pr["id"])
+            )
 
     # Populate realistic default FAQs for products with empty faq_json
     default_faqs_map = {
@@ -457,6 +488,8 @@ Splunk Enterprise paired with Enterprise Security (ES) provides enterprise-wide 
         cur.execute("ALTER TABLE posts ADD COLUMN ad_paragraph_interval INTEGER NOT NULL DEFAULT 4;")
     if "status" not in post_cols:
         cur.execute("ALTER TABLE posts ADD COLUMN status TEXT NOT NULL DEFAULT 'PUBLISHED';")
+    if "custom_js" not in post_cols:
+        cur.execute("ALTER TABLE posts ADD COLUMN custom_js TEXT NOT NULL DEFAULT '';")
 
     # Ensure status column exists for post_comments (moderation workflow)
     comment_cols = [r["name"] for r in cur.execute("PRAGMA table_info(post_comments)").fetchall()]
@@ -479,6 +512,8 @@ Splunk Enterprise paired with Enterprise Security (ES) provides enterprise-wide 
         referrer TEXT NOT NULL DEFAULT 'Direct',
         device_type TEXT NOT NULL DEFAULT 'Desktop',
         os_name TEXT NOT NULL DEFAULT 'Linux',
+        user_agent TEXT NOT NULL DEFAULT '',
+        ip_address TEXT NOT NULL DEFAULT '',
         created_at TEXT NOT NULL,
         last_ping_at TEXT NOT NULL
     )
@@ -494,8 +529,49 @@ Splunk Enterprise paired with Enterprise Security (ES) provides enterprise-wide 
         source_page TEXT NOT NULL DEFAULT '',
         target_sku TEXT NOT NULL DEFAULT '',
         meta_info TEXT NOT NULL DEFAULT '',
+        user_agent TEXT NOT NULL DEFAULT '',
+        ip_address TEXT NOT NULL DEFAULT '',
         created_at TEXT NOT NULL
     )
+    """)
+
+    # 9b. Cryptographic Visitor Cookie Registry (Maps high-entropy cryptographic cookies to visitor count numbers)
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS visitor_cookie_registry (
+        cookie_hash TEXT PRIMARY KEY,
+        visitor_number INTEGER NOT NULL,
+        created_at TEXT NOT NULL,
+        last_seen TEXT NOT NULL
+    );
+    """)
+    cur.execute("CREATE INDEX IF NOT EXISTS idx_vcr_last_seen ON visitor_cookie_registry(last_seen);")
+
+    # Schema Migrations for analytics_pageviews (user_agent and real ip_address)
+    cur.execute("PRAGMA table_info(analytics_pageviews);")
+    pv_existing_cols = {row[1] for row in cur.fetchall()}
+    if "user_agent" not in pv_existing_cols:
+        cur.execute("ALTER TABLE analytics_pageviews ADD COLUMN user_agent TEXT NOT NULL DEFAULT '';")
+    if "ip_address" not in pv_existing_cols:
+        cur.execute("ALTER TABLE analytics_pageviews ADD COLUMN ip_address TEXT NOT NULL DEFAULT '';")
+
+    # Schema Migrations for analytics_events (user_agent and real ip_address)
+    cur.execute("PRAGMA table_info(analytics_events);")
+    ev_existing_cols = {row[1] for row in cur.fetchall()}
+    if "user_agent" not in ev_existing_cols:
+        cur.execute("ALTER TABLE analytics_events ADD COLUMN user_agent TEXT NOT NULL DEFAULT '';")
+    if "ip_address" not in ev_existing_cols:
+        cur.execute("ALTER TABLE analytics_events ADD COLUMN ip_address TEXT NOT NULL DEFAULT '';")
+
+    # Backfill realistic default values for legacy seed rows if empty
+    cur.execute("""
+    UPDATE analytics_pageviews
+    SET user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
+    WHERE user_agent IS NULL OR user_agent = '';
+    """)
+    cur.execute("""
+    UPDATE analytics_pageviews
+    SET ip_address = '127.0.0.1'
+    WHERE ip_address IS NULL OR ip_address = '';
     """)
 
     # 10. Verified Product Reviews & Operational Assessments Table
@@ -553,7 +629,7 @@ def seed_if_empty(conn):
         "site_tagline": "ENTERPRISE CYBERSECURITY LICENSES, RED TEAM TOOLS & ZERO-DAY THREAT INTEL",
         "telegram_user": "ZeroDayMatrixSupport",
         "telegram_channel": "https://t.me/ZeroDayMatrixChannel",
-        "ticker_text": "⚡ [CVE-2026-8841 CRITICAL 9.8] OAUTH2 TOKEN SMUGGLING IN ENTERPRISE GATEWAYS // NEW DROP: BURP SUITE PRO v2026.10 & METASPLOIT PRO ENTERPRISE SEATS AVAILABLE VIA TELEGRAM // INSTANT ACTIVATION",
+        "ticker_text": "[CVE-2026-8841 CRITICAL 9.8] OAUTH2 TOKEN SMUGGLING IN ENTERPRISE GATEWAYS // NEW DROP: BURP SUITE PRO v2026.10 & METASPLOIT PRO ENTERPRISE SEATS AVAILABLE VIA TELEGRAM // INSTANT ACTIVATION",
         "hero_badge": "VERIFIED ENTERPRISE SECURITY ARSENAL & THREAT INTELLIGENCE",
         "hero_title": "COMMERCIAL OFFENSIVE & SIEM LICENSES. ZERO RETAIL OVERHEAD.",
         "hero_subtitle": "Deploy activated Burp Suite Professional, Metasploit Pro, Splunk Enterprise Security, and custom Red Team toolkits. Authenticated operator vault with instant license provisioning via Telegram.",
@@ -862,7 +938,7 @@ def seed_if_empty(conn):
 <p>During recent offensive assessments of enterprise Single Sign-On (SSO) gateways, our research unit identified a critical parser differential in how upstream reverse proxies validate <code>redirect_uri</code> parameters compared to backend token issuance microservices. Tracked as <strong>CVE-2026-8841 (CVSS 9.8)</strong>, an unauthenticated attacker can smuggle arbitrary callback origins using backslash-normalized Unicode sequences.</p>
 
 <div class="cyber-callout">
-<strong>⚡ IMPACT SUMMARY:</strong> Any OAuth2 authorization flow using non-strict URL normalization allows silent leakage of high-privilege <code>authorization_code</code> and bearer JWTs to attacker-controlled infrastructure via out-of-band callbacks.
+<strong>// IMPACT SUMMARY:</strong> Any OAuth2 authorization flow using non-strict URL normalization allows silent leakage of high-privilege <code>authorization_code</code> and bearer JWTs to attacker-controlled infrastructure via out-of-band callbacks.
 </div>
 
 <h2>2. Detecting & Reproducing with Burp Suite Professional</h2>
@@ -912,7 +988,7 @@ msf6 exploit(cve_2026_4412_smb3_pool_rce) &gt; run -j</code></pre>
 <p>Instead of setting up slow SOCKS4a proxies that drop UDP traffic and break Kerberos tooling, <strong>Metasploit Pro Enterprise</strong> allows operators to establish a native Layer-2 virtual network interface (VPN Pivot) directly inside the compromised Meterpreter memory space.</p>
 
 <div class="cyber-callout">
-<strong>⚡ OPSEC ADVANTAGE:</strong> By combining Metasploit Pro's dynamic payload generator with indirect syscall sleep masks, memory scanners fail to flag the injected thread during periodic EDR sweeps.
+<strong>// OPSEC ADVANTAGE:</strong> By combining Metasploit Pro's dynamic payload generator with indirect syscall sleep masks, memory scanners fail to flag the injected thread during periodic EDR sweeps.
 </div>
 
 [product:TOOL-COBALT-KIT]
@@ -1139,6 +1215,15 @@ def seed_realistic_analytics(cur):
 
     os_choices = ["Linux", "Linux", "Windows", "Windows", "macOS", "Android", "iOS"]
     ref_choices = ["Telegram", "Direct", "Search / Google", "GitHub / Advisory", "Internal Smart Ad", "Twitter / X"]
+    ua_choices = [
+        "Mozilla/5.0 (X11; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15",
+        "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:129.0) Gecko/20100101 Firefox/129.0",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:129.0) Gecko/20100101 Firefox/129.0",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Edg/128.0.0.0",
+        "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Mobile Safari/537.36"
+    ]
 
     pageviews_batch = []
     events_batch = []
@@ -1155,6 +1240,8 @@ def seed_realistic_analytics(cur):
             os_name = rng.choice(os_choices)
             device = "Mobile" if os_name in ("Android", "iOS") else "Desktop"
             ref = rng.choice(ref_choices)
+            uagent = rng.choice(ua_choices)
+            client_ip = f"198.51.{rng.randint(10, 99)}.{rng.randint(2, 250)}"
             visit_time = day_dt.replace(
                 hour=rng.randint(0, 23 if day_offset > 0 else max(0, now.hour)),
                 minute=rng.randint(0, 59),
@@ -1170,15 +1257,15 @@ def seed_realistic_analytics(cur):
                 last_ping = (visit_time + timedelta(seconds=dur)).strftime("%Y-%m-%d %H:%M:%S")
                 pageviews_batch.append((
                     f"vt_{token_idx}", vid, sid, "BLOG_POST", slug, title,
-                    dur, scroll, ref, device, os_name, ts_str, last_ping
+                    dur, scroll, ref, device, os_name, uagent, client_ip, ts_str, last_ping
                 ))
                 events_batch.append((
-                    vid, sid, "SMART_AD_IMPRESSION", f"/intel/{slug}", linked_sku, "INLINE_AD", ts_str
+                    vid, sid, "SMART_AD_IMPRESSION", f"/intel/{slug}", linked_sku, "INLINE_AD", uagent, client_ip, ts_str
                 ))
                 if rng.random() < 0.32:
                     placement = rng.choice(["INLINE_AD", "SIDEBAR_AD", "BOTTOM_BUNDLE_AD"])
                     events_batch.append((
-                        vid, sid, "SMART_AD_CLICK", f"/intel/{slug}", linked_sku, placement, ts_str
+                        vid, sid, "SMART_AD_CLICK", f"/intel/{slug}", linked_sku, placement, uagent, client_ip, ts_str
                     ))
                     token_idx += 1
                     p_match = [p for p in product_targets if p[2] == linked_sku][0]
@@ -1186,15 +1273,15 @@ def seed_realistic_analytics(cur):
                     p_scroll = min(100, max(35, int(rng.gauss(p_match[4], 10))))
                     pageviews_batch.append((
                         f"vt_{token_idx}", vid, sid, "PRODUCT", p_match[0], p_match[1],
-                        p_dur, p_scroll, "Internal Smart Ad", device, os_name, ts_str, last_ping
+                        p_dur, p_scroll, "Internal Smart Ad", device, os_name, uagent, client_ip, ts_str, last_ping
                     ))
                     if rng.random() < 0.42:
                         events_batch.append((
-                            vid, sid, "ADD_TO_CART", f"/arsenal/{p_match[0]}", linked_sku, "FROM_BLOG_AD", ts_str
+                            vid, sid, "ADD_TO_CART", f"/arsenal/{p_match[0]}", linked_sku, "FROM_BLOG_AD", uagent, client_ip, ts_str
                         ))
                     if rng.random() < 0.28:
                         events_batch.append((
-                            vid, sid, "TELEGRAM_BUY_CLICK", f"/arsenal/{p_match[0]}", linked_sku, "DIRECT_TELEGRAM", ts_str
+                            vid, sid, "TELEGRAM_BUY_CLICK", f"/arsenal/{p_match[0]}", linked_sku, "DIRECT_TELEGRAM", uagent, client_ip, ts_str
                         ))
             elif roll < 0.86:
                 slug, title, sku, base_dur, base_scroll = rng.choice(product_targets)
@@ -1203,15 +1290,15 @@ def seed_realistic_analytics(cur):
                 last_ping = (visit_time + timedelta(seconds=dur)).strftime("%Y-%m-%d %H:%M:%S")
                 pageviews_batch.append((
                     f"vt_{token_idx}", vid, sid, "PRODUCT", slug, title,
-                    dur, scroll, ref, device, os_name, ts_str, last_ping
+                    dur, scroll, ref, device, os_name, uagent, client_ip, ts_str, last_ping
                 ))
                 if rng.random() < 0.35:
                     events_batch.append((
-                        vid, sid, "ADD_TO_CART", f"/arsenal/{slug}", sku, "PRODUCT_PAGE", ts_str
+                        vid, sid, "ADD_TO_CART", f"/arsenal/{slug}", sku, "PRODUCT_PAGE", uagent, client_ip, ts_str
                     ))
                 if rng.random() < 0.24:
                     events_batch.append((
-                        vid, sid, "TELEGRAM_BUY_CLICK", f"/arsenal/{slug}", sku, "PRODUCT_PAGE", ts_str
+                        vid, sid, "TELEGRAM_BUY_CLICK", f"/arsenal/{slug}", sku, "PRODUCT_PAGE", uagent, client_ip, ts_str
                     ))
             else:
                 ptype = "HOME" if rng.random() < 0.55 else "SHOP"
@@ -1221,18 +1308,18 @@ def seed_realistic_analytics(cur):
                 last_ping = (visit_time + timedelta(seconds=dur)).strftime("%Y-%m-%d %H:%M:%S")
                 pageviews_batch.append((
                     f"vt_{token_idx}", vid, sid, ptype, "", title,
-                    dur, scroll, ref, device, os_name, ts_str, last_ping
+                    dur, scroll, ref, device, os_name, uagent, client_ip, ts_str, last_ping
                 ))
 
     cur.executemany("""
     INSERT INTO analytics_pageviews (
         visit_token, visitor_id, session_id, page_type, target_slug, target_title,
-        duration_seconds, max_scroll_pct, referrer, device_type, os_name, created_at, last_ping_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        duration_seconds, max_scroll_pct, referrer, device_type, os_name, user_agent, ip_address, created_at, last_ping_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, pageviews_batch)
 
     cur.executemany("""
     INSERT INTO analytics_events (
-        visitor_id, session_id, event_type, source_page, target_sku, meta_info, created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        visitor_id, session_id, event_type, source_page, target_sku, meta_info, user_agent, ip_address, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, events_batch)

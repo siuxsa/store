@@ -17,9 +17,11 @@
     --cyan: #00e5ff;
     --green: #10b981;
     --amber: #f59e0b;
+    --yellow: #eab308;
     --accent-cyan: #00e5ff;
     --accent-green: #10b981;
     --accent-amber: #f59e0b;
+    --accent-yellow: #eab308;
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
     --header-h: 76px;
@@ -42,6 +44,8 @@ html {
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+    max-width: 100vw;
 }
 
 body {
@@ -49,7 +53,8 @@ body {
     color: var(--text);
     font-family: var(--font-sans);
     line-height: 1.5;
-    overflow-x: hidden;
+    overflow-x: clip;
+    max-width: 100vw;
 }
 
 body.no-scroll {
@@ -92,6 +97,10 @@ ul, ol {
     opacity: 0;
     transform: translateY(15px);
     animation: pageEnter 600ms var(--ease-out) forwards;
+}
+
+.page-content-offset {
+    padding-top: var(--header-h);
 }
 
 @keyframes pageEnter {
@@ -467,10 +476,19 @@ ul, ol {
     background: transparent;
     border: none;
     color: inherit;
-    font-size: 1.35rem;
-    line-height: 1;
-    padding: 0.35rem;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
     cursor: pointer;
+    flex-shrink: 0;
+}
+
+.hamburger-btn svg {
+    display: block;
+    width: 22px;
+    height: 16px;
 }
 
 .header-spacer {
@@ -1267,6 +1285,62 @@ ul, ol {
     text-transform: uppercase;
 }
 
+.product-discount-badge {
+    position: absolute;
+    bottom: 0.65rem;
+    right: 0.65rem;
+    z-index: 4;
+    background-color: #dc2626;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 0.22rem 0.55rem;
+    font-family: var(--font-mono);
+    line-height: 1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+    pointer-events: none;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.28rem;
+    border-radius: 1px;
+}
+
+.product-discount-badge .discount-label {
+    font-size: 0.60rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.9;
+}
+
+.product-discount-badge .discount-val {
+    font-size: 0.88rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+}
+
+.product-price-wrap {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4rem;
+}
+
+.product-price-retail {
+    font-family: var(--font-mono);
+    text-decoration: line-through;
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.product-price-current {
+    font-family: var(--font-mono);
+    font-weight: 800;
+    font-size: 1.28rem;
+    color: #dc2626;
+    letter-spacing: -0.02em;
+    line-height: 1;
+}
+
 .product-card-info,
 .product-meta {
     padding: 1.25rem;
@@ -1281,8 +1355,21 @@ ul, ol {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    height: 1.4rem;
+    min-height: 1.65rem;
     margin-bottom: 0.4rem;
+}
+
+.product-meta-header .meta-mono {
+    font-size: 1.28rem;
+    font-weight: 800;
+    color: #dc2626;
+    letter-spacing: -0.02em;
+}
+
+.product-meta-header .meta-mono[style*="line-through"] {
+    font-size: 0.8rem !important;
+    font-weight: 500 !important;
+    color: var(--muted) !important;
 }
 
 .product-card-title,
@@ -1852,7 +1939,8 @@ ul, ol {
 
 .pdp-info-panel {
     position: sticky;
-    top: calc(var(--header-h) + 2rem);
+    top: calc(var(--header-h, 66px) + 1.5rem);
+    align-self: start;
     display: flex;
     flex-direction: column;
     gap: 1.65rem;
@@ -2300,7 +2388,8 @@ ul, ol {
 
 .journal-sidebar-column {
     position: sticky;
-    top: 90px;
+    top: calc(var(--header-h, 66px) + 1.5rem);
+    align-self: start;
     display: flex;
     flex-direction: column;
     gap: 1.75rem;
@@ -2452,6 +2541,15 @@ ul, ol {
     gap: 0.5rem;
     flex-wrap: wrap;
     align-items: center;
+}
+
+.smart-native-ad [data-ad-role="price"] .meta-mono:last-child,
+.smart-native-ad-banner [data-ad-role="price"] .meta-mono:last-child,
+.smart-ad-footer [data-ad-role="price"] .meta-mono:last-child {
+    color: #dc2626 !important;
+    font-weight: 800 !important;
+    font-size: 1.35rem !important;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
 }
 
 .more-advisories-grid {
@@ -2853,3 +2951,408 @@ ul, ol {
     }
 }
 
+
+
+/* ======================================================== */
+/* SCANDINAVIAN CYBERPUNK CONFIRMATION / PROMPT / ALERT MODAL */
+/* ======================================================== */
+.admin-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 999999;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.admin-modal.is-open {
+    display: flex !important;
+}
+
+.confirm-modal-box {
+    width: 100%;
+    max-width: 500px !important;
+    background: #0f1216 !important;
+    border: 1px solid rgba(239, 68, 68, 0.45) !important;
+    box-shadow: 0 20px 80px rgba(0, 0, 0, 0.95), 0 0 35px rgba(239, 68, 68, 0.18) !important;
+    padding: 1.75rem !important;
+    border-radius: 4px !important;
+    animation: modalPopIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
+    font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+}
+
+.confirm-modal-box.confirm-type-info {
+    border-color: rgba(0, 229, 255, 0.45) !important;
+    box-shadow: 0 20px 80px rgba(0, 0, 0, 0.95), 0 0 35px rgba(0, 229, 255, 0.18) !important;
+}
+
+.confirm-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.confirm-icon-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 4px;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.confirm-modal-box.confirm-type-info .confirm-icon-wrap {
+    background: rgba(0, 229, 255, 0.12);
+    border-color: rgba(0, 229, 255, 0.35);
+}
+
+.confirm-modal-tag {
+    font-family: var(--font-mono, monospace);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: #ef4444;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.confirm-modal-box.confirm-type-info .confirm-modal-tag {
+    color: #00e5ff;
+}
+
+.confirm-modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    color: #fff;
+    line-height: 1.2;
+}
+
+.confirm-modal-body {
+    margin-bottom: 1.5rem;
+}
+
+.confirm-modal-text {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #e5e7eb;
+    margin: 0 0 1rem 0;
+    font-weight: 500;
+}
+
+.confirm-modal-note {
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-left: 3px solid #ef4444;
+    padding: 0.65rem 0.85rem;
+    font-size: 11px;
+    font-family: var(--font-mono, monospace);
+    color: #9ca3af;
+    line-height: 1.5;
+}
+
+.confirm-modal-box.confirm-type-info .confirm-modal-note {
+    border-left-color: #00e5ff;
+}
+
+.confirm-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.btn-admin {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    font-size: 12px;
+    font-family: var(--font-mono, monospace);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: 1px solid transparent;
+}
+
+.btn-admin-outline {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e5e7eb;
+}
+
+.btn-admin-outline:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.4);
+    color: #fff;
+}
+
+.btn-admin-danger {
+    background: #ef4444;
+    color: #fff;
+    border: 1px solid #ef4444;
+}
+
+.btn-admin-danger:hover {
+    background: #dc2626;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+}
+
+.btn-admin-primary {
+    background: #00e5ff;
+    color: #000;
+    border: 1px solid #00e5ff;
+}
+
+.btn-admin-primary:hover {
+    background: #33ebff;
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+}
+
+@keyframes modalPopIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* ==========================================================================
+   MINIMAL STOREFRONT SHARE POPUP (BRAND COLOR: #a74e23 & SCANDINAVIAN MINIMAL)
+   ========================================================================== */
+.share-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    background: rgba(17, 17, 17, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    animation: modalPopIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.share-modal-overlay.is-open {
+    display: flex !important;
+}
+
+.share-modal-card {
+    background: var(--white, #ffffff);
+    color: var(--text, #111111);
+    border: 1px solid var(--border, rgba(17, 17, 17, 0.14));
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+    border-radius: 4px;
+    padding: 1.5rem 1.75rem;
+    width: 100%;
+    max-width: 360px;
+    box-sizing: border-box;
+    animation: modalPopIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.share-modal-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border, rgba(17, 17, 17, 0.1));
+}
+
+.share-modal-title {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text, #111111);
+    margin: 0;
+}
+
+.share-modal-close {
+    background: transparent;
+    border: none;
+    color: var(--muted, #686864);
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0.2rem 0.4rem;
+    transition: color 0.15s ease;
+}
+
+.share-modal-close:hover {
+    color: #dc2626;
+}
+
+.share-icons-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+}
+
+.share-icon-btn {
+    background: transparent;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    padding: 0.5rem 0.25rem;
+    transition: transform 0.15s ease;
+    text-decoration: none;
+}
+
+.share-icon-btn:hover {
+    transform: translateY(-2px);
+}
+
+.share-icon-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--bg, #f3f2ee);
+    border: 1px solid var(--border, rgba(17, 17, 17, 0.12));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text, #111111);
+    transition: all 0.18s ease;
+}
+
+.share-icon-btn:hover .share-icon-circle {
+    border-color: #dc2626;
+    background: #ffffff;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.2);
+}
+
+.share-icon-btn:hover .share-icon-circle.copy {
+    border-color: #dc2626;
+    color: #dc2626;
+}
+
+.share-icon-name {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--text, #111111);
+    letter-spacing: 0.02em;
+    transition: color 0.15s ease;
+}
+
+.share-icon-btn:hover .share-icon-name {
+    color: #dc2626;
+}
+
+.share-icon-btn.copied .share-icon-circle {
+    border-color: #dc2626;
+    background: #dc2626;
+    color: #ffffff;
+}
+
+.share-icon-btn.copied .share-icon-name {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+/* ==========================================================================
+   SILENT GOOGLE TRANSLATE INTEGRATION & LOCATION TRANSLATE BUTTON
+   ========================================================================== */
+#google_translate_element {
+    display: none !important;
+    visibility: hidden !important;
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+.goog-te-banner-frame,
+.goog-te-banner-frame.skiptranslate,
+iframe.goog-te-banner-frame,
+.skiptranslate.goog-te-gadget {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    width: 0 !important;
+}
+
+body {
+    top: 0px !important;
+    position: static !important;
+}
+
+#goog-gt-tt,
+.goog-tooltip,
+.goog-tooltip:hover,
+.goog-te-balloon-frame {
+    display: none !important;
+}
+
+.goog-text-highlight {
+    background-color: transparent !important;
+    box-shadow: none !important;
+}
+
+.header-lang-btn {
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    color: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: color 0.18s ease;
+    padding: 0;
+}
+
+.header-lang-btn:hover {
+    color: #dc2626;
+}
+
+.header-lang-btn.is-active {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+.header-lang-icon {
+    width: 14px;
+    height: 14px;
+    display: inline-block;
+    vertical-align: middle;
+    flex-shrink: 0;
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), stroke 0.2s ease;
+}
+
+.header-lang-btn:hover .header-lang-icon {
+    transform: rotate(20deg) scale(1.08);
+    stroke: #dc2626;
+}
+
+.header-lang-btn.is-active .header-lang-icon {
+    stroke: #dc2626;
+}

@@ -7,6 +7,71 @@
             pill.style.color = '#000';
         }
 
+        function updatePostRowInTable(p) {
+            if (!p || !p.id) return;
+            let row = document.getElementById('post-row-' + p.id) || document.getElementById('post-data-' + p.id)?.closest('tr');
+            const isDraft = (p.status || 'PUBLISHED').toUpperCase() === 'DRAFT';
+            const statusHtml = isDraft
+                ? `<span class="badge-tag" style="background:#f59e0b; color:#000; font-weight:800; font-size:10px; padding:2px 7px;">DRAFT</span>`
+                : `<span class="badge-tag" style="background:#10b981; color:#000; font-weight:800; font-size:10px; padding:2px 7px;">PUBLISHED</span>`;
+            const toggleBtnHtml = isDraft
+                ? `<button type="button" class="btn-admin btn-admin-outline" style="padding:0.35rem 0.65rem; border-color:#10b981; color:#10b981;" onclick="togglePostStatusQuick(${p.id}, this)" title="Publish this article immediately">PUBLISH</button>`
+                : `<button type="button" class="btn-admin btn-admin-outline" style="padding:0.35rem 0.65rem; border-color:#f59e0b; color:#f59e0b;" onclick="togglePostStatusQuick(${p.id}, this)" title="Unpublish and move to draft">UNPUBLISH</button>`;
+
+            const safeTitle = (p.title || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const safeCve = (p.cve_id || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const safeCat = (p.category || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const safeSeverity = (p.severity || 'MEDIUM').toUpperCase();
+            const safeSlug = encodeURIComponent(p.slug || p.id);
+            const dateStr = (p.published_at || new Date().toISOString()).substring(0, 10);
+            const pJson = JSON.stringify(p).replace(/</g, '\\u003c');
+
+            const severityHtml = safeSeverity === 'CRITICAL'
+                ? `<span class="status-pill critical">CRITICAL</span>`
+                : `<span class="status-pill">${safeSeverity}</span>`;
+
+            const innerHtml = `
+                <td style="font-weight:700;">${safeCve}</td>
+                <td>
+                    <a href="/intel/${safeSlug}" target="_blank" style="color:#fff; text-decoration:none; font-weight:600;">
+                        ${safeTitle}
+                    </a>
+                </td>
+                <td>${severityHtml}</td>
+                <td style="font-weight:700;">${p.cvss_score || '0.0'}</td>
+                <td>${safeCat}</td>
+                <td>${statusHtml}</td>
+                <td style="color:var(--admin-muted);">${dateStr}</td>
+                <td style="text-align:right; white-space:nowrap;">
+                    <script id="post-data-${p.id}" type="application/json">${pJson}</script>
+                    ${toggleBtnHtml}
+                    <button type="button" class="btn-admin btn-admin-outline" style="padding:0.35rem 0.65rem; margin-left:4px;" onclick="openPostStudioForId(${p.id})">
+                        EDIT
+                    </button>
+                    <button type="button" class="btn-admin btn-admin-danger" style="padding:0.35rem 0.65rem; margin-left:4px;" onclick="deletePost(${p.id}, '${safeTitle.replace(/'/g, "\\'")}')">
+                        DELETE
+                    </button>
+                </td>
+            `;
+
+            if (row) {
+                row.className = 'post-row';
+                row.setAttribute('data-search', `${p.cve_id || ''} ${p.title || ''} ${p.category || ''} ${p.severity || ''} ${p.status || ''}`);
+                row.innerHTML = innerHtml;
+            } else {
+                const tbody = document.querySelector('#mod-posts table.admin-table tbody');
+                if (tbody) {
+                    const tr = document.createElement('tr');
+                    tr.id = 'post-row-' + p.id;
+                    tr.className = 'post-row';
+                    tr.setAttribute('data-search', `${p.cve_id || ''} ${p.title || ''} ${p.category || ''} ${p.severity || ''} ${p.status || ''}`);
+                    tr.innerHTML = innerHtml;
+                    tbody.insertBefore(tr, tbody.firstChild);
+                }
+            }
+            renderPostsPagination();
+        }
+
         async function togglePostStatusQuick(postId, btn) {
             if (btn) btn.disabled = true;
             try {
@@ -16,14 +81,57 @@
                 });
                 const data = await res.json();
                 if (data.ok) {
-                    showThemeToast(`ADVISORY STATUS UPDATED: ${data.new_status}`);
-                    setTimeout(() => location.reload(), 450);
+                    const newStatus = data.new_status;
+                    const row = document.getElementById('post-row-' + postId) || document.getElementById('post-data-' + postId)?.closest('tr');
+                    if (row) {
+                        let s = row.getAttribute('data-search') || '';
+                        s = s.replace(/DRAFT|PUBLISHED/g, newStatus);
+                        row.setAttribute('data-search', s);
+                        if (row.cells && row.cells.length > 5) {
+                            if (newStatus === 'DRAFT') {
+                                row.cells[5].innerHTML = `<span class="badge-tag" style="background:#f59e0b; color:#000; font-weight:800; font-size:10px; padding:2px 7px;">DRAFT</span>`;
+                            } else {
+                                row.cells[5].innerHTML = `<span class="badge-tag" style="background:#10b981; color:#000; font-weight:800; font-size:10px; padding:2px 7px;">PUBLISHED</span>`;
+                            }
+                        }
+                        const toggleBtn = row.querySelector('button[onclick*="togglePostStatusQuick"]');
+                        if (toggleBtn) {
+                            if (newStatus === 'DRAFT') {
+                                toggleBtn.textContent = 'PUBLISH';
+                                toggleBtn.style.borderColor = '#10b981';
+                                toggleBtn.style.color = '#10b981';
+                                toggleBtn.title = 'Publish this article immediately';
+                            } else {
+                                toggleBtn.textContent = 'UNPUBLISH';
+                                toggleBtn.style.borderColor = '#f59e0b';
+                                toggleBtn.style.color = '#f59e0b';
+                                toggleBtn.title = 'Unpublish and move to draft';
+                            }
+                        }
+                    }
+                    const scriptEl = document.getElementById('post-data-' + postId);
+                    if (scriptEl) {
+                        try {
+                            const pData = JSON.parse(scriptEl.textContent);
+                            pData.status = newStatus;
+                            scriptEl.textContent = JSON.stringify(pData);
+                        } catch(e) {}
+                    }
+                    if (typeof updateJseStatusBadge === 'function') {
+                        const jseId = document.getElementById('jse-id');
+                        if (jseId && jseId.value == postId) {
+                            updateJseStatusBadge(newStatus);
+                        }
+                    }
+                    renderPostsPagination();
+                    showThemeToast(`ADVISORY STATUS UPDATED: ${newStatus}`);
+                    if (btn) btn.disabled = false;
                 } else {
-                    alert('Error changing status: ' + (data.error || 'Server error'));
+                    showToast('Error changing status: ' + (data.error || 'Server error'), 'error');
                     if (btn) btn.disabled = false;
                 }
             } catch(err) {
-                alert('Request failed: ' + err.message);
+                showToast('Request failed: ' + err.message, 'error');
                 if (btn) btn.disabled = false;
             }
         }
@@ -31,8 +139,8 @@
         function openPostStudio() {
             document.getElementById('jse-id').value = '';
             document.getElementById('jse-slug').value = '';
-            document.getElementById('jse-breadcrumb-title').textContent = 'DRAFT ADVISORY';
-            document.getElementById('jse-heading-title').textContent = 'DRAFT THREAT INTEL ADVISORY';
+            document.getElementById('jse-breadcrumb-title').textContent = 'NEW ARTICLE';
+            document.getElementById('jse-heading-title').textContent = 'CREATE NEW ARTICLE';
             document.getElementById('jse-btn-view-live').style.display = 'none';
 
             if (document.getElementById('jse-status')) {
@@ -70,6 +178,7 @@
             document.getElementById('jse-meta-desc').value = '';
             document.getElementById('jse-meta-keywords').value = '';
             document.getElementById('jse-og-image').value = '';
+            if (document.getElementById('jse-custom-js')) document.getElementById('jse-custom-js').value = '';
             updatePostOgPreview(bannerUrl);
 
             switchPostStudioTab('markdown', document.querySelector('.jse-subnav-btn[onclick*="markdown"]') || document.querySelector('.jse-subnav-btn'));
@@ -84,7 +193,7 @@
             const el = document.getElementById('post-data-' + id);
             if (!el) {
                 console.error('Post raw script not found for ID', id);
-                alert('Could not find post data for ID: ' + id);
+                showToast('Could not find post data for ID: ' + id, 'error');
                 return;
             }
             try {
@@ -92,7 +201,7 @@
                 editPostStudio(p);
             } catch(err) {
                 console.error('Failed to parse post data for ID', id, err);
-                alert('Failed to parse post data for ID ' + id + ': ' + err.message);
+                showToast('Failed to parse post data for ID ' + id + ': ' + err.message, 'error');
             }
         }
 
@@ -104,8 +213,8 @@
                 }
                 document.getElementById('jse-id').value = p.id || '';
                 document.getElementById('jse-slug').value = p.slug || '';
-                document.getElementById('jse-breadcrumb-title').textContent = 'EDIT: ' + (p.cve_id || p.title || ('POST #' + p.id));
-                document.getElementById('jse-heading-title').textContent = 'EDIT RESEARCH ADVISORY — ' + (p.title || '');
+                document.getElementById('jse-breadcrumb-title').textContent = 'EDIT: ' + (p.cve_id || p.title || ('ARTICLE #' + p.id));
+                document.getElementById('jse-heading-title').textContent = 'EDIT ARTICLE — ' + (p.title || '');
 
                 const liveBtn = document.getElementById('jse-btn-view-live');
                 if (liveBtn) {
@@ -145,6 +254,7 @@
                 document.getElementById('jse-meta-desc').value = p.meta_desc || '';
                 document.getElementById('jse-meta-keywords').value = p.meta_keywords || '';
                 document.getElementById('jse-og-image').value = p.og_image || '';
+                if (document.getElementById('jse-custom-js')) document.getElementById('jse-custom-js').value = p.custom_js || '';
                 updatePostOgPreview(p.og_image || bannerUrl);
 
                 renderMarkdownPreviewLive();
@@ -159,7 +269,7 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } catch(err) {
                 console.error('Failed to load post in Post Studio:', err);
-                alert('Failed to load post in Post Studio: ' + err.message);
+                showToast('Failed to load post in Post Studio: ' + err.message, 'error');
             }
         }
 
@@ -236,7 +346,7 @@
             return modified.join('\n');
         }
 
-        function formatMarkdownSelection(type, extra) {
+        async function formatMarkdownSelection(type, extra) {
             const textarea = document.getElementById('jse-content');
             if (!textarea) return;
 
@@ -320,14 +430,24 @@
                     replacement = applyLinePrefix(fullText, start, end, '- [ ] ');
                     break;
                 case 'link':
-                    const linkUrl = prompt('Enter Hyperlink Target URL:', 'https://');
+                    const linkUrl = await showPromptModal({
+                        title: 'INSERT HYPERLINK',
+                        message: 'Enter target destination URL for the highlighted anchor text:',
+                        defaultValue: 'https://',
+                        placeholder: 'https://example.com'
+                    });
                     if (linkUrl === null) return;
                     const linkText = selected || 'Technical Specification';
                     replacement = `[${linkText}](${linkUrl || 'https://'})`;
                     selectRange = [start + 1, start + 1 + linkText.length];
                     break;
                 case 'image':
-                    const imgUrl = prompt('Enter Image Asset URL:', 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=85');
+                    const imgUrl = await showPromptModal({
+                        title: 'INSERT IMAGE ASSET',
+                        message: 'Enter public image URL to embed in intel advisory markdown:',
+                        defaultValue: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=85',
+                        placeholder: 'https://domain.com/image.png'
+                    });
                     if (imgUrl === null) return;
                     const altText = selected || 'Architecture & Attack Surface Diagram';
                     replacement = `\n![${altText}](${imgUrl})\n`;
@@ -534,12 +654,18 @@
             }
         }
 
-        function loadMarkdownTemplate(tmplKey) {
+        async function loadMarkdownTemplate(tmplKey) {
             const textarea = document.getElementById('jse-content');
             if (!textarea) return;
 
             if (textarea.value.trim().length > 30) {
-                if (!confirm('Replace current markdown draft with the selected structured template?')) return;
+                const ok = await showConfirmModal({
+                    title: 'LOAD INTEL TEMPLATE',
+                    message: 'Replace current markdown draft with the selected structured template?',
+                    confirmText: 'LOAD TEMPLATE',
+                    danger: false
+                });
+                if (!ok) return;
             }
 
             const cve = (document.getElementById('jse-cve') ? document.getElementById('jse-cve').value.trim() : '') || 'CVE-2026-3199';
@@ -564,9 +690,9 @@
             const preview = document.getElementById('jse-live-markdown-preview');
             if (!preview) return;
             navigator.clipboard.writeText(preview.innerHTML).then(() => {
-                alert('Rendered HTML copied to clipboard.');
+                showThemeToast('Rendered HTML copied to clipboard.');
             }).catch(() => {
-                alert('Copied to clipboard.');
+                showToast('Copied to clipboard.', 'success');
             });
         }
 
@@ -678,7 +804,7 @@
                         </p>
                         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; padding-top:0.4rem; border-top:1px solid rgba(255,255,255,0.2);">
                             <div style="display:flex; align-items:baseline; gap:6px;">
-                                <span style="font-size:14px; font-weight:800; color:#ffffff;">$${price}</span>
+                                <span style="font-size:15px; font-weight:800; color:#dc2626;">$${price}</span>
                                 ${retail > price ? `<span style="font-size:11px; text-decoration:line-through; color:rgba(255,255,255,0.5);">$${retail}</span>` : ''}
                             </div>
                             <span style="background:#ffffff; color:#0c0d0e; padding:3px 8px; font-size:10px; font-weight:800; border-radius:2px;">${ctaText}</span>
@@ -719,8 +845,9 @@
             const countT = document.getElementById('jse-count-title');
             const countD = document.getElementById('jse-count-desc');
 
+            const siteName = (window.ORIGINAL_THEME_SETTINGS && window.ORIGINAL_THEME_SETTINGS.site_name) || 'ZERO//FORM';
             if (serpUrl) serpUrl.textContent = `https://matrix.security/journal/${slug}`;
-            if (serpTitle) serpTitle.textContent = customTitle || `${title} [${cve}] // {{ site_settings.site_name }} Threat Research`;
+            if (serpTitle) serpTitle.textContent = customTitle || `${title} [${cve}] // ${siteName}`;
             if (serpDesc) serpDesc.textContent = customDesc || summary || 'Brief technical vulnerability analysis and PoC exploit mitigation details...';
 
             if (countT) countT.textContent = customTitle ? `${customTitle.length}/60 chars` : 'AUTO-FALLBACK';
@@ -754,7 +881,7 @@
 
             const title = document.getElementById('jse-title').value.trim();
             if (!title) {
-                alert('Please enter an Advisory Title.');
+                showToast('Please enter an Advisory Title.', 'error');
                 switchPostStudioTab('specs', document.querySelector('.jse-subnav-btn'));
                 return;
             }
@@ -768,7 +895,7 @@
                 updateJseStatusPill(finalStatus);
             }
 
-            if (saveBtn) { saveBtn.textContent = 'PERSISTING ADVISORY...'; saveBtn.disabled = true; }
+            if (saveBtn) { saveBtn.textContent = 'SAVING...'; saveBtn.disabled = true; }
             if (draftBtn) { draftBtn.disabled = true; }
 
             const payload = {
@@ -793,7 +920,8 @@
                 meta_title: document.getElementById('jse-meta-title').value.trim(),
                 meta_desc: document.getElementById('jse-meta-desc').value.trim(),
                 meta_keywords: document.getElementById('jse-meta-keywords').value.trim(),
-                og_image: document.getElementById('jse-og-image').value.trim()
+                og_image: document.getElementById('jse-og-image').value.trim(),
+                custom_js: (document.getElementById('jse-custom-js') ? document.getElementById('jse-custom-js').value : '').trim()
             };
             if (id) payload.id = parseInt(id, 10);
 
@@ -806,24 +934,31 @@
                 const data = await res.json();
                 if (data.ok || data.success) {
                     try { sessionStorage.setItem('activeAdminTab', 'posts'); } catch(e) {}
-                    const statusMsg = payload.status === 'DRAFT' ? 'SAVED AS DRAFT' : 'PUBLISHED & ARCHIVED';
-                    showThemeToast(`ADVISORY ${statusMsg}: ${payload.title.substring(0, 30)}...`);
+                    const savedId = data.id || payload.id;
+                    payload.id = savedId;
+                    const finalSlug = data.slug || payload.slug || savedId;
+                    payload.slug = finalSlug;
 
                     const liveBtn = document.getElementById('jse-btn-view-live');
                     if (liveBtn) {
-                        const finalSlug = data.slug || payload.slug || id;
                         liveBtn.href = '/intel/' + finalSlug;
                         liveBtn.style.display = 'inline-flex';
                     }
-                    if (data.id) {
-                        document.getElementById('jse-id').value = data.id;
+                    if (savedId) {
+                        document.getElementById('jse-id').value = savedId;
                     }
-                    setTimeout(() => location.reload(), 700);
+                    if (typeof updateJseStatusBadge === 'function') {
+                        updateJseStatusBadge(payload.status);
+                    }
+                    updatePostRowInTable(payload);
+
+                    const statusMsg = payload.status === 'DRAFT' ? 'SAVED AS DRAFT' : 'PUBLISHED & ARCHIVED';
+                    showThemeToast(`ADVISORY ${statusMsg}: ${payload.title.substring(0, 30)}...`);
                 } else {
-                    alert('Error saving advisory: ' + (data.error || 'Server error'));
+                    showToast('Error saving advisory: ' + (data.error || 'Server error'), 'error');
                 }
             } catch(err) {
-                alert('Save error: ' + err.message);
+                showToast('Save error: ' + err.message, 'error');
             } finally {
                 if (saveBtn) { saveBtn.textContent = origText; saveBtn.disabled = false; }
                 if (draftBtn) { draftBtn.disabled = false; }
@@ -918,17 +1053,161 @@
                 body: JSON.stringify(payload)
             });
             const data = await res.json();
-            if (data.ok || data.success) location.reload();
-            else alert(data.error || 'Post save error');
+            if (data.ok || data.success) {
+                closeModal('modal-post');
+                payload.id = data.id || payload.id;
+                updatePostRowInTable(payload);
+                showToast(`Advisory "${payload.title}" saved successfully.`, 'success');
+            } else {
+                showToast(data.error || 'Post save error', 'error');
+            }
         }
 
         async function deletePost(id, title) {
-            if (!confirm('Permanently delete advisory: ' + title + '?')) return;
+            const confirmed = await showConfirmModal({
+                title: 'DELETE ARTICLE',
+                message: `Permanently delete article: "${title}"?`,
+                confirmText: 'DELETE ARTICLE',
+                note: 'WARNING: Comments and analytics associated with this article will be permanently removed.'
+            });
+            if (!confirmed) return;
             try { sessionStorage.setItem('activeAdminTab', 'posts'); } catch(e) {}
             const res = await fetch('/api/admin/posts/' + id, { method: 'DELETE' });
             const data = await res.json();
-            if (data.ok || data.success) location.reload();
-            else alert(data.error || 'Delete error');
+            if (data.ok || data.success) {
+                const row = document.getElementById('post-row-' + id) || document.getElementById('post-data-' + id)?.closest('tr');
+                if (row) row.remove();
+                renderPostsPagination();
+                showToast(`Article "${title}" deleted successfully.`, 'info');
+            } else {
+                showToast(data.error || 'Delete error', 'error');
+            }
+        }
+
+        // ==========================================
+        // ARTICLES (POSTS) PAGINATION & SEARCH (30 / PAGE)
+        // ==========================================
+        let postsCurrentPage = 1;
+        const POSTS_PAGE_SIZE = 30;
+
+        function goToPostsPrevPage() {
+            if (postsCurrentPage > 1) {
+                postsCurrentPage--;
+                renderPostsPagination();
+                const wrap = document.querySelector('#mod-posts .admin-table-wrap');
+                if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        function goToPostsNextPage() {
+            const matchingRows = getMatchingPostsRows();
+            const totalPages = Math.max(1, Math.ceil(matchingRows.length / POSTS_PAGE_SIZE));
+            if (postsCurrentPage < totalPages) {
+                postsCurrentPage++;
+                renderPostsPagination();
+                const wrap = document.querySelector('#mod-posts .admin-table-wrap');
+                if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        function onPostSearchInput(val) {
+            const clearBtn = document.getElementById('posts-search-clear-btn');
+            if (clearBtn) {
+                clearBtn.style.display = (val && val.trim().length > 0) ? 'inline-block' : 'none';
+            }
+            postsCurrentPage = 1;
+            renderPostsPagination();
+        }
+
+        function clearPostSearch() {
+            const input = document.getElementById('posts-search-input');
+            const clearBtn = document.getElementById('posts-search-clear-btn');
+            if (input) {
+                input.value = '';
+                input.focus();
+            }
+            if (clearBtn) clearBtn.style.display = 'none';
+            postsCurrentPage = 1;
+            renderPostsPagination();
+        }
+
+        function getMatchingPostsRows() {
+            const searchInput = document.getElementById('posts-search-input');
+            const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+            const rows = document.querySelectorAll('#mod-posts table.admin-table tbody tr.post-row');
+            const matching = [];
+
+            rows.forEach(row => {
+                const searchData = (row.getAttribute('data-search') || row.textContent || '').toLowerCase();
+                if (!query || searchData.includes(query)) {
+                    matching.push(row);
+                }
+            });
+            return matching;
+        }
+
+        function renderPostsPagination() {
+            const allRows = document.querySelectorAll('#mod-posts table.admin-table tbody tr.post-row');
+            const matchingRows = getMatchingPostsRows();
+            const total = matchingRows.length;
+            const totalPages = Math.max(1, Math.ceil(total / POSTS_PAGE_SIZE));
+
+            if (postsCurrentPage > totalPages) postsCurrentPage = totalPages;
+            if (postsCurrentPage < 1) postsCurrentPage = 1;
+
+            const startIndex = (postsCurrentPage - 1) * POSTS_PAGE_SIZE;
+            const endIndex = Math.min(startIndex + POSTS_PAGE_SIZE, total);
+
+            allRows.forEach(row => {
+                row.style.display = 'none';
+            });
+
+            for (let i = startIndex; i < endIndex; i++) {
+                matchingRows[i].style.display = '';
+            }
+
+            const countEl = document.getElementById('posts-search-count');
+            if (countEl) {
+                countEl.textContent = `SHOWING ${total} ARTICLE${total === 1 ? '' : 'S'} (30 / PAGE)`;
+            }
+
+            const noResultsEl = document.getElementById('posts-no-results');
+            if (noResultsEl) {
+                noResultsEl.style.display = (total === 0) ? '' : 'none';
+            }
+
+            const pageRangeEl = document.getElementById('posts-page-range');
+            if (pageRangeEl) {
+                pageRangeEl.textContent = total === 0 ? '0–0' : `${startIndex + 1}–${endIndex}`;
+            }
+            const totalCountEl = document.getElementById('posts-total-count');
+            if (totalCountEl) totalCountEl.textContent = total;
+
+            const curPageEl = document.getElementById('posts-current-page');
+            if (curPageEl) curPageEl.textContent = postsCurrentPage;
+
+            const totPagesEl = document.getElementById('posts-total-pages');
+            if (totPagesEl) totPagesEl.textContent = totalPages;
+
+            const prevBtn = document.getElementById('btn-posts-prev');
+            if (prevBtn) {
+                prevBtn.disabled = (postsCurrentPage <= 1);
+                prevBtn.style.opacity = (postsCurrentPage <= 1) ? '0.4' : '1';
+                prevBtn.style.cursor = (postsCurrentPage <= 1) ? 'not-allowed' : 'pointer';
+            }
+
+            const nextBtn = document.getElementById('btn-posts-next');
+            if (nextBtn) {
+                nextBtn.disabled = (postsCurrentPage >= totalPages);
+                nextBtn.style.opacity = (postsCurrentPage >= totalPages) ? '0.4' : '1';
+                nextBtn.style.cursor = (postsCurrentPage >= totalPages) ? 'not-allowed' : 'pointer';
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', renderPostsPagination);
+        } else {
+            renderPostsPagination();
         }
 
         // ==========================================

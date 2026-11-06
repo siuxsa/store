@@ -61,6 +61,35 @@ def register_admin_products_routes(app):
     
         sha256_hash = (data.get("sha256_hash") or "").strip()
         download_url = (data.get("download_url") or "").strip()
+
+        raw_delivery_links = data.get("delivery_links")
+        if raw_delivery_links is None:
+            raw_delivery_links = data.get("delivery_links_json")
+        if isinstance(raw_delivery_links, str):
+            try:
+                links_list = json.loads(raw_delivery_links)
+            except Exception:
+                links_list = []
+        elif isinstance(raw_delivery_links, list):
+            links_list = raw_delivery_links
+        else:
+            links_list = []
+        cleaned_delivery_links = []
+        for lk in links_list:
+            if isinstance(lk, dict):
+                l_url = str(lk.get("url") or "").strip()
+                l_label = str(lk.get("label") or "").strip() or "Download Package"
+                if l_url:
+                    cleaned_delivery_links.append({"label": l_label, "url": l_url})
+            elif isinstance(lk, str) and lk.strip():
+                cleaned_delivery_links.append({"label": "Download Package", "url": lk.strip()})
+        if not cleaned_delivery_links and download_url:
+            cleaned_delivery_links.append({"label": f"{name} ({version})", "url": download_url})
+        if cleaned_delivery_links and not download_url:
+            download_url = cleaned_delivery_links[0]["url"]
+        delivery_links_json = json.dumps(cleaned_delivery_links)
+        delivery_message = (data.get("delivery_message") or "").strip()
+
         badge_text = (data.get("badge_text") or "INSTANT DELIVERY").strip()
         featured = 1 if data.get("featured") else 0
         status = (data.get("status") or "PUBLISHED").strip().upper()
@@ -76,25 +105,33 @@ def register_admin_products_routes(app):
         ad_badge = (data.get("ad_badge") or "").strip()
         ad_cta_text = (data.get("ad_cta_text") or "").strip()
         ad_image_url = (data.get("ad_image_url") or "").strip()
+        custom_js = (data.get("custom_js") or "").strip()
         now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         conn = get_db()
+        # RBAC: Only Master Administrator (role=ADMIN) can supply or alter executable custom_js
+        if admin.get("role") != "ADMIN":
+            if prod_id:
+                existing_p = conn.execute("SELECT custom_js FROM products WHERE id=?", (int(prod_id),)).fetchone()
+                custom_js = existing_p["custom_js"] if existing_p else ""
+            else:
+                custom_js = ""
         try:
             if prod_id:
                 conn.execute("""
                 UPDATE products SET
                     sku=?, name=?, slug=?, category=?, product_type=?, price=?, retail_price=?,
                     version=?, license_duration=?, platform=?, short_desc=?, description=?, specs_json=?, faq_json=?,
-                    sha256_hash=?, download_url=?, badge_text=?, featured=?, status=?,
+                    sha256_hash=?, download_url=?, delivery_links_json=?, delivery_message=?, badge_text=?, featured=?, status=?,
                     image_url=?, meta_title=?, meta_desc=?, meta_keywords=?, og_image=?,
-                    ad_headline=?, ad_description=?, ad_badge=?, ad_cta_text=?, ad_image_url=?
+                    ad_headline=?, ad_description=?, ad_badge=?, ad_cta_text=?, ad_image_url=?, custom_js=?
                 WHERE id=?
                 """, (
                     sku, name, slug, category, product_type, price, retail_price,
                     version, license_duration, platform, short_desc, description, specs_json, faq_json,
-                    sha256_hash, download_url, badge_text, featured, status,
+                    sha256_hash, download_url, delivery_links_json, delivery_message, badge_text, featured, status,
                     image_url, meta_title, meta_desc, meta_keywords, og_image,
-                    ad_headline, ad_description, ad_badge, ad_cta_text, ad_image_url, int(prod_id)
+                    ad_headline, ad_description, ad_badge, ad_cta_text, ad_image_url, custom_js, int(prod_id)
                 ))
                 log_audit_event(conn, admin["id"], admin["username"], "PRODUCT_UPDATED", f"SKU={sku} STATUS={status}")
             else:
@@ -102,16 +139,16 @@ def register_admin_products_routes(app):
                 INSERT INTO products (
                     sku, name, slug, category, product_type, price, retail_price,
                     version, license_duration, platform, short_desc, description, specs_json, faq_json,
-                    sha256_hash, download_url, badge_text, featured, status, views_count, created_at,
+                    sha256_hash, download_url, delivery_links_json, delivery_message, badge_text, featured, status, views_count, created_at,
                     image_url, meta_title, meta_desc, meta_keywords, og_image,
-                    ad_headline, ad_description, ad_badge, ad_cta_text, ad_image_url
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ad_headline, ad_description, ad_badge, ad_cta_text, ad_image_url, custom_js
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     sku, name, slug, category, product_type, price, retail_price,
                     version, license_duration, platform, short_desc, description, specs_json, faq_json,
-                    sha256_hash, download_url, badge_text, featured, status, now_str,
+                    sha256_hash, download_url, delivery_links_json, delivery_message, badge_text, featured, status, now_str,
                     image_url, meta_title, meta_desc, meta_keywords, og_image,
-                    ad_headline, ad_description, ad_badge, ad_cta_text, ad_image_url
+                    ad_headline, ad_description, ad_badge, ad_cta_text, ad_image_url, custom_js
                 ))
                 saved_id = cur.lastrowid
                 log_audit_event(conn, admin["id"], admin["username"], "PRODUCT_CREATED", f"SKU={sku} STATUS={status}")

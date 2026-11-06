@@ -1,9 +1,9 @@
 <section id="mod-orders" class="admin-module">
             <div class="module-header">
                 <div>
-                    <h2 class="module-title">ORDER TICKETS &amp; PROVISIONING DISPATCH</h2>
+                    <h2 class="module-title">ORDERS</h2>
                     <p style="font-size:12px; color:var(--admin-muted); margin-top:2px;">
-                        Manage customer purchases, confirm Telegram transfers, and fulfill cryptographically unlocked keys.
+                        Manage customer orders, verify payments, and fulfill license keys or download links.
                     </p>
                 </div>
                 <div style="display:flex; gap:6px; align-items:center;">
@@ -19,29 +19,61 @@
                 </div>
             </div>
 
+            <!-- SEARCH & STATS BAR STRIP -->
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem;">
+                <div style="font-family:var(--admin-font-mono); font-size:11px; color:var(--admin-muted); display:inline-flex; align-items:center; gap:6px;">
+                    <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#00e5ff;"></span>
+                    <span id="orders-search-count">SHOWING {{ orders|length }} ORDER{{ 'S' if orders|length != 1 else '' }} (30 / PAGE)</span>
+                </div>
+                <div style="position:relative; display:inline-flex; align-items:center;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--admin-muted)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute; left:11px; pointer-events:none;">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="orders-search-input" oninput="onOrderSearchInput(this.value)" onkeydown="if(event.key==='Escape') clearOrderSearch()" placeholder="SEARCH ORDER #, @TG, USER, SKU..." class="form-input" style="width:280px; padding:0.48rem 2.2rem 0.48rem 2.15rem; font-size:11px; font-family:var(--admin-font-mono); border-color:var(--admin-border); background:var(--admin-surface); border-radius:4px;">
+                    <button type="button" id="orders-search-clear-btn" onclick="clearOrderSearch()" title="Clear search" style="display:none; position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--admin-muted); cursor:pointer; font-size:14px; line-height:1; padding:2px;">&times;</button>
+                </div>
+            </div>
+
             <div class="admin-table-wrap">
-                <table class="admin-table">
+                <table class="admin-table" id="orders-table">
                     <thead>
                         <tr>
-                            <th>TICKET #</th>
-                            <th>TIMESTAMP</th>
-                            <th>BUYER TELEGRAM</th>
-                            <th>ITEMS &amp; SKU</th>
+                            <th>ORDER #</th>
+                            <th>DATE</th>
+                            <th>CUSTOMER / AUTH ACCOUNT</th>
+                            <th>ITEMS</th>
                             <th>TOTAL</th>
                             <th>STATUS</th>
-                            <th>PROVISIONED KEY</th>
-                            <th style="text-align:right;">ACTION</th>
+                            <th>DELIVERY LINKS &amp; MESSAGE</th>
+                            <th style="text-align:right;">ACTIONS</th>
                         </tr>
                     </thead>
                     <tbody style="font-family: var(--admin-font-mono);">
+                        <tr id="orders-no-results" style="display:none;">
+                            <td colspan="8" style="text-align:center; padding:2.5rem; color:var(--admin-muted); font-family:var(--admin-font-mono); font-size:12px;">
+                                NO MATCHING ORDERS FOUND FOR CURRENT FILTER.
+                            </td>
+                        </tr>
                         {% for o in orders %}
-                        <tr>
-                            <td style="font-weight:700;">{{ o.order_number }}</td>
+                        <tr id="order-row-{{ o.id }}" class="order-row" data-status="{{ o.status }}"
+                            data-search="{{ o.order_number }} {{ o.buyer_telegram }} {{ o.owner_username or '' }} {% for it in o['items'] %}{{ it.name }} {{ it.sku }} {% endfor %}{{ o.status }} ${{ '%.2f'|format(o.total_amount) }}">
+                            <td style="font-weight:700;">
+                                {{ o.order_number }}
+                                <script type="application/json" id="order-data-{{ o.id }}">{{ o|tojson|safe }}</script>
+                            </td>
                             <td style="color:var(--admin-muted); font-size:11px;">{{ o.created_at[:16] }}</td>
                             <td>
-                                <a href="https://t.me/{{ o.buyer_telegram.lstrip('@') }}" target="_blank" style="color:#fff; text-decoration:underline;">
-                                    {{ o.buyer_telegram }}
-                                </a>
+                                <div>
+                                    <a href="https://t.me/{{ o.buyer_telegram.lstrip('@') }}" target="_blank" style="color:#fff; text-decoration:underline;">
+                                        {{ o.buyer_telegram }}
+                                    </a>
+                                </div>
+                                {% if o.owner_username %}
+                                <div style="font-size:10px; color:#10b981; margin-top:2px;">USER: {{ o.owner_username }} (#{{ o.owner_user_id }})</div>
+                                {% else %}
+                                <div style="font-size:10px; color:var(--admin-muted); margin-top:2px;">UNLINKED ACCOUNT</div>
+                                {% endif %}
                             </td>
                             <td>
                                 {% for it in o['items'] %}
@@ -50,30 +82,62 @@
                             </td>
                             <td style="font-weight:700;">${{ "%.2f"|format(o.total_amount) }}</td>
                             <td>
+                                <select class="form-select" style="padding:0.25rem 0.5rem; font-size:11px; font-weight:700; width:auto; min-width:130px; {% if o.status == 'COMPLETED' %}border-color:#10b981; color:#10b981;{% elif o.status == 'PENDING_TELEGRAM' %}border-color:#f59e0b; color:#f59e0b;{% endif %}"
+                                        data-prev-status="{{ o.status }}"
+                                        onchange="onOrderRowStatusChange({{ o.id }}, this.value, this)">
+                                    <option value="PENDING_TELEGRAM" {% if o.status == 'PENDING_TELEGRAM' %}selected{% endif %}>PENDING</option>
+                                    <option value="COMPLETED" {% if o.status == 'COMPLETED' %}selected{% endif %}>COMPLETED</option>
+                                    <option value="CANCELLED" {% if o.status == 'CANCELLED' %}selected{% endif %}>CANCELLED</option>
+                                </select>
+                            </td>
+                            <td style="font-size:11px; max-width:220px;">
+                                {% set active_links = o.delivery_links if o.delivery_links else o.default_delivery_links %}
+                                {% set active_msg = o.delivery_message if o.delivery_message else o.default_delivery_message %}
                                 {% if o.status == 'COMPLETED' %}
-                                <span class="status-pill completed">COMPLETED</span>
-                                {% elif o.status == 'PENDING_TELEGRAM' %}
-                                <span class="status-pill pending">PENDING</span>
+                                    <div style="color:#10b981; font-weight:700;">SENT ({{ active_links|length }} link{{ '' if active_links|length == 1 else 's' }})</div>
+                                    <div style="color:var(--admin-muted); font-size:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                        {{ active_msg or o.fulfilled_license_info or 'Delivered to user vault' }}
+                                    </div>
                                 {% else %}
-                                <span class="status-pill">{{ o.status }}</span>
+                                    <div style="color:#00e5ff; font-size:10.5px;">READY ({{ active_links|length }} product link{{ '' if active_links|length == 1 else 's' }})</div>
+                                    <div style="color:var(--admin-muted); font-size:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                        {{ active_msg or 'Default product package ready' }}
+                                    </div>
                                 {% endif %}
                             </td>
-                            <td style="font-size:11px; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                                {{ o.fulfilled_license_info or '—' }}
-                            </td>
                             <td style="text-align:right; white-space:nowrap;">
-                                <button type="button" class="btn-admin btn-admin-outline" style="padding:0.35rem 0.65rem;"
-                                        onclick="openFulfillModal({{ o.id }}, '{{ o.order_number }}', '{{ o.status }}', '{{ o.fulfilled_license_info|replace('\'', '\\\'') }}')">
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:0.35rem 0.65rem; border-color:#00e5ff; color:#00e5ff;"
+                                        onclick="openFulfillModalById({{ o.id }})">
                                     FULFILL / EDIT
                                 </button>
                                 <button type="button" class="btn-admin btn-admin-danger" style="padding:0.35rem 0.65rem; margin-left:4px;"
-                                        onclick="deleteOrder({{ o.id }}, '{{ o.order_number }}')">
-                                    DEL
+                                        onclick="deleteOrder({{ o.id }}, {{ o.order_number|tojson|forceescape }})">
+                                    DELETE
                                 </button>
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
+            </div>
+
+            <!-- ORDERS PAGINATION BAR (30 PER PAGE) -->
+            <div class="matrix-pagination-footer" id="orders-pagination-bar" style="margin-top:0.75rem; border-radius:4px; border:1px solid var(--admin-border);">
+                <div style="font-family:var(--admin-font-mono); font-size:11.5px; color:var(--admin-muted);">
+                    SHOWING <strong id="orders-page-range" style="color:#fff;">1–{{ [orders|length, 30]|min if orders else 0 }}</strong> OF <strong id="orders-total-count" style="color:#00e5ff;">{{ orders|length if orders else 0 }}</strong> TOTAL ORDERS (30 / PAGE)
+                </div>
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <button type="button" id="btn-orders-prev" class="btn-admin btn-admin-outline" onclick="goToOrdersPrevPage()" style="padding:0.35rem 0.85rem; font-size:11px; display:inline-flex; align-items:center; gap:5px;">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                        <span>PREV</span>
+                    </button>
+                    <span style="font-family:var(--admin-font-mono); font-size:11.5px; padding:0 0.5rem; color:#fff; font-weight:700;">
+                        PAGE <span id="orders-current-page" style="color:#00e5ff;">1</span> / <span id="orders-total-pages">1</span>
+                    </span>
+                    <button type="button" id="btn-orders-next" class="btn-admin btn-admin-outline" onclick="goToOrdersNextPage()" style="padding:0.35rem 0.85rem; font-size:11px; display:inline-flex; align-items:center; gap:5px;">
+                        <span>NEXT</span>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </div>
             </div>
         </section>

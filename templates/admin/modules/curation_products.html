@@ -2,23 +2,24 @@
     <div class="module-header">
         <div>
             <div style="display:flex; align-items:center; gap:8px;">
-                <h2 class="module-title">HOMEPAGE 4-SYSTEM SHOWCASE CURATION</h2>
+                <h2 class="module-title">FEATURED HOMEPAGE PRODUCTS</h2>
                 <span class="badge-tag" style="background:#00e5ff; color:#000; font-weight:800; font-size:10px; padding:2px 8px;">ADMIN ONLY</span>
             </div>
             <p style="font-size:12px; color:var(--admin-muted); margin-top:2px;">
-                Designate the exact 4 security systems displayed in the public homepage showcase. Reorder positions (UP / DOWN) or swap systems.
+                Select up to 4 featured products to highlight on the homepage. Reorder slots using UP / DOWN.
             </p>
         </div>
         <div style="display:flex; gap:8px; align-items:center;">
             <button type="button" class="btn-admin btn-admin-outline" onclick="switchFeature('products', 'catalog')">
-                ← BACK TO CATALOG
+                ← BACK TO PRODUCTS
             </button>
-            <button type="button" class="btn-admin btn-admin-primary" onclick="openProductStudio()">
-                + NEW SYSTEM IN STUDIO
+            <button type="button" class="btn-admin btn-admin-primary" onclick="openProductStudio()" style="display:inline-flex; align-items:center; gap:6px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>ADD PRODUCT</span>
             </button>
             <button type="button" class="btn-admin btn-admin-primary" style="background:#00e5ff; color:#000; font-weight:700; display:inline-flex; align-items:center;" onclick="saveDirectHomeCuration()">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" style="margin-right:5px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                SAVE 4-SYSTEM SHOWCASE
+                SAVE FEATURED PRODUCTS
             </button>
         </div>
     </div>
@@ -27,12 +28,12 @@
     <div style="background:rgba(0,229,255,0.035); border:1px solid rgba(0,229,255,0.25); padding:0.85rem 1rem; border-radius:3px; margin-bottom:1.5rem; font-family:var(--admin-font-mono); font-size:11px; line-height:1.65;">
         <div style="font-weight:700; color:#00e5ff; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-            <span>HOW TO MANAGE 4-SYSTEM HOMEPAGE SHOWCASE SLOTS</span>
+            <span>MANAGING FEATURED PRODUCT SLOTS</span>
         </div>
         <div style="color:#d1d5db;">
-            • <strong>Replace / Add:</strong> Click <span style="background:rgba(239,68,68,0.25); color:#ef4444; padding:1px 5px; border-radius:2px; font-weight:700;">REMOVE</span> on any slot to vacate it, then choose a new system from the dropdown.<br>
-            • <strong>Reorder Positions:</strong> Use <strong>UP</strong> and <strong>DOWN</strong> to move systems between Serial 01, 02, 03, and 04.<br>
-            • <strong>Deploy:</strong> Click <strong>SAVE 4-SYSTEM SHOWCASE</strong> to persist live to the public homepage storefront.
+            • <strong>Replace / Add:</strong> Click <span style="background:rgba(239,68,68,0.25); color:#ef4444; padding:1px 5px; border-radius:2px; font-weight:700;">REMOVE</span> on any slot to clear it, then select a product from the dropdown.<br>
+            • <strong>Reorder Positions:</strong> Use <strong>UP</strong> and <strong>DOWN</strong> to reorder Slot 01 through Slot 04.<br>
+            • <strong>Save:</strong> Click <strong>SAVE FEATURED PRODUCTS</strong> to update the homepage immediately.
         </div>
     </div>
 
@@ -87,7 +88,7 @@
         <div id="curate-save-status" style="font-family:var(--admin-font-mono); font-size:12px;"></div>
         <button type="button" class="btn-admin btn-admin-primary" style="background:#00e5ff; color:#000; font-weight:700; display:inline-flex; align-items:center;" onclick="saveDirectHomeCuration()">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" style="margin-right:5px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-            SAVE &amp; DEPLOY 4-SYSTEM SHOWCASE
+            SAVE FEATURED PRODUCTS
         </button>
     </div>
 </section>

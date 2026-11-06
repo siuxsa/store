@@ -20,11 +20,27 @@
 
 @media (max-width: 1024px) {
     .nav-center {
-        display: none;
+        display: none !important;
     }
 
     .hamburger-btn {
-        display: inline-flex;
+        display: inline-flex !important;
+    }
+
+    .orders-layout {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        gap: 2.5rem !important;
+    }
+
+    .orders-main-content,
+    .orders-sidebar {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
     }
 
     .header-inner {
@@ -149,6 +165,54 @@
         white-space: nowrap;
     }
 
+    /* Clean Mobile Header: brand logo on left, 3-line hamburger menu on right */
+    .header-inner {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        grid-template-columns: none !important;
+        padding: 0 1rem !important;
+    }
+
+    .header-left {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        min-width: 0;
+        gap: 0.75rem;
+    }
+
+    .brand-logo {
+        order: 1;
+        font-size: clamp(0.78rem, 3.4vw, 0.95rem);
+        letter-spacing: clamp(0.06em, 1.2vw, 0.14em);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
+        flex: 1 1 auto;
+        max-width: calc(100% - 50px);
+    }
+
+    .hamburger-btn {
+        order: 2;
+        display: inline-flex !important;
+        flex-shrink: 0;
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        min-height: 44px;
+        margin-left: auto;
+        position: relative;
+        z-index: 10;
+    }
+
+    /* Hide Search, Sign In, and Bag in header on mobile mode (already inside 3-line menu) */
+    .header-right {
+        display: none !important;
+    }
+
     .split-panels {
         grid-template-columns: 1fr;
     }
@@ -206,33 +270,35 @@
 }
 
 @media (max-width: 600px) {
-    /* Clean Mobile Header: brand logo on left, 3-line hamburger menu on right */
-    .header-inner {
-        display: flex !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        grid-template-columns: none !important;
+    .req-grid-2col {
+        grid-template-columns: 1fr !important;
+        gap: 1.15rem !important;
     }
 
-    .header-left {
-        width: 100%;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+    #request-form-card {
+        padding: clamp(1.2rem, 3.5vw, 1.85rem) !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
+        max-width: 100% !important;
     }
 
-    .brand-logo {
-        order: 1;
+    #btn-submit-request {
+        width: 100% !important;
+        justify-content: center !important;
+        text-align: center !important;
     }
 
-    .hamburger-btn {
-        order: 2;
-        display: inline-flex !important;
+    .site-footer .brand-logo {
+        font-size: clamp(0.85rem, 4.5vw, 1.15rem) !important;
+        white-space: normal !important;
+        word-break: break-word !important;
     }
 
-    /* Hide Search, Sign In, and Bag in header on mobile mode (already inside 3-line menu) */
-    .header-right {
-        display: none !important;
+    .footer-top-grid > div {
+        min-width: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        word-break: break-word !important;
     }
 
     .product-grid {

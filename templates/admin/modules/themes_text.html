@@ -1,56 +1,60 @@
 <section id="mod-themes-text" class="admin-module">
-    <div class="module-header">
-        <div>
-            <div style="display:flex; align-items:center; gap:8px;">
-                <h2 class="module-title">TEXT-BASED THEME &amp; CONTENT STUDIO</h2>
-                <span class="status-pill completed" style="font-size:10px;">COPY MATRIX ACTIVE</span>
+    <div class="settings-sticky-panel">
+        <div class="settings-sticky-header">
+            <div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <h2 class="module-title" style="margin:0; font-size:17px;">PAGE CONTENT &amp; TYPOGRAPHY</h2>
+                </div>
+                <p style="font-size:11px; color:var(--admin-muted); margin-top:3px; margin-bottom:0;">
+                    Edit storefront headlines, hero copy, page sections, global navigation labels, and theme colors.
+                </p>
             </div>
-            <p style="font-size:12px; color:var(--admin-muted); margin-top:2px;">
-                Direct form-based management for headlines, hero copywriting, single-line category ticker banner, manifestos, and typography.
-            </p>
+            <div style="display:flex; align-items:center; gap:0.65rem; flex-wrap:wrap;">
+                <button type="button" class="btn-admin btn-admin-outline" onclick="switchFeature('system', 'themes-visual')" style="border-color:#00e5ff; color:#00e5ff; font-weight:700; height:32px; display:inline-flex; align-items:center;">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" style="margin-right:5px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <span>THEME PREVIEW →</span>
+                </button>
+                <button type="button" class="btn-admin btn-admin-outline" onclick="switchFeature('system', 'seo')" style="border-color:#00e5ff; color:#00e5ff; height:32px; display:inline-flex; align-items:center;">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" style="margin-right:5px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <span>SEO</span>
+                </button>
+                <button type="button" class="btn-admin btn-admin-outline" onclick="resetThemeStudio()" style="height:32px;">
+                    REVERT CHANGES
+                </button>
+                <button type="button" class="btn-admin btn-admin-primary" onclick="saveThemeStudio()" id="btn-save-theme-text" style="background:#10b981; color:#000; font-weight:700; height:32px; display:inline-flex; align-items:center;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" style="margin-right:5px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    <span>SAVE CHANGES</span>
+                </button>
+            </div>
         </div>
-        <div style="display:flex; align-items:center; gap:0.65rem;">
-            <button type="button" class="btn-admin btn-admin-outline" onclick="switchFeature('system', 'themes-visual')" style="border-color:#00e5ff; color:#00e5ff; font-weight:700; display:inline-flex; align-items:center;">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" style="margin-right:5px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                <span>VISUAL INSPECT MODE →</span>
-            </button>
-            <button type="button" class="btn-admin btn-admin-outline" onclick="switchFeature('system', 'seo')" style="border-color:#00e5ff; color:#00e5ff; display:inline-flex; align-items:center;">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" style="margin-right:5px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <span>SEO &amp; METADATA</span>
-            </button>
-            <button type="button" class="btn-admin btn-admin-outline" onclick="resetThemeStudio()">
-                REVERT CHANGES
-            </button>
-            <button type="button" class="btn-admin btn-admin-primary" onclick="saveThemeStudio()" id="btn-save-theme-text" style="background:#10b981; color:#000; font-weight:700; display:inline-flex; align-items:center;">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" style="margin-right:5px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                <span>SAVE ALL THEME TEXT CHANGES</span>
-            </button>
-        </div>
-    </div>
 
-    <!-- PAGE SELECTOR STRIP FOR TEXT-BASED EDITING -->
-    <div class="module-subnav" style="margin-bottom:1.5rem;">
-        <button type="button" class="subnav-btn theme-text-subnav-btn active" onclick="switchThemeTextTab('home', this)">
-            [01] HOME PAGE CONTENT
-        </button>
-        <button type="button" class="subnav-btn theme-text-subnav-btn" onclick="switchThemeTextTab('about', this)">
-            [02] ABOUT &amp; MANIFESTO
-        </button>
-        <button type="button" class="subnav-btn theme-text-subnav-btn" onclick="switchThemeTextTab('shop', this)">
-            [03] DIGITAL ARSENAL (SHOP)
-        </button>
-        <button type="button" class="subnav-btn theme-text-subnav-btn" onclick="switchThemeTextTab('journal', this)">
-            [04] THREAT JOURNAL
-        </button>
-        <button type="button" class="subnav-btn theme-text-subnav-btn" onclick="switchThemeTextTab('request', this)">
-            [05] CUSTOM TOOL REQUEST PAGE
-        </button>
-        <button type="button" class="subnav-btn theme-text-subnav-btn" onclick="switchThemeTextTab('global', this)">
-            [06] GLOBAL SHELL &amp; BRANDING
-        </button>
-        <button type="button" class="subnav-btn theme-text-subnav-btn" onclick="switchThemeTextTab('styling', this)">
-            [07] TYPOGRAPHY, PALETTE &amp; CSS
-        </button>
+        <!-- PAGE SELECTOR STRIP FOR TEXT-BASED EDITING -->
+        <div class="settings-sticky-subnav module-subnav" style="margin-bottom:0;">
+            <button type="button" class="subnav-btn theme-text-subnav-btn active" onclick="switchThemeTextTab('home', this)">
+                HOME
+            </button>
+            <button type="button" class="subnav-btn theme-text-subnav-btn" onclick="switchThemeTextTab('about', this)">
+                ABOUT
+            </button>
+            <button type="button" class="subnav-btn theme-text-subnav-btn" onclick="switchThemeTextTab('shop', this)">
+                SHOP
+            </button>
+            <button type="button" class="subnav-btn theme-text-subnav-btn" onclick="switchThemeTextTab('journal', this)">
+                JOURNAL
+            </button>
+            <button type="button" class="subnav-btn theme-text-subnav-btn" onclick="switchThemeTextTab('request', this)">
+                REQUEST
+            </button>
+            <button type="button" class="subnav-btn theme-text-subnav-btn" onclick="switchThemeTextTab('404', this)">
+                404 PAGE
+            </button>
+            <button type="button" class="subnav-btn theme-text-subnav-btn" onclick="switchThemeTextTab('global', this)">
+                HEADER &amp; FOOTER
+            </button>
+            <button type="button" class="subnav-btn theme-text-subnav-btn" onclick="switchThemeTextTab('styling', this)">
+                COLORS &amp; CSS
+            </button>
+        </div>
     </div>
 
     <!-- ========================================== -->
@@ -62,7 +66,7 @@
             <!-- HERO COPYWRITING & HEADLINES -->
             <div class="theme-card-group">
                 <div class="theme-card-title">
-                    <span style="color:#00e5ff; font-weight:700;">[01] HERO HEADLINES &amp; BRAND COPY</span>
+                    <span style="color:#00e5ff; font-weight:700;">HERO HEADLINES &amp; BRAND COPY</span>
                     <span class="status-pill completed" style="font-size:9.5px;">ABOVE-THE-FOLD</span>
                 </div>
 
@@ -102,7 +106,7 @@
             <!-- CALL TO ACTION BUTTONS & CATEGORY STRIP -->
             <div class="theme-card-group">
                 <div class="theme-card-title">
-                    <span style="color:#00e5ff; font-weight:700;">[02] CTA BUTTONS &amp; SINGLE-LINE CATEGORY BANNER</span>
+                    <span style="color:#00e5ff; font-weight:700;">CTA BUTTONS &amp; SINGLE-LINE CATEGORY BANNER</span>
                 </div>
 
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:1rem;">
@@ -147,7 +151,7 @@
             <!-- TECHNICAL SYSTEM SPECIFICATIONS BANNER -->
             <div class="theme-card-group" style="grid-column: 1 / -1;">
                 <div class="theme-card-title">
-                    <span style="color:#00e5ff; font-weight:700;">[03] TECHNICAL SYSTEM SPECIFICATIONS &amp; STATS COPY</span>
+                    <span style="color:#00e5ff; font-weight:700;">TECHNICAL SYSTEM SPECIFICATIONS &amp; STATS COPY</span>
                 </div>
                 <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:1rem;">
                     <div class="form-group">
@@ -281,7 +285,7 @@
             <!-- PAGE HEADER & BREADCRUMBS -->
             <div class="theme-card-group">
                 <div class="theme-card-title">
-                    <span style="color:#00e5ff; font-weight:700;">[01] PAGE HEADER &amp; PROTOCOL DISPATCH</span>
+                    <span style="color:#00e5ff; font-weight:700;">PAGE HEADER &amp; PROTOCOL DISPATCH</span>
                     <span class="status-pill completed" style="font-size:9.5px;">ABOVE-THE-FOLD</span>
                 </div>
 
@@ -309,7 +313,7 @@
             <!-- INTAKE FORM SPECIFICATIONS -->
             <div class="theme-card-group">
                 <div class="theme-card-title">
-                    <span style="color:#00e5ff; font-weight:700;">[02] INTAKE FORM HEADINGS &amp; LABELS</span>
+                    <span style="color:#00e5ff; font-weight:700;">INTAKE FORM HEADINGS &amp; LABELS</span>
                     <span class="status-pill completed" style="font-size:9.5px;">FORM CARD</span>
                 </div>
 
@@ -337,7 +341,7 @@
             <!-- TIMELINE & SOURCING PROTOCOL (STEPS 1-3) -->
             <div class="theme-card-group">
                 <div class="theme-card-title">
-                    <span style="color:#00e5ff; font-weight:700;">[03] SOURCING TIMELINE PROTOCOL (SIDEBAR)</span>
+                    <span style="color:#00e5ff; font-weight:700;">SOURCING TIMELINE PROTOCOL (SIDEBAR)</span>
                     <span class="status-pill completed" style="font-size:9.5px;">STEPS 01–03</span>
                 </div>
 
@@ -368,7 +372,7 @@
             <!-- DIRECT CONCIERGE CARD (SIDEBAR) -->
             <div class="theme-card-group">
                 <div class="theme-card-title">
-                    <span style="color:#00e5ff; font-weight:700;">[04] DIRECT PRIVATE CONCIERGE (SIDEBAR)</span>
+                    <span style="color:#00e5ff; font-weight:700;">DIRECT PRIVATE CONCIERGE (SIDEBAR)</span>
                     <span class="status-pill completed" style="font-size:9.5px;">TELEGRAM BROKERAGE</span>
                 </div>
 
@@ -398,7 +402,96 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- 6. GLOBAL SHELL & BRANDING PANE            -->
+    <!-- 6. 404 ERROR PAGE CONTENT PANE             -->
+    <!-- ========================================== -->
+    <div id="theme-text-pane-404" class="theme-text-pane" style="display:none;">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(420px, 1fr)); gap:1.5rem;">
+
+            <!-- 404 ANOMALY HEADER & TITLES -->
+            <div class="theme-card-group">
+                <div class="theme-card-title">
+                    <span style="color:#00e5ff; font-weight:700;">404 ANOMALY HEADER &amp; PROTOCOL</span>
+                    <span class="status-pill completed" style="font-size:9.5px;">ERROR SCREEN</span>
+                </div>
+
+                <div class="form-group" style="margin-bottom:1rem;">
+                    <label class="form-label">
+                        <span>404 STATUS BADGE</span>
+                        <span style="color:var(--admin-muted); font-size:10px;">TOP INCIDENT PILL</span>
+                    </label>
+                    <input type="text" name="error_404_badge" value="{{ site_settings.error_404_badge or 'SURFACE ANOMALY DETECTED' }}" class="form-input theme-field" oninput="onThemeFieldInput(this.name, this.value)">
+                </div>
+
+                <div class="form-group" style="margin-bottom:1rem;">
+                    <label class="form-label">
+                        <span>MAIN DISPLAY CODE / TITLE</span>
+                        <span style="color:var(--admin-muted); font-size:10px;">LARGE GLITCH HEADLINE</span>
+                    </label>
+                    <input type="text" name="error_404_title" value="{{ site_settings.error_404_title or '404 // ROUTE_NOT_FOUND' }}" class="form-input theme-field" oninput="onThemeFieldInput(this.name, this.value)">
+                </div>
+
+                <div class="form-group" style="margin-bottom:1rem;">
+                    <label class="form-label">
+                        <span>ANOMALY SUB-HEADLINE</span>
+                        <span style="color:var(--admin-muted); font-size:10px;">CYAN ACCENT NOTICE</span>
+                    </label>
+                    <input type="text" name="error_404_headline" value="{{ site_settings.error_404_headline or 'TARGET COORDINATES COMPROMISED OR NON-EXISTENT' }}" class="form-input theme-field" oninput="onThemeFieldInput(this.name, this.value)">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <span>EXPLANATORY MESSAGE / PROSE DIRECTIVE</span>
+                        <span style="color:var(--admin-muted); font-size:10px;">PARAGRAPH</span>
+                    </label>
+                    <textarea name="error_404_message" rows="3" class="form-textarea theme-field" oninput="onThemeFieldInput(this.name, this.value)">{{ site_settings.error_404_message or 'The tactical asset or sector you are attempting to address does not exist on the current perimeter. It may have been decommissioned, air-gapped, or scrubbed from the telemetry matrix.' }}</textarea>
+                </div>
+            </div>
+
+            <!-- 404 CTAS & VISUAL ACTIONS -->
+            <div class="theme-card-group">
+                <div class="theme-card-title">
+                    <span style="color:#00e5ff; font-weight:700;">ACTION BUTTONS &amp; INTERACTIVE TOOLS</span>
+                    <span class="status-pill completed" style="font-size:9.5px;">NAVIGATION RECOVERY</span>
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:1rem;">
+                    <div class="form-group">
+                        <label class="form-label">RETURN CTA BUTTON LABEL</label>
+                        <input type="text" name="error_404_cta_text" value="{{ site_settings.error_404_cta_text or '← RETURN TO COMMAND REPOSITORY' }}" class="form-input theme-field" oninput="onThemeFieldInput(this.name, this.value)">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">RETURN CTA TARGET URL</label>
+                        <input type="text" name="error_404_cta_url" value="{{ site_settings.error_404_cta_url or '/' }}" class="form-input theme-field" oninput="onThemeFieldInput(this.name, this.value)">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:1.25rem;">
+                    <label class="form-label">ASSET SEARCH BOX VISIBILITY</label>
+                    <select name="error_404_show_search" class="form-select theme-field" onchange="onThemeFieldInput(this.name, this.value)">
+                        <option value="1" {% if site_settings.error_404_show_search != '0' %}selected{% endif %}>ENABLED — Display Asset Search Bar</option>
+                        <option value="0" {% if site_settings.error_404_show_search == '0' %}selected{% endif %}>DISABLED — Hide Search Bar</option>
+                    </select>
+                </div>
+
+                <div style="background:rgba(0,229,255,0.04); border:1px solid rgba(0,229,255,0.2); padding:1rem; border-radius:3px;">
+                    <div style="font-family:var(--admin-font-mono); font-size:11px; font-weight:700; color:#00e5ff; margin-bottom:0.35rem;">
+                        VISUAL POINT-AND-CLICK INSPECTION
+                    </div>
+                    <p style="font-size:11.5px; color:var(--admin-muted); margin:0 0 0.75rem 0;">
+                        Switch to Visual Inspect Mode to point-and-click edit the 404 page directly on Desktop, Tablet, and Mobile canvases.
+                    </p>
+                    <button type="button" class="btn-admin btn-admin-outline" onclick="switchFeature('system', 'themes-visual'); setTimeout(() => switchVisualCanvasPage('404', '/404-preview-live'), 100);" style="border-color:#00e5ff; color:#00e5ff; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>INSPECT 404 IN LIVE VISUAL CANVAS →</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 7. GLOBAL SHELL & BRANDING PANE            -->
     <!-- ========================================== -->
     <div id="theme-text-pane-global" class="theme-text-pane" style="display:none;">
         <div class="theme-card-group">

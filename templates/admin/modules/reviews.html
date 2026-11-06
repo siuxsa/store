@@ -1,33 +1,15 @@
 <section id="mod-reviews" class="admin-module">
             <div class="module-header">
                 <div>
-                    <h2 class="module-title">VERIFIED OPERATIONAL REVIEWS MATRIX</h2>
+                    <h2 class="module-title">CUSTOMER REVIEWS</h2>
                     <p style="font-size:12px; color:var(--admin-muted); margin-top:2px;">
-                        Curate cryptographic assessments and client endorsements displayed on product pages and the homepage Editorial Manifesto block.
+                        Manage verified customer reviews displayed on product pages and the homepage testimonials section.
                     </p>
                 </div>
-                <button type="button" class="btn-admin btn-admin-primary" onclick="openReviewModal()">
-                    + ADD NEW VERIFIED REVIEW
+                <button type="button" class="btn-admin btn-admin-primary" onclick="openReviewModal()" style="display:inline-flex; align-items:center; gap:6px;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <span>ADD REVIEW</span>
                 </button>
-            </div>
-
-            <!-- REVIEW METRICS -->
-            <div class="stat-grid" style="margin-bottom:1.5rem;">
-                <div class="stat-card">
-                    <div class="stat-label">TOTAL OPERATOR ASSESSMENTS</div>
-                    <div class="stat-value" style="color:#00e5ff;">{{ reviews|length }}</div>
-                    <div class="stat-sub">Active in Catalog &amp; Manifesto</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">MANIFESTO FEATURED REVIEWS</div>
-                    <div class="stat-value" style="color:#10b981;">{{ reviews|selectattr('featured_manifesto')|list|length }}</div>
-                    <div class="stat-sub">Showcased on Home Manifesto Block</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">5-STAR VERIFIED AUDITS</div>
-                    <div class="stat-value" style="color:#f59e0b;">{{ reviews|selectattr('rating', 'equalto', 5)|list|length }}</div>
-                    <div class="stat-sub">100% Critical Endorsement Rate</div>
-                </div>
             </div>
 
             <!-- HOMEPAGE REVIEWS SHOWCASE CURATOR (4-6+ REVIEWS) -->
@@ -35,13 +17,13 @@
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem; margin-bottom:1rem; padding-bottom:0.85rem; border-bottom:1px solid var(--admin-border);">
                     <div>
                         <div style="display:flex; align-items:center; gap:8px;">
-                            <span class="badge-tag" style="background:#00e5ff; color:#000; font-weight:800; font-size:10px; padding:2px 8px;">LIVE STOREFRONT</span>
+                            <span class="badge-tag" style="background:#00e5ff; color:#000; font-weight:800; font-size:10px; padding:2px 8px;">HOMEPAGE</span>
                             <h3 style="font-size:15px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; margin:0; color:#fff;">
-                                // HOMEPAGE CLIENT REVIEWS SHOWCASE CURATOR (<span id="curate-reviews-count-badge">4</span> REVIEWS)
+                                FEATURED HOMEPAGE REVIEWS (<span id="curate-reviews-count-badge">4</span> SLOTS)
                             </h3>
                         </div>
                         <p style="font-size:12px; color:var(--admin-muted); margin-top:4px; margin-bottom:0;">
-                            Select exactly which verified reviews appear in the homepage Editorial Manifesto slider, adjust their sequence (UP / DOWN), or configure 4, 5, 6+ reviews.
+                            Choose which customer reviews appear on the homepage slider and adjust their display order.
                         </p>
                     </div>
                     <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
@@ -50,11 +32,11 @@
                         <button type="button" class="btn-admin btn-admin-outline" style="padding:0.35rem 0.65rem; font-size:11px;" onclick="setReviewShowcaseSlotCount(5)">5 SLOTS</button>
                         <button type="button" class="btn-admin btn-admin-outline" style="padding:0.35rem 0.65rem; font-size:11px;" onclick="setReviewShowcaseSlotCount(6)">6 SLOTS</button>
                         <button type="button" class="btn-admin btn-admin-outline" style="padding:0.35rem 0.75rem; font-size:11px; border-color:#00e5ff; color:#00e5ff;" onclick="addReviewShowcaseSlot()">
-                            + ADD REVIEW SLOT
+                            + ADD SLOT
                         </button>
                         <button type="button" class="btn-admin btn-admin-primary" style="background:#00e5ff; color:#000; font-weight:700; padding:0.35rem 0.95rem; font-size:11px; display:inline-flex; align-items:center; gap:5px;" onclick="saveHomepageReviewsShowcase()">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                            <span>SAVE &amp; DEPLOY SHOWCASE</span>
+                            <span>SAVE FEATURED REVIEWS</span>
                         </button>
                     </div>
                 </div>
@@ -67,29 +49,68 @@
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding-top:0.75rem; border-top:1px solid rgba(255,255,255,0.05);">
                     <div id="curate-reviews-status" style="font-family:var(--admin-font-mono); font-size:11.5px; color:#10b981;"></div>
                     <div style="font-size:11px; color:var(--admin-muted); font-family:var(--admin-font-mono);">
-                        // TIPS: REORDER SLOTS USING UP/DOWN · REVIEWS STREAM RIGHT-TO-LEFT ON PUBLIC HOMEPAGE
+                        TIP: REORDER SLOTS USING UP / DOWN BUTTONS
                     </div>
+                </div>
+            </div>
+
+            <!-- REVIEWS FILTER & SEARCH STRIP (CUSTOM ORDER PROCUREMENT STYLE) -->
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem;">
+                <div class="review-filter-bar">
+                    <button type="button" class="review-filter-btn active" data-filter="ALL" onclick="filterReviewsBySegment('ALL', this)">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                        <span>TOTAL REVIEWS</span>
+                        <span class="review-count" id="rev-stat-total">{{ reviews|length }}</span>
+                    </button>
+                    <button type="button" class="review-filter-btn" data-filter="HOMEPAGE" onclick="filterReviewsBySegment('HOMEPAGE', this)">
+                        <span class="review-dot" style="background:#10b981; box-shadow:0 0 6px rgba(16,185,129,0.5);"></span>
+                        <span>HOMEPAGE FEATURED</span>
+                        <span class="review-count" id="rev-stat-homepage" style="color:#10b981;">{{ reviews|selectattr('featured_manifesto')|list|length }}</span>
+                    </button>
+                    <button type="button" class="review-filter-btn" data-filter="5STARS" onclick="filterReviewsBySegment('5STARS', this)">
+                        <span class="review-dot" style="background:#f59e0b; box-shadow:0 0 6px rgba(245,158,11,0.5);"></span>
+                        <span>5-STAR REVIEWS</span>
+                        <span class="review-count" id="rev-stat-5stars" style="color:#f59e0b;">{{ reviews|selectattr('rating', 'equalto', 5)|list|length }}</span>
+                    </button>
+                    <button type="button" class="review-filter-btn" data-filter="CATALOG" onclick="filterReviewsBySegment('CATALOG', this)">
+                        <span class="review-dot" style="background:#00e5ff; box-shadow:0 0 6px rgba(0,229,255,0.4);"></span>
+                        <span>CATALOG ONLY</span>
+                        <span class="review-count" id="rev-stat-catalog" style="color:#00e5ff;">{{ reviews|rejectattr('featured_manifesto')|list|length }}</span>
+                    </button>
+                </div>
+                <div style="position:relative; display:inline-flex; align-items:center;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--admin-muted)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute; left:11px; pointer-events:none;">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="reviews-search-input" oninput="onReviewSearchInput(this.value)" onkeydown="if(event.key==='Escape') clearReviewSearch()" placeholder="SEARCH REVIEWER, PRODUCT, CONTENT..." class="form-input" style="width:280px; padding:0.48rem 2.2rem 0.48rem 2.15rem; font-size:11px; font-family:var(--admin-font-mono); border-color:var(--admin-border); background:var(--admin-surface); border-radius:4px;">
+                    <button type="button" id="reviews-search-clear-btn" onclick="clearReviewSearch()" title="Clear search" style="display:none; position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--admin-muted); cursor:pointer; font-size:14px; line-height:1; padding:2px;">&times;</button>
                 </div>
             </div>
 
             <!-- REVIEWS TABLE -->
             <div class="admin-table-wrap">
-                <table class="admin-table">
+                <table class="admin-table" id="reviews-table">
                     <thead>
                         <tr>
                             <th>RATING</th>
-                            <th>AUTHOR &amp; ENTITY</th>
-                            <th>TARGET SYSTEM</th>
-                            <th>ASSESSMENT TITLE &amp; CONTENT</th>
-                            <th>MANIFESTO?</th>
-                            <th>VERIFIED BADGE</th>
+                            <th>REVIEWER</th>
+                            <th>PRODUCT</th>
+                            <th>REVIEW</th>
+                            <th>HOMEPAGE</th>
+                            <th>BADGE</th>
                             <th>DATE</th>
                             <th style="text-align:right;">ACTIONS</th>
                         </tr>
                     </thead>
                     <tbody>
+                        <tr id="reviews-no-results" style="display:none;">
+                            <td colspan="8" style="text-align:center; padding:3rem; color:var(--admin-muted); font-family:var(--admin-font-mono); font-size:12px;">
+                                NO MATCHING REVIEWS FOUND.
+                            </td>
+                        </tr>
                         {% for r in reviews %}
-                        <tr>
+                        <tr id="review-row-{{ r.id }}" class="review-row" data-rating="{{ r.rating }}" data-homepage="{{ '1' if r.featured_manifesto else '0' }}" data-search="{{ r.author_name }} {{ r.author_role or '' }} {{ r.author_org or '' }} {{ r.product_sku or 'GLOBAL ALL' }} {{ r.title }} {{ r.content }} {{ r.verified_badge or '' }}">
                             <td style="white-space:nowrap;">
                                 <span class="badge-tag" style="background:rgba(245,158,11,0.12); color:#f59e0b; border:1px solid rgba(245,158,11,0.3); font-weight:700; font-size:11px; padding:2px 6px;">
                                     {{ r.rating }}.0 / 5.0
@@ -148,19 +169,39 @@
                                 <button type="button" class="btn-admin btn-admin-outline" style="padding:0.35rem 0.65rem;" onclick="openReviewModalForId({{ r.id }})">
                                     EDIT
                                 </button>
-                                <button type="button" class="btn-admin btn-admin-danger" style="padding:0.35rem 0.65rem; margin-left:4px;" onclick="deleteReview({{ r.id }}, '{{ r.author_name }}')">
-                                    DEL
+                                <button type="button" class="btn-admin btn-admin-danger" style="padding:0.35rem 0.65rem; margin-left:4px;" onclick="deleteReview({{ r.id }}, {{ r.author_name|tojson|forceescape }})">
+                                    DELETE
                                 </button>
                             </td>
                         </tr>
                         {% else %}
                         <tr>
                             <td colspan="8" style="text-align:center; padding:3rem; color:var(--admin-muted);">
-                                // NO VERIFIED REVIEWS RECORDED YET. CLICK '+ ADD NEW VERIFIED REVIEW' TO CURATE CLIENT ASSESSMENTS.
+                                No reviews found. Click "ADD REVIEW" to create one.
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
+            </div>
+
+            <!-- REVIEWS PAGINATION BAR (20 PER PAGE) -->
+            <div class="matrix-pagination-footer" id="reviews-pagination-bar" style="margin-top:0.75rem; border-radius:4px; border:1px solid var(--admin-border);">
+                <div style="font-family:var(--admin-font-mono); font-size:11.5px; color:var(--admin-muted);">
+                    SHOWING <strong id="reviews-page-range" style="color:#fff;">1–{{ [reviews|length, 20]|min if reviews else 0 }}</strong> OF <strong id="reviews-total-count" style="color:#00e5ff;">{{ reviews|length if reviews else 0 }}</strong> TOTAL REVIEWS (20 / PAGE)
+                </div>
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <button type="button" id="btn-reviews-prev" class="btn-admin btn-admin-outline" onclick="goToReviewsPrevPage()" style="padding:0.35rem 0.85rem; font-size:11px; display:inline-flex; align-items:center; gap:5px;">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                        <span>PREV</span>
+                    </button>
+                    <span style="font-family:var(--admin-font-mono); font-size:11.5px; padding:0 0.5rem; color:#fff; font-weight:700;">
+                        PAGE <span id="reviews-current-page" style="color:#00e5ff;">1</span> / <span id="reviews-total-pages">1</span>
+                    </span>
+                    <button type="button" id="btn-reviews-next" class="btn-admin btn-admin-outline" onclick="goToReviewsNextPage()" style="padding:0.35rem 0.85rem; font-size:11px; display:inline-flex; align-items:center; gap:5px;">
+                        <span>NEXT</span>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </div>
             </div>
         </section>

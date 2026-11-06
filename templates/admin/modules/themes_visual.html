@@ -1,51 +1,56 @@
 <section id="mod-themes-visual" class="admin-module">
-    <div class="module-header">
-        <div>
-            <div style="display:flex; align-items:center; gap:8px;">
-                <h2 class="module-title">VISUAL INSPECT STUDIO // LIVE STORE ENGINE</h2>
-                <span class="status-pill completed" style="font-size:10px;">RESPONSIVE CANVAS READY</span>
+    <div class="settings-sticky-panel">
+        <div class="settings-sticky-header">
+            <div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <h2 class="module-title" style="margin:0; font-size:17px;">THEME PREVIEW &amp; VISUAL EDITOR</h2>
+                    <span class="status-pill completed" style="font-size:10px;">LIVE PREVIEW</span>
+                </div>
+                <p style="font-size:11px; color:var(--admin-muted); margin-top:3px; margin-bottom:0;">
+                    Preview your storefront across Desktop, Tablet, and Mobile viewports and click elements to edit inline.
+                </p>
             </div>
-            <p style="font-size:12px; color:var(--admin-muted); margin-top:2px;">
-                Visually inspect and test the live storefront on Desktop, Tablet, and Mobile viewports with interactive point-and-click element inspection.
-            </p>
+            <div style="display:flex; align-items:center; gap:0.65rem; flex-wrap:wrap;">
+                <button type="button" class="btn-admin btn-admin-outline" onclick="switchFeature('system', 'themes-text')" style="border-color:#10b981; color:#10b981; font-weight:700; height:32px; display:inline-flex; align-items:center;">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" style="margin-right:5px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    <span>PAGE CONTENT EDITOR →</span>
+                </button>
+                <button type="button" class="btn-admin btn-admin-outline" onclick="switchFeature('system', 'seo')" style="border-color:#00e5ff; color:#00e5ff; height:32px; display:inline-flex; align-items:center;">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" style="margin-right:5px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <span>SEO</span>
+                </button>
+                <button type="button" class="btn-admin btn-admin-outline" onclick="refreshThemePreview()" style="height:32px; display:inline-flex; align-items:center; gap:4px;">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                    <span>RELOAD</span>
+                </button>
+                <a id="theme-open-external-btn" href="/" target="_blank" class="btn-admin btn-admin-outline" style="text-decoration:none; height:32px; display:inline-flex; align-items:center; gap:4px;">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+                    <span>OPEN STORE</span>
+                </a>
+            </div>
         </div>
-        <div style="display:flex; align-items:center; gap:0.65rem;">
-            <button type="button" class="btn-admin btn-admin-outline" onclick="switchFeature('system', 'themes-text')" style="border-color:#10b981; color:#10b981; font-weight:700; display:inline-flex; align-items:center;">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" style="margin-right:5px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                <span>TEXT-BASED EDIT MODE →</span>
-            </button>
-            <button type="button" class="btn-admin btn-admin-outline" onclick="switchFeature('system', 'seo')" style="border-color:#00e5ff; color:#00e5ff; display:inline-flex; align-items:center;">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" style="margin-right:5px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <span>LIVE SEO STUDIO</span>
-            </button>
-            <button type="button" class="btn-admin btn-admin-outline" onclick="refreshThemePreview()" style="display:inline-flex; align-items:center; gap:4px;">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-                <span>RELOAD</span>
-            </button>
-            <a id="theme-open-external-btn" href="/" target="_blank" class="btn-admin btn-admin-outline" style="text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
-                <span>OPEN WINDOW</span>
-            </a>
-        </div>
-    </div>
 
-    <!-- PAGE ROUTE SWITCHER STRIP FOR LIVE CANVAS -->
-    <div class="module-subnav" style="margin-bottom:1rem;">
-        <button type="button" class="subnav-btn active" onclick="switchVisualCanvasPage('home', '/', this)">
-            [01] HOME PAGE (/)
-        </button>
-        <button type="button" class="subnav-btn" onclick="switchVisualCanvasPage('about', '/about', this)">
-            [02] ABOUT &amp; MANIFESTO (/about)
-        </button>
-        <button type="button" class="subnav-btn" onclick="switchVisualCanvasPage('shop', '/shop', this)">
-            [03] DIGITAL ARSENAL (/shop)
-        </button>
-        <button type="button" class="subnav-btn" onclick="switchVisualCanvasPage('journal', '/journal', this)">
-            [04] THREAT JOURNAL (/journal)
-        </button>
-        <button type="button" class="subnav-btn" onclick="switchVisualCanvasPage('request', '/request', this)">
-            [05] REQUEST TOOL (/request)
-        </button>
+        <!-- PAGE ROUTE SWITCHER STRIP FOR LIVE CANVAS -->
+        <div class="settings-sticky-subnav module-subnav" style="margin-bottom:0;">
+            <button type="button" class="subnav-btn active" onclick="switchVisualCanvasPage('home', '/', this)">
+                HOME (/)
+            </button>
+            <button type="button" class="subnav-btn" onclick="switchVisualCanvasPage('about', '/about', this)">
+                ABOUT (/about)
+            </button>
+            <button type="button" class="subnav-btn" onclick="switchVisualCanvasPage('shop', '/shop', this)">
+                SHOP (/shop)
+            </button>
+            <button type="button" class="subnav-btn" onclick="switchVisualCanvasPage('journal', '/journal', this)">
+                JOURNAL (/journal)
+            </button>
+            <button type="button" class="subnav-btn" onclick="switchVisualCanvasPage('request', '/request', this)">
+                REQUEST (/request)
+            </button>
+            <button type="button" class="subnav-btn" onclick="switchVisualCanvasPage('404', '/404-preview-live', this)">
+                404 PAGE (/404)
+            </button>
+        </div>
     </div>
 
     <!-- DEDICATED VISUAL CANVAS WRAPPER -->

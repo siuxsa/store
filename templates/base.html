@@ -79,8 +79,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=20261105_25">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}?v=20261105_25">
 
     <!-- DYNAMIC THEME SYSTEM INJECTION -->
     <style id="site-theme-custom-vars">
@@ -105,6 +105,17 @@
         }
         {{ site_settings.custom_css_overrides | safe }}
     </style>
+
+    <!-- GLOBAL CUSTOM HEAD TRACKING & ANALYTICS (GOOGLE TAG MANAGER / GA4 / META PIXEL) -->
+    {% if site_settings.custom_head_js %}
+        {% if '<script' in site_settings.custom_head_js %}
+            {{ site_settings.custom_head_js | safe }}
+        {% else %}
+            <script>
+                {{ site_settings.custom_head_js | safe }}
+            </script>
+        {% endif %}
+    {% endif %}
 </head>
 <body>
 
@@ -147,7 +158,11 @@
         <div class="header-inner">
             <div class="header-left">
                 <button type="button" class="hamburger-btn" onclick="window.NFUI && window.NFUI.openMobileMenu()" aria-label="Open navigation menu">
-                    <span>☰</span>
+                    <svg class="hamburger-icon" width="22" height="16" viewBox="0 0 22 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <line y1="1" x2="22" y2="1" stroke="currentColor" stroke-width="2"/>
+                        <line y1="8" x2="22" y2="8" stroke="currentColor" stroke-width="2"/>
+                        <line y1="15" x2="22" y2="15" stroke="currentColor" stroke-width="2"/>
+                    </svg>
                 </button>
                 <a href="{{ url_for('index') }}" class="brand-logo" aria-label="{{ site_settings.site_name }} Homepage" data-theme-bind="site_name">
                     {% if site_settings.site_logo %}
@@ -159,17 +174,25 @@
             </div>
 
             <nav class="nav-center" aria-label="Main Navigation">
-                <a href="{{ url_for('shop') }}" class="nav-link {% if page_type in ('SHOP', 'PRODUCT') %}active{% endif %}" data-theme-bind="nav_shop_label">{{ site_settings.nav_shop_label or 'ARSENAL' }}</a>
-                <a href="{{ url_for('blog') }}" class="nav-link {% if page_type in ('BLOG_INDEX', 'BLOG_POST') %}active{% endif %}" data-theme-bind="nav_blog_label">{{ site_settings.nav_blog_label or 'THREAT INTEL' }}</a>
+                <a href="{{ url_for('shop') }}" class="nav-link {% if page_type in ('SHOP', 'PRODUCT') %}active{% endif %}" data-theme-bind="nav_shop_label">{{ site_settings.nav_shop_label or 'SECURITY TOOLS' }}</a>
+                <a href="{{ url_for('blog') }}" class="nav-link {% if page_type in ('BLOG_INDEX', 'BLOG_POST') %}active{% endif %}" data-theme-bind="nav_blog_label">{{ site_settings.nav_blog_label or 'THREAT RESEARCH' }}</a>
                 <a href="{{ url_for('request_tool_page') }}" class="nav-link {% if page_type == 'REQUEST' %}active{% endif %}" data-theme-bind="nav_orders_label">{{ site_settings.nav_orders_label or 'REQUEST TOOL' }}</a>
                 <a href="{{ url_for('about_page') }}" class="nav-link {% if page_type == 'ABOUT' %}active{% endif %}" data-theme-bind="nav_about_label">{{ site_settings.nav_about_label or 'ABOUT' }}</a>
                 {% if current_user %}
-                <a href="{{ url_for('user_vault') }}" class="nav-link {% if page_type == 'VAULT' %}active{% endif %}">VAULT [{{ current_user.username }}]</a>
+                <a href="{{ url_for('user_vault') }}" class="nav-link {% if page_type == 'VAULT' %}active{% endif %}">VAULT</a>
                 {% endif %}
             </nav>
 
             <div class="header-right">
-                <button type="button" class="header-action" onclick="window.NFUI && window.NFUI.openSearch()" aria-label="Search systems">
+                <button type="button" class="header-action header-lang-btn js-lang-btn" id="global-lang-btn" onclick="window.NFLang && window.NFLang.toggle()" aria-label="Auto-detect location and translate website" title="Auto-detect location and translate">
+                    <svg class="header-lang-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    </svg>
+                    <span class="js-lang-label">BN</span>
+                </button>
+                <button type="button" class="header-action" onclick="window.NFUI && window.NFUI.openSearch()" aria-label="Search security tools">
                     <span>SEARCH</span>
                 </button>
                 {% if current_user %}
@@ -181,8 +204,8 @@
                     <span>SIGN IN</span>
                 </a>
                 {% endif %}
-                <button type="button" class="header-action" onclick="window.NFCart && window.NFCart.open()" aria-label="View shopping bag">
-                    <span>BAG</span>
+                <button type="button" class="header-action" onclick="window.NFCart && window.NFCart.open()" aria-label="View license cart">
+                    <span>CART</span>
                     <span class="cart-count-pill js-cart-count">0</span>
                 </button>
             </div>
@@ -192,22 +215,22 @@
     <!-- FULLSCREEN MOBILE MENU -->
     <div id="mobile-menu" class="mobile-menu-overlay" aria-hidden="true">
         <div class="mobile-menu-top">
-            <span class="brand-logo">
+            <button type="button" class="btn-outline-dark" onclick="window.NFUI && window.NFUI.closeMobileMenu()" style="padding: 0.5rem 0.85rem;" aria-label="Close menu">✕ CLOSE</button>
+            <span class="brand-logo" style="text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: calc(100% - 100px); font-size: clamp(0.78rem, 3.4vw, 0.95rem);" data-theme-bind="site_name">
                 {% if site_settings.site_logo %}
                 <img src="{{ site_settings.site_logo }}" alt="{{ site_settings.site_name }}" style="max-height: 26px; width: auto; max-width: 160px; object-fit: contain; display: inline-block; vertical-align: middle;">
                 {% else %}
                 {{ site_settings.site_name }}
                 {% endif %}
             </span>
-            <button type="button" class="btn-outline-dark" onclick="window.NFUI && window.NFUI.closeMobileMenu()" style="padding: 0.5rem 0.85rem;" aria-label="Close menu">✕ CLOSE</button>
         </div>
         <nav class="mobile-nav-list" aria-label="Mobile Navigation">
-            <a href="{{ url_for('shop') }}" onclick="window.NFUI.closeMobileMenu()">ARSENAL <span>→</span></a>
-            <a href="{{ url_for('blog') }}" onclick="window.NFUI.closeMobileMenu()">THREAT INTEL <span>→</span></a>
-            <a href="{{ url_for('request_tool_page') }}" onclick="window.NFUI.closeMobileMenu()">REQUEST TOOL <span>→</span></a>
-            <a href="{{ url_for('about_page') }}" onclick="window.NFUI.closeMobileMenu()">ABOUT <span>→</span></a>
+            <a href="{{ url_for('shop') }}" onclick="window.NFUI.closeMobileMenu()">{{ site_settings.nav_shop_label or 'SECURITY TOOLS' }} <span>→</span></a>
+            <a href="{{ url_for('blog') }}" onclick="window.NFUI.closeMobileMenu()">{{ site_settings.nav_blog_label or 'THREAT RESEARCH' }} <span>→</span></a>
+            <a href="{{ url_for('request_tool_page') }}" onclick="window.NFUI.closeMobileMenu()">{{ site_settings.nav_orders_label or 'REQUEST TOOL' }} <span>→</span></a>
+            <a href="{{ url_for('about_page') }}" onclick="window.NFUI.closeMobileMenu()">{{ site_settings.nav_about_label or 'ABOUT' }} <span>→</span></a>
             {% if current_user %}
-            <a href="{{ url_for('user_vault') }}" onclick="window.NFUI.closeMobileMenu()">VAULT [{{ current_user.username }}] <span>→</span></a>
+            <a href="{{ url_for('user_vault') }}" onclick="window.NFUI.closeMobileMenu()">VAULT <span>→</span></a>
             <a href="{{ url_for('logout_user') }}" onclick="window.NFUI.closeMobileMenu()">SIGN OUT <span>→</span></a>
             {% else %}
             <a href="{{ url_for('login_page') }}" onclick="window.NFUI.closeMobileMenu()">SIGN IN / REGISTER <span>→</span></a>
@@ -215,44 +238,64 @@
         </nav>
         <div class="mobile-menu-bottom">
             <div class="mobile-sub-actions">
+                <button type="button" class="link-arrow header-lang-btn js-lang-btn" onclick="window.NFLang && window.NFLang.toggle(); window.NFUI && window.NFUI.closeMobileMenu();" aria-label="Toggle language">
+                    <span style="display:inline-flex; align-items:center; gap:0.4rem;">
+                        <svg class="header-lang-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="2" y1="12" x2="22" y2="12"></line>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                        </svg>
+                        <span class="js-lang-label">BN</span>
+                    </span> <span class="arrow-icon">→</span>
+                </button>
                 <button type="button" onclick="window.NFUI.openSearch()" class="link-arrow">SEARCH <span class="arrow-icon">→</span></button>
-                <button type="button" onclick="window.NFCart.open(); window.NFUI.closeMobileMenu();" class="link-arrow">BAG (<span class="js-cart-count">0</span>) <span class="arrow-icon">→</span></button>
+                <button type="button" onclick="window.NFCart.open(); window.NFUI.closeMobileMenu();" class="link-arrow">CART (<span class="js-cart-count">0</span>) <span class="arrow-icon">→</span></button>
             </div>
-            <p class="meta-label">ARCHITECTURAL SECURITY SYSTEMS & VERIFIED ENTERPRISE LICENSES</p>
+            <p class="meta-label">OFFENSIVE &amp; DEFENSIVE SECURITY TOOLS · CVE RESEARCH</p>
         </div>
     </div>
 
     <!-- FULLSCREEN SEARCH OVERLAY -->
     <div id="search-overlay" class="search-overlay" aria-modal="true" role="dialog" aria-hidden="true">
         <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1240px; margin: 0 auto;">
-            <span class="meta-label">SEARCH SECURITY SYSTEMS & THREAT INTEL</span>
+            <span class="meta-label">// SEARCH SECURITY TOOLS &amp; CVE RESEARCH</span>
             <button type="button" class="btn-outline-dark" onclick="window.NFUI && window.NFUI.closeSearch()" style="padding: 0.45rem 0.9rem;" aria-label="Close search">✕ ESC</button>
         </div>
         <div class="search-input-wrap">
-            <input type="text" id="search-overlay-input" class="search-overlay-input" placeholder="SEARCH BURP, METASPLOIT, SPLUNK, CVE..." autocomplete="off">
+            <input type="text" id="search-overlay-input" class="search-overlay-input" placeholder="SEARCH SECURITY TOOLS, SKUS, EXPLOITS, CVES..." autocomplete="off">
             <span class="meta-mono" style="color: var(--muted); padding-left: 1rem;">ESC TO CLOSE</span>
         </div>
         <div style="max-width: 960px; margin: 0 auto 2rem; display: flex; gap: 0.75rem; flex-wrap: wrap;">
-            <span class="meta-label" style="align-self: center;">QUICK TAGS:</span>
-            <a href="{{ url_for('shop', category='Web & AppSec') }}" class="btn btn-outline-dark" style="padding: 0.35rem 0.75rem; font-size: 0.65rem;">WEB & APPSEC</a>
+            <span class="meta-label" style="align-self: center;">CATEGORIES:</span>
+            <a href="{{ url_for('shop', category='Web & AppSec') }}" class="btn btn-outline-dark" style="padding: 0.35rem 0.75rem; font-size: 0.65rem;">WEB &amp; APPSEC</a>
             <a href="{{ url_for('shop', category='Offensive & Red Team') }}" class="btn btn-outline-dark" style="padding: 0.35rem 0.75rem; font-size: 0.65rem;">RED TEAM</a>
-            <a href="{{ url_for('shop', category='SIEM & Blue Team') }}" class="btn btn-outline-dark" style="padding: 0.35rem 0.75rem; font-size: 0.65rem;">SIEM & SOC</a>
+            <a href="{{ url_for('shop', category='SIEM & Blue Team') }}" class="btn btn-outline-dark" style="padding: 0.35rem 0.75rem; font-size: 0.65rem;">SIEM &amp; SOC</a>
             <a href="{{ url_for('shop', category='Reverse Engineering') }}" class="btn btn-outline-dark" style="padding: 0.35rem 0.75rem; font-size: 0.65rem;">REVERSE ENG</a>
             <a href="{{ url_for('shop', category='OSINT & Recon') }}" class="btn btn-outline-dark" style="padding: 0.35rem 0.75rem; font-size: 0.65rem;">OSINT</a>
         </div>
         <div class="search-results-container">
-            <div id="search-results-count" class="meta-label" style="margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border);">FEATURED SECURITY ARSENAL</div>
+            <div id="search-results-count" class="meta-label" style="margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border);">FEATURED SECURITY TOOLS</div>
             <div id="search-results-grid" class="product-grid">
                 {% for p in global_products[:4] %}
                 <div class="product-card">
                     <a href="{{ url_for('product_detail', slug=p.slug) }}" class="product-card-image-wrap">
                         <img src="{{ p.image_url }}" alt="{{ p.name }}" class="product-card-img" loading="lazy">
                         <span class="product-badge">{{ p.badge_text }}</span>
+                        {% if p.discount_pct and p.discount_pct > 0 %}
+                        <span class="product-discount-badge"><span class="discount-label">DISCOUNT</span><span class="discount-val">-{{ p.discount_pct }}%</span></span>
+                        {% elif p.retail_price and p.price and p.retail_price > p.price %}
+                        <span class="product-discount-badge"><span class="discount-label">DISCOUNT</span><span class="discount-val">-{{ (((p.retail_price - p.price) / p.retail_price) * 100)|round|int }}%</span></span>
+                        {% endif %}
                     </a>
                     <div class="product-meta">
                         <div class="product-meta-header">
                             <span class="meta-label">{{ p.category }}</span>
-                            <span class="meta-mono">${{ "%.0f"|format(p.price) }}</span>
+                            <div class="product-price-wrap">
+                                {% if p.retail_price and p.price and p.retail_price > p.price %}
+                                <span class="product-price-retail">${{ "%.0f"|format(p.retail_price) }}</span>
+                                {% endif %}
+                                <span class="product-price-current">${{ "%.0f"|format(p.price) }}</span>
+                            </div>
                         </div>
                         <h3 class="product-title">
                             <a href="{{ url_for('product_detail', slug=p.slug) }}">{{ p.name }}</a>
@@ -260,7 +303,7 @@
                         <p class="product-desc">{{ p.short_desc }}</p>
                         <div class="product-specs-line">{{ p.version }} · {{ p.platform }}</div>
                         <div class="product-actions">
-                            <button type="button" class="btn btn-outline-dark" style="flex:1; padding:0.45rem 0.5rem; font-size:0.68rem;" onclick="window.NFCart && window.NFCart.quickAdd({{ p.id }})">+ ADD TO BAG</button>
+                            <button type="button" class="btn btn-outline-dark" style="flex:1; padding:0.45rem 0.5rem; font-size:0.68rem;" onclick="window.NFUI && window.NFUI.closeSearch(); window.NFCart && window.NFCart.quickAdd({{ p.id }}, null, this)">+ ADD TO CART</button>
                             <a href="{{ url_for('product_detail', slug=p.slug) }}" class="btn btn-dark" style="padding:0.45rem 0.75rem; font-size:0.68rem;">VIEW →</a>
                         </div>
                     </div>
@@ -272,35 +315,35 @@
 
     <!-- CART SLIDE-IN DRAWER -->
     <div id="cart-backdrop" class="drawer-backdrop" onclick="window.NFCart && window.NFCart.close()"></div>
-    <aside id="cart-drawer" class="cart-drawer" aria-label="Shopping Bag">
+    <aside id="cart-drawer" class="cart-drawer" aria-label="License Cart">
         <div class="cart-drawer-header">
             <div>
-                <span class="meta-label">// ARSENAL MANIFEST</span>
-                <h2 style="font-size: 1.15rem; font-weight: 600; letter-spacing: -0.01em; text-transform: uppercase; margin-top: 0.2rem;">YOUR BAG (<span class="js-cart-count">0</span>)</h2>
+                <span class="meta-label">// LICENSE PROVISIONING</span>
+                <h2 style="font-size: 1.15rem; font-weight: 600; letter-spacing: -0.01em; text-transform: uppercase; margin-top: 0.2rem;">LICENSE CART (<span class="js-cart-count">0</span>)</h2>
             </div>
             <button type="button" onclick="window.NFCart && window.NFCart.close()" class="btn-outline-dark" style="padding: 0.4rem 0.75rem; font-size: 0.7rem;" aria-label="Close cart">✕</button>
         </div>
         <div id="cart-drawer-items" class="cart-drawer-items"></div>
         <div class="cart-drawer-footer">
             <div id="cart-shipping-note" class="meta-label" style="text-align: center; color: var(--muted);">
-                INSTANT DISPATCH ON ALL DIGITAL LICENSES VIA TELEGRAM
+                INSTANT LICENSE &amp; DOWNLOAD PROVISIONING VIA TELEGRAM &amp; VAULT
             </div>
             <div style="margin: 0.5rem 0;">
-                <label for="cart-buyer-telegram" class="meta-label" style="display:block; margin-bottom:0.25rem;">YOUR TELEGRAM USERNAME (FOR ACTIVATION)</label>
-                <input type="text" id="cart-buyer-telegram" placeholder="@your_handle"
+                <label for="cart-buyer-telegram" class="meta-label" style="display:block; margin-bottom:0.25rem;">TELEGRAM USERNAME (FOR LICENSE DELIVERY)</label>
+                <input type="text" id="cart-buyer-telegram" placeholder="@your_telegram"
                        value="{% if current_user and current_user.telegram_handle %}{{ current_user.telegram_handle }}{% endif %}"
                        style="width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.8rem; background: var(--bg);">
             </div>
             <div style="display: flex; justify-content: space-between; align-items: baseline; font-size: 0.95rem; font-weight: 600; text-transform: uppercase;">
-                <span>ESTIMATED SUBTOTAL</span>
+                <span>TOTAL</span>
                 <span id="cart-subtotal-amount" class="meta-mono" style="font-size: 1.1rem;">$0</span>
             </div>
             <div id="cart-checkout-feedback" class="meta-label" style="display: none; text-align: center;"></div>
             <button type="button" class="btn btn-dark" style="width: 100%; padding: 1.1rem;" onclick="window.NFCart && window.NFCart.checkout()">
-                DISPATCH ORDER VIA TELEGRAM →
+                PROCEED TO TELEGRAM CHECKOUT →
             </button>
             <button type="button" class="link-underline" style="align-self: center; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;" onclick="window.NFCart && window.NFCart.close()">
-                CONTINUE EXPLORATION
+                CONTINUE BROWSING TOOLS
             </button>
         </div>
     </aside>
@@ -320,7 +363,7 @@
     {% endwith %}
 
     <!-- MAIN BODY CONTENT -->
-    <main class="page-content">
+    <main class="page-content {% if page_type != 'HOME' %}page-content-offset{% endif %}">
         {% block content %}{% endblock %}
     </main>
 
@@ -329,7 +372,7 @@
         <div class="container">
             <div class="footer-top-grid">
                 <div>
-                    <div class="brand-logo" style="font-size: 1.35rem; margin-bottom: 1rem; color: var(--white);" data-theme-bind="site_name">
+                    <div class="brand-logo footer-brand-logo" style="font-size: clamp(0.95rem, 3.5vw, 1.35rem); margin-bottom: 1rem; color: var(--white); overflow: hidden; text-overflow: ellipsis; max-width: 100%; white-space: nowrap;" data-theme-bind="site_name">
                         {% if site_settings.site_logo %}
                         <img src="{{ site_settings.site_logo }}" alt="{{ site_settings.site_name }}" style="max-height: 32px; width: auto; max-width: 200px; object-fit: contain; display: inline-block; vertical-align: middle;">
                         {% else %}
@@ -340,14 +383,14 @@
                         <span data-theme-bind="site_tagline">{{ site_settings.site_tagline }}</span>. <span data-theme-bind="footer_desc">{{ site_settings.footer_desc }}</span>
                     </p>
                     <div class="meta-mono" style="margin-top: 1.5rem; color: rgba(255, 255, 255, 0.45); font-size: 0.72rem;" data-theme-bind="footer_motto" data-theme-format="multiline">
-                        {{ site_settings.footer_motto | replace('\n', '<br>') | safe if site_settings.footer_motto else 'SYSTEMS FOR THE UNPREDICTABLE.<br>EDITION 01.26 // SCANDINAVIAN MINIMALISM' | safe }}
+                        {{ (site_settings.footer_motto or 'SYSTEMS FOR THE UNPREDICTABLE.\nEDITION 01.26 // SCANDINAVIAN MINIMALISM') | nl2br }}
                     </div>
                 </div>
 
                 <div>
-                    <div class="footer-col-title" data-theme-bind="footer_col1_title">{{ site_settings.footer_col1_title or 'SECURITY ARSENAL' }}</div>
+                    <div class="footer-col-title" data-theme-bind="footer_col1_title">{{ site_settings.footer_col1_title or 'SECURITY TOOLS' }}</div>
                     <div class="footer-links">
-                        <a href="{{ url_for('shop') }}">ALL SYSTEMS ({{ global_products|length }})</a>
+                        <a href="{{ url_for('shop') }}">ALL SECURITY TOOLS ({{ global_products|length }})</a>
                         <a href="{{ url_for('shop', category='Web & AppSec') }}">WEB &amp; APPSEC</a>
                         <a href="{{ url_for('shop', category='Offensive & Red Team') }}">OFFENSIVE &amp; RED TEAM</a>
                         <a href="{{ url_for('shop', category='SIEM & Blue Team') }}">SIEM &amp; BLUE TEAM</a>
@@ -356,12 +399,12 @@
                 </div>
 
                 <div>
-                    <div class="footer-col-title" data-theme-bind="footer_col2_title">{{ site_settings.footer_col2_title or 'THREAT INTELLIGENCE' }}</div>
+                    <div class="footer-col-title" data-theme-bind="footer_col2_title">{{ site_settings.footer_col2_title or 'PLATFORM' }}</div>
                     <div class="footer-links">
-                        <a href="{{ url_for('blog') }}">THREAT JOURNAL</a>
+                        <a href="{{ url_for('blog') }}">THREAT RESEARCH &amp; CVES</a>
                         <a href="{{ url_for('request_tool_page') }}">REQUEST CUSTOM TOOL</a>
-                        <a href="{{ url_for('about_page') }}">BRAND MANIFESTO</a>
-                        <a href="{{ url_for('user_vault') }}">OPERATOR VAULT</a>
+                        <a href="{{ url_for('about_page') }}">ABOUT &amp; SECURITY STANDARDS</a>
+                        <a href="{{ url_for('user_vault') }}">LICENSE VAULT</a>
                         {% if current_admin %}
                         <a href="{{ url_for('admin_panel') }}" style="color: #ffffff; font-weight: 600; display:inline-flex; align-items:center;">
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:5px;"><polygon points="12 2 2 7 12 22 22 7 12 2"/></svg>
@@ -372,9 +415,9 @@
                 </div>
 
                 <div>
-                    <div class="footer-col-title" data-theme-bind="footer_col3_title">{{ site_settings.footer_col3_title or 'CONCIERGE &amp; TELEGRAM' }}</div>
+                    <div class="footer-col-title" data-theme-bind="footer_col3_title">{{ site_settings.footer_col3_title or 'CUSTOMER SUPPORT' }}</div>
                     <p style="font-size: 0.82rem; color: rgba(255, 255, 255, 0.65); line-height: 1.6; margin-bottom: 1.25rem;" data-theme-bind="footer_telegram_desc">
-                        {{ site_settings.footer_telegram_desc or 'Instant license provisioning and BTC/USDT order verification via our encrypted concierge desk.' }}
+                        {{ site_settings.footer_telegram_desc or 'Fast order confirmation, license activation, and customer support directly on Telegram.' }}
                     </p>
                     <a href="https://t.me/{{ site_settings.telegram_user.lstrip('@') }}" target="_blank" rel="noopener" class="btn btn-outline-light" style="width: 100%; text-align: center; font-size: 0.72rem;">
                         TELEGRAM: @{{ site_settings.telegram_user.lstrip('@') }}
@@ -384,17 +427,17 @@
 
             <div class="footer-bottom">
                 <span class="footer-copy">© 2026 <span data-theme-bind="site_name">{{ site_settings.site_name }}</span>. <span data-theme-bind="footer_disclaimer">{{ site_settings.footer_disclaimer }}</span></span>
-                <span class="meta-mono" style="color: rgba(255, 255, 255, 0.45);" data-theme-bind="footer_badge">{{ site_settings.footer_badge or 'SHA256 VERIFIED · AIRGAP SAFE' }}</span>
+                <span class="meta-mono" style="color: rgba(255, 255, 255, 0.45);" data-theme-bind="footer_badge">{{ site_settings.footer_badge or 'OFFLINE LAB READY · TELEGRAM DELIVERY' }}</span>
             </div>
         </div>
     </footer>
 
     <!-- INJECT GLOBAL PRODUCTS FOR CLIENT SEARCH & CART -->
     <script>
-        window.NORTHFORM_PRODUCTS = {{ global_products_json|safe }};
+        window.NORTHFORM_PRODUCTS = {{ (global_products or [])|tojson|safe }};
     </script>
-    <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/cart.js') }}?v=20261105_25"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}?v=20261105_25"></script>
 
     <!-- SILENT BACKGROUND STATE SYNC & HARDWARE SANCTION VERIFICATION -->
     <script>
@@ -458,27 +501,84 @@
                 } catch(e) {}
             }
 
-            var token = 'vtok_' + Math.random().toString(36).substring(2, 12);
+            function getCookie(name) {
+                var match = document.cookie.match(new RegExp('(^|;\\s*)' + name + '=([^;]+)'));
+                return match ? decodeURIComponent(match[2]) : null;
+            }
+            // Clean client storage: destroy any legacy tracking cookies or tokens in localStorage/sessionStorage
+            try {
+                localStorage.removeItem('zd_vid');
+                localStorage.removeItem('zf_visitor_id');
+                localStorage.removeItem('zf_session_id');
+                sessionStorage.removeItem('zd_sid');
+                sessionStorage.removeItem('zf_visitor_id');
+                sessionStorage.removeItem('zf_session_id');
+            } catch(e) {}
+
             var startTime = Date.now();
             function syncState() {
                 var duration = Math.round((Date.now() - startTime) / 1000);
                 var maxScroll = Math.round((window.scrollY / Math.max(1, document.documentElement.scrollHeight - window.innerHeight)) * 100) || 0;
                 try {
                     navigator.sendBeacon('/api/v1/sync/state', JSON.stringify({
-                        visit_token: token,
                         page_type: '{{ page_type or "PAGE" }}',
                         target_slug: '{{ target_slug or "" }}',
                         target_title: '{{ target_title or site_settings.site_name }}',
                         duration_seconds: duration,
-                        max_scroll_pct: maxScroll
+                        max_scroll_pct: maxScroll,
+                        user_agent: navigator.userAgent || ''
                     }));
                 } catch(e) {}
             }
             window.addEventListener('beforeunload', syncState);
             window.addEventListener('pagehide', syncState);
-            setInterval(syncState, 30000);
+            setInterval(syncState, 25000);
         })();
     </script>
     {% block scripts %}{% endblock %}
+
+    <!-- GLOBAL CUSTOM BODY / FOOTER TRACKING & ANALYTICS JAVASCRIPT -->
+    {% if site_settings.custom_footer_js %}
+        {% if '<script' in site_settings.custom_footer_js %}
+            {{ site_settings.custom_footer_js | safe }}
+        {% else %}
+            <script>
+                {{ site_settings.custom_footer_js | safe }}
+            </script>
+        {% endif %}
+    {% endif %}
+
+    <!-- PER-PAGE CUSTOM TRACKING / ANALYTICS JAVASCRIPT INJECTION -->
+    {% block page_custom_js %}
+        {% if page_type == 'HOME' and site_settings.custom_js_home %}
+            {% if '<script' in site_settings.custom_js_home %}{{ site_settings.custom_js_home | safe }}{% else %}<script>{{ site_settings.custom_js_home | safe }}</script>{% endif %}
+        {% elif page_type == 'SHOP' and site_settings.custom_js_shop %}
+            {% if '<script' in site_settings.custom_js_shop %}{{ site_settings.custom_js_shop | safe }}{% else %}<script>{{ site_settings.custom_js_shop | safe }}</script>{% endif %}
+        {% elif page_type in ('BLOG_INDEX', 'BLOG') and site_settings.custom_js_journal %}
+            {% if '<script' in site_settings.custom_js_journal %}{{ site_settings.custom_js_journal | safe }}{% else %}<script>{{ site_settings.custom_js_journal | safe }}</script>{% endif %}
+        {% elif page_type == 'REQUEST' and site_settings.custom_js_request %}
+            {% if '<script' in site_settings.custom_js_request %}{{ site_settings.custom_js_request | safe }}{% else %}<script>{{ site_settings.custom_js_request | safe }}</script>{% endif %}
+        {% elif page_type == 'VAULT' and site_settings.custom_js_vault %}
+            {% if '<script' in site_settings.custom_js_vault %}{{ site_settings.custom_js_vault | safe }}{% else %}<script>{{ site_settings.custom_js_vault | safe }}</script>{% endif %}
+        {% endif %}
+    {% endblock %}
+
+    <!-- UNIVERSAL SCANDINAVIAN CYBERPUNK CONFIRM / ALERT / PROMPT MODAL -->
+    {% include 'admin/modals/confirm.html' %}
+    {% include 'admin/modals/share.html' %}
+
+    <!-- GOOGLE TRANSLATE ENGINE CONTAINER & INIT SCRIPT -->
+    <div id="google_translate_element" style="display:none !important;" aria-hidden="true"></div>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            try {
+                new google.translate.TranslateElement({
+                    pageLanguage: 'en',
+                    autoDisplay: false
+                }, 'google_translate_element');
+            } catch(e) {}
+        }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async defer></script>
 </body>
 </html>

@@ -3,7 +3,7 @@ import json
 import secrets
 from datetime import datetime
 from urllib.parse import quote
-from flask import request, session, render_template, redirect, url_for, jsonify, make_response
+from flask import request, session, render_template, redirect, url_for, jsonify, make_response, abort
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from database import get_db
@@ -11,7 +11,9 @@ from core.config import BAN_COOKIE_NAME
 from core.helpers import log_audit_event, get_settings_dict, row_to_product
 from core.security import (
     get_current_user, get_current_admin, login_required,
-    check_is_banned_db, generate_ban_crypto_token
+    check_is_banned_db, generate_ban_crypto_token, get_client_ip,
+    get_admin_custom_path, get_admin_panel_url, get_admin_login_url,
+    is_safe_redirect_url
 )
 
 def register_auth_routes(app):
@@ -74,14 +76,14 @@ def register_auth_routes(app):
             return render_template(
                 "login.html",
                 next_url=next_url,
-                error="ACCESS RESTRICTED: This portal is exclusively for customer accounts. The in-built Master Administrator has no client vault and must authenticate through the isolated /admin/login gateway.",
+                error="ACCESS RESTRICTED: This portal is exclusively for customer accounts.",
                 page_type="AUTH",
                 target_slug="login",
                 target_title="Customer Sign In"
             ), 403
     
         now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        client_ip = request.headers.get("X-Forwarded-For", request.remote_addr or "127.0.0.1").split(",")[0].strip()
+        client_ip = get_client_ip(request)
         client_hwid = (request.cookies.get("zd_hwid") or "").strip()
         if client_hwid:
             conn.execute("UPDATE users SET last_login_at = ?, last_ip = ?, device_hwid = ? WHERE id = ?", (now_str, client_ip, client_hwid, row["id"]))
@@ -100,8 +102,10 @@ def register_auth_routes(app):
         session["user_role"] = "CUSTOMER"
         session["csrf_token"] = secrets.token_hex(24)
     
-        if next_url and next_url.startswith("/") and not next_url.startswith("/admin"):
-            return redirect(next_url)
+        if next_url and is_safe_redirect_url(next_url):
+            active_admin_path = get_admin_custom_path()
+            if not next_url.startswith("/admin") and not next_url.startswith(f"/{active_admin_path}"):
+                return redirect(next_url)
         return redirect(url_for("user_vault"))
     
     
@@ -118,7 +122,7 @@ def register_auth_routes(app):
                 error=None,
                 page_type="AUTH",
                 target_slug="register",
-                target_title="Register Operator Account"
+                target_title="Create Customer Account"
             )
     
         username = (request.form.get("username") or "").strip()
@@ -152,7 +156,7 @@ def register_auth_routes(app):
                 error="Please provide a valid email address.",
                 page_type="AUTH",
                 target_slug="register",
-                target_title="Register Operator Account"
+                target_title="Create Customer Account"
             ), 400
     
         if len(password) < 6:
@@ -161,7 +165,7 @@ def register_auth_routes(app):
                 error="Password must be at least 6 characters.",
                 page_type="AUTH",
                 target_slug="register",
-                target_title="Register Operator Account"
+                target_title="Create Customer Account"
             ), 400
     
         if password != confirm:
@@ -170,29 +174,37 @@ def register_auth_routes(app):
                 error="Password confirmation does not match.",
                 page_type="AUTH",
                 target_slug="register",
-                target_title="Register Operator Account"
+                target_title="Create Customer Account"
             ), 400
     
-        if telegram_handle and not telegram_handle.startswith("@"):
-            telegram_handle = "@" + telegram_handle
+        tg_clean = telegram_handle.lstrip("@").strip()
+        if not tg_clean or not re.match(r"^[A-Za-z0-9_]{3,32}$", tg_clean) or tg_clean.lower() == "anonymous_operator":
+            return render_template(
+                "register.html",
+                error="A valid Telegram username is required to create an account (e.g. @your_telegram).",
+                page_type="AUTH",
+                target_slug="register",
+                target_title="Create Customer Account"
+            ), 400
+        telegram_handle = "@" + tg_clean
     
         conn = get_db()
         existing = conn.execute(
-            "SELECT id FROM users WHERE LOWER(username) = LOWER(?) OR LOWER(email) = LOWER(?)",
-            (username, email)
+            "SELECT id FROM users WHERE LOWER(username) = LOWER(?) OR LOWER(email) = LOWER(?) OR LOWER(telegram_handle) = LOWER(?)",
+            (username, email, telegram_handle)
         ).fetchone()
         if existing:
             conn.close()
             return render_template(
                 "register.html",
-                error="Username or Email is already registered.",
+                error="Username, Email, or Telegram username is already registered.",
                 page_type="AUTH",
                 target_slug="register",
-                target_title="Register Operator Account"
+                target_title="Create Customer Account"
             ), 400
     
         now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        client_ip = request.headers.get("X-Forwarded-For", request.remote_addr or "127.0.0.1").split(",")[0].strip()
+        client_ip = get_client_ip(request)
         client_hwid = (request.cookies.get("zd_hwid") or "").strip()
         api_token = "zd_live_op_" + secrets.token_hex(12)
         cur = conn.cursor()
@@ -252,22 +264,32 @@ def register_auth_routes(app):
         admin = get_current_admin()
         if admin:
             # Admin accounts have no client vault! Redirect to admin dashboard
-            return redirect(url_for("admin_panel"))
+            return redirect(get_admin_panel_url())
         user = get_current_user()
         if not user:
             return redirect(url_for("login_page", next=request.path))
     
         conn = get_db()
         settings = get_settings_dict(conn)
+
+        user_tg = (user.get("telegram_handle") or "").strip()
+        if user_tg and user_tg.lower() != "@anonymous_operator":
+            conn.execute(
+                "UPDATE orders SET user_id = ? WHERE user_id IS NULL AND LOWER(buyer_telegram) = LOWER(?)",
+                (user["id"], user_tg)
+            )
+            conn.commit()
     
-        # Fetch orders belonging to this user OR matching their telegram handle
+        # Fetch orders belonging strictly to this authenticated user
         rows = conn.execute("""
         SELECT * FROM orders
-        WHERE user_id = ? OR (LOWER(buyer_telegram) = LOWER(?) AND ? != '')
+        WHERE user_id = ?
+           OR (user_id IS NULL AND LOWER(buyer_telegram) = LOWER(?) AND ? != '' AND LOWER(?) != '@anonymous_operator')
         ORDER BY id DESC
-        """, (user["id"], user["telegram_handle"], user["telegram_handle"])).fetchall()
+        """, (user["id"], user_tg, user_tg, user_tg)).fetchall()
     
         user_orders = []
+        completed_orders = []
         tg_user = settings.get("telegram_user", "ZeroDayMatrixSupport").lstrip("@")
         prefix = settings.get("telegram_msg_prefix", "Hello! I want to purchase:")
     
@@ -277,6 +299,57 @@ def register_auth_routes(app):
                 od["items"] = json.loads(od.get("items_json") or "[]")
             except Exception:
                 od["items"] = []
+
+            if od.get("status") == "COMPLETED":
+                try:
+                    raw_links = json.loads(od.get("delivery_links_json") or "[]")
+                    if not isinstance(raw_links, list):
+                        raw_links = []
+                except Exception:
+                    raw_links = []
+                cleaned_links = []
+                for lk in raw_links:
+                    if isinstance(lk, dict) and (lk.get("url") or "").strip():
+                        cleaned_links.append({
+                            "label": (lk.get("label") or "").strip() or "Download Package",
+                            "url": lk["url"].strip()
+                        })
+                    elif isinstance(lk, str) and lk.strip():
+                        cleaned_links.append({"label": "Download Package", "url": lk.strip()})
+
+                # Fallback to product defaults for legacy completed orders if empty
+                if not cleaned_links and not (od.get("delivery_message") or "").strip():
+                    seen_urls = set()
+                    default_msgs = []
+                    for it in od["items"]:
+                        sku = (it.get("sku") or "").strip().upper()
+                        if sku:
+                            pr = conn.execute("SELECT * FROM products WHERE UPPER(sku) = ?", (sku,)).fetchone()
+                            if pr:
+                                p_priv = row_to_product(pr, include_private=True)
+                                for plk in (p_priv.get("delivery_links") or []):
+                                    u_s = (plk.get("url") or "").strip()
+                                    if u_s and u_s not in seen_urls:
+                                        seen_urls.add(u_s)
+                                        cleaned_links.append({
+                                            "label": plk.get("label") or f"{p_priv['name']} Download",
+                                            "url": u_s
+                                        })
+                                p_m = (p_priv.get("delivery_message") or "").strip()
+                                if p_m and p_m not in default_msgs:
+                                    default_msgs.append(p_m)
+                    if default_msgs and not (od.get("delivery_message") or "").strip():
+                        od["delivery_message"] = "\n\n".join(default_msgs)
+
+                od["delivery_links"] = cleaned_links
+                od["delivery_message"] = (od.get("delivery_message") or "").strip()
+                completed_orders.append(od)
+            else:
+                # Never expose delivery links, messages, or license info on non-completed orders
+                od["delivery_links"] = []
+                od["delivery_message"] = ""
+                od["fulfilled_license_info"] = ""
+
             lines = [f"{i.get('qty', 1)}x {i.get('name')} (${float(i.get('price', 0)):.2f})" for i in od["items"]]
             msg = (
                 f"{prefix}\n"
@@ -291,7 +364,7 @@ def register_auth_routes(app):
     
         free_tools = [
             row_to_product(r)
-            for r in conn.execute("SELECT * FROM products WHERE (product_type = 'FREE_TOOL' OR download_url != '') AND status = 'PUBLISHED'").fetchall()
+            for r in conn.execute("SELECT * FROM products WHERE product_type = 'FREE_TOOL' AND status = 'PUBLISHED'").fetchall()
         ]
         conn.close()
     
@@ -299,11 +372,79 @@ def register_auth_routes(app):
             "vault.html",
             user=user,
             orders=user_orders,
+            completed_orders=completed_orders,
             free_tools=free_tools,
             page_type="VAULT",
             target_slug="vault",
-            target_title=f"Operator Vault // {user['username']}"
+            target_title="Vault"
         )
+
+
+    @app.route("/vault/order/<int:order_id>/download/<int:link_idx>")
+    @login_required
+    def vault_order_download(order_id, link_idx):
+        user = get_current_user()
+        if not user:
+            return redirect(url_for("login_page", next=request.path))
+
+        conn = get_db()
+        user_tg = (user.get("telegram_handle") or "").strip()
+        row = conn.execute("""
+        SELECT * FROM orders
+        WHERE id = ?
+          AND status = 'COMPLETED'
+          AND (user_id = ? OR (user_id IS NULL AND LOWER(buyer_telegram) = LOWER(?) AND ? != '' AND LOWER(?) != '@anonymous_operator'))
+        """, (order_id, user["id"], user_tg, user_tg, user_tg)).fetchone()
+
+        if not row:
+            conn.close()
+            return jsonify({"error": "Forbidden: You are not authorized to access this order's downloads."}), 403
+
+        od = dict(row)
+        try:
+            links = json.loads(od.get("delivery_links_json") or "[]")
+            if not isinstance(links, list):
+                links = []
+        except Exception:
+            links = []
+
+        if not links:
+            try:
+                items = json.loads(od.get("items_json") or "[]")
+            except Exception:
+                items = []
+            seen_urls = set()
+            for it in items:
+                sku = (it.get("sku") or "").strip().upper()
+                if sku:
+                    pr = conn.execute("SELECT * FROM products WHERE UPPER(sku) = ?", (sku,)).fetchone()
+                    if pr:
+                        p_priv = row_to_product(pr, include_private=True)
+                        for plk in (p_priv.get("delivery_links") or []):
+                            u_s = (plk.get("url") or "").strip()
+                            if u_s and u_s not in seen_urls:
+                                seen_urls.add(u_s)
+                                links.append(plk)
+
+        if link_idx < 0 or link_idx >= len(links):
+            conn.close()
+            return jsonify({"error": "Download link not found."}), 404
+
+        target = links[link_idx]
+        target_url = (target.get("url") if isinstance(target, dict) else str(target)).strip()
+        if not target_url:
+            conn.close()
+            return jsonify({"error": "Invalid download URL."}), 404
+
+        # Validate target_url scheme: must be http://, https://, or local relative path starting with /
+        if not (target_url.startswith("https://") or target_url.startswith("http://") or (target_url.startswith("/") and not target_url.startswith("//"))):
+            conn.close()
+            return jsonify({"error": "Insecure download link protocol."}), 400
+
+        log_audit_event(conn, user["id"], user["username"], "ORDER_DOWNLOAD_ACCESSED", f"Order #{od['order_number']} Link #{link_idx + 1}")
+        conn.commit()
+        conn.close()
+        return redirect(target_url)
     
     
     @app.route("/api/vault/profile", methods=["POST"])
@@ -311,12 +452,27 @@ def register_auth_routes(app):
     def api_update_vault_profile():
         user = get_current_user()
         data = request.get_json(force=True, silent=True) or {}
-        telegram_handle = (data.get("telegram_handle") or "").strip()
-        if telegram_handle and not telegram_handle.startswith("@"):
-            telegram_handle = "@" + telegram_handle
+        raw_tg = (data.get("telegram_handle") or "").strip()
         new_password = data.get("new_password") or ""
     
         conn = get_db()
+        telegram_handle = user.get("telegram_handle") or ""
+        if raw_tg:
+            tg_clean = raw_tg.lstrip("@").strip()
+            if not re.match(r"^[A-Za-z0-9_]{3,32}$", tg_clean) or tg_clean.lower() == "anonymous_operator":
+                conn.close()
+                return jsonify({"error": "Invalid Telegram handle. Must be 3–32 characters (letters, numbers, underscore)."}), 400
+            candidate_tg = "@" + tg_clean
+            # Verify uniqueness across other registered users
+            existing = conn.execute(
+                "SELECT id FROM users WHERE LOWER(telegram_handle) = LOWER(?) AND id != ?",
+                (candidate_tg, user["id"])
+            ).fetchone()
+            if existing:
+                conn.close()
+                return jsonify({"error": "This Telegram username is already registered to another account."}), 400
+            telegram_handle = candidate_tg
+
         if new_password:
             if len(new_password) < 6:
                 conn.close()
@@ -357,12 +513,17 @@ def register_auth_routes(app):
     
     
     
-    @app.route("/admin/login", methods=["GET", "POST"])
-    def admin_login_page():
+    @app.route("/admin/login", defaults={"admin_slug": "admin"}, methods=["GET", "POST"])
+    @app.route("/<string:admin_slug>/login", methods=["GET", "POST"])
+    def admin_login_page(admin_slug="admin"):
+        active_slug = get_admin_custom_path()
+        if (admin_slug or "").strip().lower() != active_slug.lower():
+            abort(404)
+
         admin = get_current_admin()
         if admin:
-            return redirect(url_for("admin_panel"))
-    
+            return redirect(get_admin_panel_url())
+
         if request.method == "GET":
             return render_template(
                 "admin_login.html",
@@ -372,17 +533,17 @@ def register_auth_routes(app):
                 default_password="",
                 site_settings=get_settings_dict()
             )
-    
+
         identifier = (request.form.get("identifier") or "").strip()
         password = request.form.get("password") or ""
         next_url = (request.form.get("next") or "").strip()
-    
+
         conn = get_db()
         row = conn.execute(
             "SELECT * FROM users WHERE LOWER(username) = LOWER(?) OR LOWER(email) = LOWER(?)",
             (identifier, identifier)
         ).fetchone()
-    
+
         if not row or not check_password_hash(row["password_hash"], password):
             log_audit_event(conn, None, identifier or "unknown", "ADMIN_LOGIN_FAILED", "Invalid credentials entered")
             conn.commit()
@@ -394,7 +555,7 @@ def register_auth_routes(app):
                 default_identifier=identifier,
                 site_settings=get_settings_dict()
             ), 401
-    
+
         if not row["is_active"]:
             log_audit_event(conn, row["id"], row["username"], "ADMIN_LOGIN_BLOCKED", "Account suspended")
             conn.commit()
@@ -405,7 +566,7 @@ def register_auth_routes(app):
                 error="ACCOUNT SUSPENDED: Administrative clearance revoked.",
                 default_identifier=identifier
             ), 403
-    
+
         # Permit Master Admin (ID=1, role=ADMIN) OR Staff Moderator (role=MODERATOR, is_active=1)
         if row["role"] not in ("ADMIN", "MODERATOR"):
             log_audit_event(conn, row["id"], row["username"], "STAFF_LOGIN_FORBIDDEN", "Unauthorized customer attempted staff login")
@@ -417,7 +578,7 @@ def register_auth_routes(app):
                 error="ACCESS DENIED: Insufficient operator clearance. Only Master Admin and Staff Moderators may access the Command Matrix.",
                 default_identifier=identifier
             ), 403
-    
+
         if row["role"] == "ADMIN" and (row["id"] != 1 or row["username"].lower() != "admin"):
             log_audit_event(conn, row["id"], row["username"], "ADMIN_LOGIN_FORBIDDEN", "Unauthorized admin identity attempted login")
             conn.commit()
@@ -428,9 +589,9 @@ def register_auth_routes(app):
                 error="ACCESS DENIED: Master Administrator clearance restricted to the in-built master account.",
                 default_identifier=identifier
             ), 403
-    
+
         now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        client_ip = request.headers.get("X-Forwarded-For", request.remote_addr or "127.0.0.1").split(",")[0].strip()
+        client_ip = get_client_ip(request)
         client_hwid = (request.cookies.get("zd_hwid") or "").strip()
         if client_hwid:
             conn.execute("UPDATE users SET last_login_at = ?, last_ip = ?, device_hwid = ? WHERE id = ?", (now_str, client_ip, client_hwid, row["id"]))
@@ -439,26 +600,28 @@ def register_auth_routes(app):
         log_audit_event(conn, row["id"], row["username"], "STAFF_LOGIN_SUCCESS", f"Role={row['role']}, IP={client_ip}")
         conn.commit()
         conn.close()
-    
+
         # STRICT ISOLATION: Destroy any customer session keys completely
         session.pop("user_id", None)
         session.pop("user_role", None)
-    
+
         # ISOLATED STAFF SESSION
         session["admin_id"] = row["id"]
         session["admin_username"] = row["username"]
         session["admin_role"] = row["role"]
         session["csrf_token"] = secrets.token_hex(24)
-    
+
         # DIRECT OPEN ADMIN DASHBOARD!
-        return redirect(url_for("admin_panel"))
-    
-    
-    
-    
-    @app.route("/admin/logout")
-    def admin_logout():
+        return redirect(get_admin_panel_url())
+
+
+    @app.route("/admin/logout", defaults={"admin_slug": "admin"})
+    @app.route("/<string:admin_slug>/logout")
+    def admin_logout(admin_slug="admin"):
+        active_slug = get_admin_custom_path()
         admin = get_current_admin()
+        if not admin and (admin_slug or "").strip().lower() != active_slug.lower():
+            abort(404)
         if admin:
             conn = get_db()
             log_audit_event(conn, admin["id"], admin["username"], "ADMIN_LOGOUT", "Admin session terminated")
@@ -468,7 +631,7 @@ def register_auth_routes(app):
         session.pop("admin_username", None)
         session.pop("admin_role", None)
         session.pop("csrf_token", None)
-        return redirect(url_for("admin_login_page"))
+        return redirect(get_admin_login_url())
     
     
     
@@ -477,7 +640,7 @@ def register_auth_routes(app):
     def api_device_verify():
         data = request.get_json(force=True, silent=True) or {}
         hwid = (data.get("hwid") or request.cookies.get("zd_hwid") or "").strip()
-        client_ip = request.headers.get("X-Forwarded-For", request.remote_addr or "127.0.0.1").split(",")[0].strip()
+        client_ip = get_client_ip(request)
         user_id = session.get("user_id")
     
         conn = get_db()

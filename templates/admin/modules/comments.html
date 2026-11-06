@@ -1,48 +1,68 @@
 <section id="mod-comments" class="admin-module">
             <div class="module-header">
                 <div>
-                    <h2 class="module-title">JOURNAL VERIFICATION LOGS &amp; PEER ASSESSMENTS</h2>
+                    <h2 class="module-title">ARTICLE COMMENTS</h2>
                     <p style="font-size:12px; color:var(--admin-muted); margin-top:2px;">
-                        Audit, approve, or reject technical reproduction notes and observations submitted by operators on threat research dispatches.
+                        Review, approve, or reject reader comments submitted on published articles.
                     </p>
                 </div>
             </div>
 
-            <!-- COMMENT STATS -->
-            <div class="stat-grid" style="margin-bottom:1.5rem;">
-                <div class="stat-card">
-                    <div class="stat-label">TOTAL VERIFICATION NOTES</div>
-                    <div class="stat-value" style="color:#00e5ff;">{{ comments_list|length }}</div>
-                    <div class="stat-sub">Across all research dispatches</div>
+            <!-- COMMENTS FILTER & SEARCH STRIP (CUSTOM ORDER PROCUREMENT STYLE) -->
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem;">
+                <div class="comment-filter-bar">
+                    <button type="button" class="comment-filter-btn active" data-filter="ALL" onclick="filterCommentsByStatus('ALL', this)">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                        <span>TOTAL COMMENTS</span>
+                        <span class="comment-count" id="comment-stat-total">{{ comments_list|length }}</span>
+                    </button>
+                    <button type="button" class="comment-filter-btn" data-filter="PENDING" onclick="filterCommentsByStatus('PENDING', this)">
+                        <span class="comment-dot" style="background:#f59e0b; box-shadow:0 0 6px rgba(245,158,11,0.5);"></span>
+                        <span>PENDING APPROVAL</span>
+                        <span class="comment-count" id="comment-stat-pending" style="color:#f59e0b;">{{ pending_comments_count }}</span>
+                    </button>
+                    <button type="button" class="comment-filter-btn" data-filter="APPROVED" onclick="filterCommentsByStatus('APPROVED', this)">
+                        <span class="comment-dot" style="background:#10b981; box-shadow:0 0 6px rgba(16,185,129,0.5);"></span>
+                        <span>APPROVED</span>
+                        <span class="comment-count" id="comment-stat-approved" style="color:#10b981;">{{ comments_list|selectattr('status', 'equalto', 'APPROVED')|list|length }}</span>
+                    </button>
+                    <button type="button" class="comment-filter-btn" data-filter="REJECTED" onclick="filterCommentsByStatus('REJECTED', this)">
+                        <span class="comment-dot" style="background:#ef4444; box-shadow:0 0 6px rgba(239,68,68,0.5);"></span>
+                        <span>REJECTED</span>
+                        <span class="comment-count" id="comment-stat-rejected" style="color:#ef4444;">{{ comments_list|selectattr('status', 'equalto', 'REJECTED')|list|length }}</span>
+                    </button>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-label">PENDING APPROVAL</div>
-                    <div class="stat-value" style="color:{% if pending_comments_count %}#f59e0b{% else %}var(--admin-muted){% endif %}; font-weight:700;">{{ pending_comments_count }}</div>
-                    <div class="stat-sub">Awaiting admin review before publication</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">APPROVED &amp; LIVE</div>
-                    <div class="stat-value" style="color:#10b981;">{{ comments_list|selectattr('status', 'equalto', 'APPROVED')|list|length }}</div>
-                    <div class="stat-sub">Active in public journal dispatches</div>
+                <div style="position:relative; display:inline-flex; align-items:center;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--admin-muted)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute; left:11px; pointer-events:none;">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="comments-search-input" oninput="onCommentSearchInput(this.value)" onkeydown="if(event.key==='Escape') clearCommentSearch()" placeholder="SEARCH AUTHOR, ARTICLE, COMMENT..." class="form-input" style="width:280px; padding:0.48rem 2.2rem 0.48rem 2.15rem; font-size:11px; font-family:var(--admin-font-mono); border-color:var(--admin-border); background:var(--admin-surface); border-radius:4px;">
+                    <button type="button" id="comments-search-clear-btn" onclick="clearCommentSearch()" title="Clear search" style="display:none; position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--admin-muted); cursor:pointer; font-size:14px; line-height:1; padding:2px;">&times;</button>
                 </div>
             </div>
 
             <!-- COMMENTS TABLE -->
             <div class="admin-table-wrap">
-                <table class="admin-table">
+                <table class="admin-table" id="comments-table">
                     <thead>
                         <tr>
                             <th>STATUS</th>
-                            <th>RESEARCH DISPATCH</th>
-                            <th>OPERATOR / CALLSIGN</th>
-                            <th>OBSERVATION DEBRIEF</th>
-                            <th>TIMESTAMP</th>
-                            <th style="text-align:right;">MODERATION ACTIONS</th>
+                            <th>ARTICLE</th>
+                            <th>AUTHOR</th>
+                            <th>COMMENT</th>
+                            <th>DATE</th>
+                            <th style="text-align:right;">ACTIONS</th>
                         </tr>
                     </thead>
                     <tbody>
+                        <tr id="comments-no-results" style="display:none;">
+                            <td colspan="6" style="text-align:center; padding:3rem; color:var(--admin-muted); font-family:var(--admin-font-mono); font-size:12px;">
+                                NO MATCHING COMMENTS FOUND.
+                            </td>
+                        </tr>
                         {% for c in comments_list %}
-                        <tr id="comment-row-{{ c.id }}" style="{% if c.status == 'PENDING' %}background:rgba(245,158,11,0.04);{% endif %}">
+                        <tr id="comment-row-{{ c.id }}" class="comment-row" data-status="{{ c.status }}" data-search="{{ c.author_name }} {{ c.author_role or '' }} {{ c.post_title or c.post_slug or '' }} {{ c.body }} {{ c.status }}" style="{% if c.status == 'PENDING' %}background:rgba(245,158,11,0.04);{% endif %}">
                             <td>
                                 {% if c.status == 'APPROVED' %}
                                 <span class="status-pill completed" style="font-size:10px; background:rgba(16,185,129,0.15); color:#10b981; border:1px solid #10b981;">
@@ -91,18 +111,38 @@
                                 </button>
                                 {% endif %}
                                 <button type="button" class="btn-admin btn-admin-danger" style="padding:0.35rem 0.65rem; margin-left:4px;" onclick="deleteComment({{ c.id }})">
-                                    DEL
+                                    DELETE
                                 </button>
                             </td>
                         </tr>
                         {% else %}
                         <tr>
                             <td colspan="6" style="text-align:center; padding:3rem; color:var(--admin-muted);">
-                                // NO VERIFICATION OBSERVATIONS LOGGED ACROSS THREAT INTEL DISPATCHES.
+                                No comments submitted yet.
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
+            </div>
+
+            <!-- COMMENTS PAGINATION BAR (20 PER PAGE) -->
+            <div class="matrix-pagination-footer" id="comments-pagination-bar" style="margin-top:0.75rem; border-radius:4px; border:1px solid var(--admin-border);">
+                <div style="font-family:var(--admin-font-mono); font-size:11.5px; color:var(--admin-muted);">
+                    SHOWING <strong id="comments-page-range" style="color:#fff;">1–{{ [comments_list|length, 20]|min if comments_list else 0 }}</strong> OF <strong id="comments-total-count" style="color:#00e5ff;">{{ comments_list|length if comments_list else 0 }}</strong> TOTAL COMMENTS (20 / PAGE)
+                </div>
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <button type="button" id="btn-comments-prev" class="btn-admin btn-admin-outline" onclick="goToCommentsPrevPage()" style="padding:0.35rem 0.85rem; font-size:11px; display:inline-flex; align-items:center; gap:5px;">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                        <span>PREV</span>
+                    </button>
+                    <span style="font-family:var(--admin-font-mono); font-size:11.5px; padding:0 0.5rem; color:#fff; font-weight:700;">
+                        PAGE <span id="comments-current-page" style="color:#00e5ff;">1</span> / <span id="comments-total-pages">1</span>
+                    </span>
+                    <button type="button" id="btn-comments-next" class="btn-admin btn-admin-outline" onclick="goToCommentsNextPage()" style="padding:0.35rem 0.85rem; font-size:11px; display:inline-flex; align-items:center; gap:5px;">
+                        <span>NEXT</span>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </div>
             </div>
         </section>

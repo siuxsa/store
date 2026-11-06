@@ -454,7 +454,7 @@
         } else if (type === "code") {
             snippet = "\n<pre><code># Terminal payload or exploit command\nmsf6 > use exploit/multi/handler\n</code></pre>\n";
         } else if (type === "callout") {
-            snippet = '\n<div class="cyber-callout">\n<strong>⚡ TACTICAL ADVISORY:</strong> Key zero-day impact or mitigation note.\n</div>\n';
+            snippet = '\n<div class="cyber-callout">\n<strong>// TACTICAL ADVISORY:</strong> Key zero-day impact or mitigation note.\n</div>\n';
         } else if (type === "smart_ad") {
             const skuSelect = document.getElementById("blog-smart-ad-sku-picker");
             const sku = skuSelect ? skuSelect.value : "LIC-BURP-PRO";

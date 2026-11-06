@@ -18,6 +18,9 @@ itsdangerous>=2.1.2
 click>=8.1.3
 blinker>=1.6.2
 
+# Environment & Configuration Management
+python-dotenv>=1.0.0
+
 # Markdown & Technical Prose Engine (core/helpers.py)
 markdown-it-py>=3.0.0
 mdurl>=0.1.2

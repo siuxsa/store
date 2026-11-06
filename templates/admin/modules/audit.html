@@ -1,27 +1,48 @@
 <section id="mod-audit" class="admin-module">
             <div class="module-header">
                 <div>
-                    <h2 class="module-title">CRYPTOGRAPHIC SECURITY &amp; AUTH AUDIT LOGS</h2>
+                    <h2 class="module-title">AUDIT LOGS</h2>
                     <p style="font-size:12px; color:var(--admin-muted); margin-top:2px;">
-                        Immutable log of administrative access, password authentications, and system provisioning.
+                        Activity log of admin sign-ins, configuration changes, and moderation actions.
                     </p>
                 </div>
             </div>
 
+            <!-- SEARCH & STATS BAR STRIP -->
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem;">
+                <div style="font-family:var(--admin-font-mono); font-size:11px; color:var(--admin-muted); display:inline-flex; align-items:center; gap:6px;">
+                    <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#f59e0b;"></span>
+                    <span id="audit-search-count">SHOWING {{ audit_logs|length }} EVENT{{ 'S' if audit_logs|length != 1 else '' }} (30 / PAGE)</span>
+                </div>
+                <div style="position:relative; display:inline-flex; align-items:center;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--admin-muted)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute; left:11px; pointer-events:none;">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="audit-search-input" oninput="onAuditSearchInput(this.value)" onkeydown="if(event.key==='Escape') clearAuditSearch()" placeholder="SEARCH USER, ACTION, IP, DETAILS..." class="form-input" style="width:280px; padding:0.48rem 2.2rem 0.48rem 2.15rem; font-size:11px; font-family:var(--admin-font-mono); border-color:var(--admin-border); background:var(--admin-surface); border-radius:4px;">
+                    <button type="button" id="audit-search-clear-btn" onclick="clearAuditSearch()" title="Clear search" style="display:none; position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--admin-muted); cursor:pointer; font-size:14px; line-height:1; padding:2px;">&times;</button>
+                </div>
+            </div>
+
             <div class="admin-table-wrap">
-                <table class="admin-table">
+                <table class="admin-table" id="audit-table">
                     <thead>
                         <tr>
                             <th>TIMESTAMP</th>
-                            <th>OPERATOR</th>
+                            <th>USER</th>
                             <th>ACTION</th>
                             <th>IP ADDRESS</th>
                             <th>DETAILS</th>
                         </tr>
                     </thead>
                     <tbody style="font-family: var(--admin-font-mono); font-size:11px;">
+                        <tr id="audit-no-results" style="display:none;">
+                            <td colspan="5" style="text-align:center; padding:2.5rem; color:var(--admin-muted); font-family:var(--admin-font-mono); font-size:12px;">
+                                NO MATCHING AUDIT LOG EVENTS FOUND.
+                            </td>
+                        </tr>
                         {% for log in audit_logs %}
-                        <tr>
+                        <tr class="audit-row" data-search="{{ log.created_at }} {{ log.username }} {{ log.action }} {{ log.ip_address }} {{ log.details }}">
                             <td style="color:var(--admin-muted);">{{ log.created_at }}</td>
                             <td style="font-weight:700;">{{ log.username }}</td>
                             <td><span class="status-pill">{{ log.action }}</span></td>
@@ -31,5 +52,25 @@
                         {% endfor %}
                     </tbody>
                 </table>
+            </div>
+
+            <!-- AUDIT PAGINATION BAR (30 PER PAGE) -->
+            <div class="matrix-pagination-footer" id="audit-pagination-bar" style="margin-top:0.75rem; border-radius:4px; border:1px solid var(--admin-border);">
+                <div style="font-family:var(--admin-font-mono); font-size:11.5px; color:var(--admin-muted);">
+                    SHOWING <strong id="audit-page-range" style="color:#fff;">1–{{ [audit_logs|length, 30]|min if audit_logs else 0 }}</strong> OF <strong id="audit-total-count" style="color:#00e5ff;">{{ audit_logs|length if audit_logs else 0 }}</strong> TOTAL AUDIT LOGS (30 / PAGE)
+                </div>
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <button type="button" id="btn-audit-prev" class="btn-admin btn-admin-outline" onclick="goToAuditPrevPage()" style="padding:0.35rem 0.85rem; font-size:11px; display:inline-flex; align-items:center; gap:5px;">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                        <span>PREV</span>
+                    </button>
+                    <span style="font-family:var(--admin-font-mono); font-size:11.5px; padding:0 0.5rem; color:#fff; font-weight:700;">
+                        PAGE <span id="audit-current-page" style="color:#00e5ff;">1</span> / <span id="audit-total-pages">1</span>
+                    </span>
+                    <button type="button" id="btn-audit-next" class="btn-admin btn-admin-outline" onclick="goToAuditNextPage()" style="padding:0.35rem 0.85rem; font-size:11px; display:inline-flex; align-items:center; gap:5px;">
+                        <span>NEXT</span>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </div>
             </div>
         </section>

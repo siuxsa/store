@@ -47,28 +47,76 @@ async function updateToolRequestStatus(reqId, newStatus) {
                 row.setAttribute('data-status', newStatus);
             }
         } else {
-            alert('Status update failed: ' + (data.error || 'Unknown error'));
+            showToast('Status update failed: ' + (data.error || 'Unknown error'), 'error');
         }
     } catch(err) {
-        alert('Network error while updating status: ' + err.message);
+        showToast('Network error while updating status: ' + err.message, 'error');
     }
 }
 
-function viewToolRequestDetail(req) {
+function populateAndOpenToolRequestModal(req) {
     const modal = document.getElementById('modal-tool-request-detail');
     if (!modal) return;
 
-    document.getElementById('tr-modal-db-id').value = req.id || '';
-    document.getElementById('tr-modal-title').textContent = req.tool_name || 'TOOL SOURCING BRIEF';
-    document.getElementById('tr-modal-id').textContent = '#' + (req.request_id || '');
-    document.getElementById('tr-modal-date').textContent = req.created_at || '';
-    document.getElementById('tr-modal-telegram').textContent = req.contact_telegram || '--';
-    document.getElementById('tr-modal-email').textContent = req.contact_email || '--';
-    document.getElementById('tr-modal-budget').textContent = (req.budget_range || 'FLEXIBLE').replace(/_/g, ' ');
-    document.getElementById('tr-modal-urgency').textContent = req.urgency || 'STANDARD';
-    document.getElementById('tr-modal-specs').textContent = req.technical_specs || 'No specific technical instructions provided.';
-    document.getElementById('tr-modal-admin-notes').value = req.admin_notes || '';
-    document.getElementById('tr-modal-ip').textContent = 'CLIENT IP: ' + (req.ip_address || '127.0.0.1');
+    const dbId = document.getElementById('tr-modal-db-id');
+    if (dbId) dbId.value = req.id || '';
+
+    const titleEl = document.getElementById('tr-modal-title');
+    if (titleEl) titleEl.textContent = req.tool_name || 'TOOL SOURCING BRIEF';
+
+    const idEl = document.getElementById('tr-modal-id');
+    if (idEl) idEl.textContent = '#' + (req.request_id || '');
+
+    const dateEl = document.getElementById('tr-modal-date');
+    if (dateEl) dateEl.textContent = req.created_at || '';
+
+    const tgEl = document.getElementById('tr-modal-telegram');
+    const esc = window.escapeHtml || function(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); };
+    if (tgEl) {
+        if (req.contact_telegram) {
+            const cleanTg = encodeURIComponent(req.contact_telegram.replace('@', '').trim());
+            tgEl.innerHTML = `<a href="https://t.me/${cleanTg}" target="_blank" rel="noopener noreferrer" style="color:#00e5ff; font-family:var(--admin-font-mono); font-size:12px; text-decoration:none; font-weight:700; display:inline-flex; align-items:center; gap:5px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                <span>${esc(req.contact_telegram)}</span>
+            </a>`;
+        } else {
+            tgEl.textContent = '--';
+        }
+    }
+
+    const emailEl = document.getElementById('tr-modal-email');
+    if (emailEl) {
+        if (req.contact_email) {
+            const cleanEmail = encodeURIComponent(req.contact_email.trim());
+            emailEl.innerHTML = `<a href="mailto:${cleanEmail}" style="color:#fff; text-decoration:underline;">${esc(req.contact_email)}</a>`;
+        } else {
+            emailEl.textContent = '--';
+        }
+    }
+
+    const budgetEl = document.getElementById('tr-modal-budget');
+    if (budgetEl) budgetEl.textContent = (req.budget_range || 'FLEXIBLE').replace(/_/g, ' ');
+
+    const urgencyEl = document.getElementById('tr-modal-urgency');
+    if (urgencyEl) {
+        urgencyEl.textContent = req.urgency || 'STANDARD';
+        if (req.urgency === 'IMMEDIATE') {
+            urgencyEl.style.color = '#ef4444';
+        } else if (req.urgency === 'HIGH') {
+            urgencyEl.style.color = '#f59e0b';
+        } else {
+            urgencyEl.style.color = '#fff';
+        }
+    }
+
+    const specsEl = document.getElementById('tr-modal-specs');
+    if (specsEl) specsEl.textContent = req.technical_specs || 'No specific technical instructions provided.';
+
+    const notesEl = document.getElementById('tr-modal-admin-notes');
+    if (notesEl) notesEl.value = req.admin_notes || '';
+
+    const ipEl = document.getElementById('tr-modal-ip');
+    if (ipEl) ipEl.textContent = 'CLIENT IP: ' + (req.ip_address || '127.0.0.1');
 
     const badge = document.getElementById('tr-modal-status-badge');
     if (badge) {
@@ -88,9 +136,40 @@ function viewToolRequestDetail(req) {
         }
     }
 
-    if (typeof openModal === 'function') {
-        openModal('modal-tool-request-detail');
+    modal.classList.add('is-open');
+    modal.style.display = 'flex';
+}
+
+function viewToolRequestDetail(target) {
+    let req = null;
+    if (typeof target === 'object' && target !== null) {
+        req = target;
+    } else if (window.ADMIN_TOOL_REQUESTS && Array.isArray(window.ADMIN_TOOL_REQUESTS)) {
+        req = window.ADMIN_TOOL_REQUESTS.find(r => r.id == target || r.request_id == target);
     }
+
+    if (!req) {
+        fetch('/api/admin/tool-requests')
+            .then(res => res.json())
+            .then(data => {
+                if (data.ok && data.requests) {
+                    window.ADMIN_TOOL_REQUESTS = data.requests;
+                    const found = data.requests.find(r => r.id == target || r.request_id == target);
+                    if (found) {
+                        populateAndOpenToolRequestModal(found);
+                    } else {
+                        showToast('Could not find procurement record #' + target, 'error');
+                    }
+                }
+            })
+            .catch(err => {
+                console.error('Failed to fetch tool requests:', err);
+                showToast('Failed to load request dossier.', 'error');
+            });
+        return;
+    }
+
+    populateAndOpenToolRequestModal(req);
 }
 
 async function saveToolRequestAdminNotes(e) {
@@ -111,17 +190,34 @@ async function saveToolRequestAdminNotes(e) {
             if (typeof showThemeToast === 'function') {
                 showThemeToast('INTERNAL NOTES PERSISTED to procurement dossier.');
             }
-            closeModal('modal-tool-request-detail');
+            if (window.ADMIN_TOOL_REQUESTS) {
+                const item = window.ADMIN_TOOL_REQUESTS.find(r => r.id == reqId);
+                if (item) item.admin_notes = notes;
+            }
+            const modal = document.getElementById('modal-tool-request-detail');
+            if (modal) {
+                modal.classList.remove('is-open');
+                modal.style.display = 'none';
+            }
+            if (typeof closeModal === 'function') {
+                closeModal('modal-tool-request-detail');
+            }
         } else {
-            alert('Failed to save notes: ' + (data.error || 'Error'));
+            showToast('Failed to save notes: ' + (data.error || 'Error'), 'error');
         }
     } catch(err) {
-        alert('Network error: ' + err.message);
+        showToast('Network error: ' + err.message, 'error');
     }
 }
 
 async function deleteToolRequest(reqId, refId) {
-    if (!confirm(`Permanently remove tool procurement request #${refId} from the intake queue?`)) {
+    const confirmed = await showConfirmModal({
+        title: 'DELETE CUSTOM REQUEST',
+        message: `Permanently delete custom request #${refId}?`,
+        confirmText: 'DELETE REQUEST',
+        note: 'WARNING: This request and its details will be permanently removed.'
+    });
+    if (!confirmed) {
         return;
     }
 
@@ -137,9 +233,9 @@ async function deleteToolRequest(reqId, refId) {
                 showThemeToast(`PURGED: Request #${refId} removed permanently.`);
             }
         } else {
-            alert('Delete failed: ' + (data.error || 'Unknown error'));
+            showToast('Delete failed: ' + (data.error || 'Unknown error'), 'error');
         }
     } catch(err) {
-        alert('Network error: ' + err.message);
+        showToast('Network error: ' + err.message, 'error');
     }
 }

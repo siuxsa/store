@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}{{ site_settings.seo_journal_title or ('Threat Journal & CVE Research Disclosures // ' ~ site_settings.site_name) }}{% endblock %}
-{% block meta_description %}{{ site_settings.seo_journal_desc or site_settings.journal_subtitle or site_settings.seo_meta_description or 'Zero-day vulnerability disclosures, offensive security tradecraft, and verified threat research.' }}{% endblock %}
+{% block title %}{{ site_settings.seo_journal_title or ('Threat Research & CVE Writeups // ' ~ site_settings.site_name) }}{% endblock %}
+{% block meta_description %}{{ site_settings.seo_journal_desc or site_settings.journal_subtitle or site_settings.seo_meta_description or 'Technical vulnerability writeups, CVE proof-of-concept analysis, and defensive security research.' }}{% endblock %}
 {% block meta_keywords %}{{ site_settings.seo_journal_keywords or site_settings.seo_meta_keywords }}{% endblock %}
-{% block og_title %}{{ site_settings.seo_journal_title or ('Threat Journal & Research Disclosures // ' ~ site_settings.site_name) }}{% endblock %}
-{% block og_description %}{{ site_settings.seo_journal_desc or site_settings.journal_subtitle or site_settings.seo_meta_description or 'Zero-day vulnerability disclosures, offensive security tradecraft, and verified threat research.' }}{% endblock %}
+{% block og_title %}{{ site_settings.seo_journal_title or ('Threat Research & CVE Writeups // ' ~ site_settings.site_name) }}{% endblock %}
+{% block og_description %}{{ site_settings.seo_journal_desc or site_settings.journal_subtitle or site_settings.seo_meta_description or 'Technical vulnerability writeups, CVE proof-of-concept analysis, and defensive security research.' }}{% endblock %}
 {% block og_image %}{{ site_settings.seo_journal_image or site_settings.seo_og_image or site_settings.hero_image }}{% endblock %}
-{% block twitter_title %}{{ site_settings.seo_journal_title or ('Threat Journal & Research Disclosures // ' ~ site_settings.site_name) }}{% endblock %}
+{% block twitter_title %}{{ site_settings.seo_journal_title or ('Threat Research & CVE Writeups // ' ~ site_settings.site_name) }}{% endblock %}
 {% block twitter_description %}{{ site_settings.seo_journal_desc or site_settings.journal_subtitle or site_settings.seo_meta_description }}{% endblock %}
 {% block twitter_image %}{{ site_settings.seo_journal_image or site_settings.seo_og_image or site_settings.hero_image }}{% endblock %}
 
@@ -14,17 +14,17 @@
 <div class="container" style="padding-top: 3rem; padding-bottom: 5rem;">
     <!-- HEADER -->
     <div style="border-bottom: 1px solid var(--border); padding-bottom: 2rem; margin-bottom: 2.5rem;">
-        <span class="meta-label" data-theme-bind="journal_eyebrow">{{ site_settings.journal_eyebrow or '// RESEARCH DISCLOSURES & INTEL' }}</span>
+        <span class="meta-label" data-theme-bind="journal_eyebrow">{{ site_settings.journal_eyebrow or '// VULNERABILITY RESEARCH & CVE ADVISORIES' }}</span>
         <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; margin-top: 0.5rem;">
             <div>
-                <h1 class="display-lg" style="margin: 0;" data-theme-bind="journal_title">{{ site_settings.journal_title or 'THREAT JOURNAL.' }}</h1>
+                <h1 class="display-lg" style="margin: 0;" data-theme-bind="journal_title">{{ site_settings.journal_title or 'THREAT RESEARCH.' }}</h1>
                 <p style="color: var(--muted); margin: 0.5rem 0 0 0; font-size: 0.95rem; max-width: 680px;" data-theme-bind="journal_subtitle">{{ site_settings.journal_subtitle or '' }}</p>
             </div>
             <span class="meta-mono" style="color: var(--muted); font-size: 0.9rem;">
                 {% if total_items and total_items > 0 %}
-                SHOWING {{ start_item }}–{{ end_item }} OF {{ total_items }} ADVISORIES PUBLISHED
+                SHOWING {{ start_item }}–{{ end_item }} OF {{ total_items }} RESEARCH WRITEUPS
                 {% else %}
-                0 OF {{ all_count }} ADVISORIES PUBLISHED
+                0 OF {{ all_count }} RESEARCH WRITEUPS
                 {% endif %}
             </span>
         </div>
@@ -33,7 +33,7 @@
     <!-- FILTER BAR -->
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 2.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border);">
         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-            <a href="{{ url_for('blog') }}" class="btn {% if not current_severity %}btn-dark{% else %}btn-outline-dark{% endif %}" style="padding: 0.45rem 0.9rem; font-size: 0.72rem;">
+            <a href="{{ url_for('blog') }}" class="btn {% if not current_severity and not current_category %}btn-dark{% else %}btn-outline-dark{% endif %}" style="padding: 0.45rem 0.9rem; font-size: 0.72rem;">
                 ALL SEVERITIES
             </a>
             <a href="{{ url_for('blog', severity='CRITICAL') }}" class="btn {% if current_severity == 'CRITICAL' %}btn-dark{% else %}btn-outline-dark{% endif %}" style="padding: 0.45rem 0.9rem; font-size: 0.72rem;">
@@ -42,10 +42,21 @@
             <a href="{{ url_for('blog', severity='HIGH') }}" class="btn {% if current_severity == 'HIGH' %}btn-dark{% else %}btn-outline-dark{% endif %}" style="padding: 0.45rem 0.9rem; font-size: 0.72rem;">
                 HIGH (CVSS &gt;= 7.0)
             </a>
+            {% if current_category %}
+            <a href="{{ url_for('blog') }}" class="btn btn-dark" style="padding: 0.45rem 0.9rem; font-size: 0.72rem;" title="Clear category filter">
+                {{ current_category|upper }} ✕
+            </a>
+            {% endif %}
         </div>
 
         <form method="GET" action="{{ url_for('blog') }}" style="display: flex; gap: 0.5rem;">
-            <input type="text" name="q" value="{{ search_query or '' }}" placeholder="SEARCH DISCLOSURES..."
+            {% if current_severity %}
+            <input type="hidden" name="severity" value="{{ current_severity }}">
+            {% endif %}
+            {% if current_category %}
+            <input type="hidden" name="category" value="{{ current_category }}">
+            {% endif %}
+            <input type="text" name="q" value="{{ search_query or '' }}" placeholder="SEARCH CVES & WRITEUPS..."
                    style="padding: 0.45rem 0.85rem; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.75rem; background: var(--bg); min-width: 200px;">
             <button type="submit" class="btn btn-dark" style="padding: 0.45rem 0.85rem; font-size: 0.72rem;">SEARCH</button>
         </form>
@@ -55,7 +66,7 @@
     {% if posts %}
     <div style="display: flex; flex-direction: column; gap: 2.5rem;">
         {% for post in posts %}
-        <article style="border: 1px solid var(--border); background-color: var(--white); display: flex; flex-direction: column; md:flex-row; overflow: hidden;">
+        <article style="border: 1px solid var(--border); background-color: var(--white); display: flex; flex-direction: column; overflow: hidden;">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); align-items: stretch;">
                 {% if post.image_url %}
                 <a href="{{ url_for('post_detail', slug=post.slug) }}" style="position: relative; min-height: 240px; background-color: var(--dark); overflow: hidden; display: block;">
@@ -83,7 +94,7 @@
                     <div class="journal-card-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.85rem; padding-top: 1.25rem; border-top: 1px solid var(--border); margin-top: auto;">
                         <span class="meta-mono journal-date" style="font-size: 0.74rem; color: var(--muted); letter-spacing: 0.05em;">PUBLISHED: {{ post.published_at[:10] }}</span>
                         <a href="{{ url_for('post_detail', slug=post.slug) }}" class="btn btn-dark journal-read-btn" style="padding: 0.6rem 1.35rem; font-size: 0.74rem; font-weight: 700; letter-spacing: 0.04em; white-space: nowrap;">
-                            READ FULL DISCLOSURE →
+                            READ WRITEUP →
                         </a>
                     </div>
                 </div>
@@ -94,7 +105,7 @@
 
     <!-- PAGINATION NAVIGATION CONTROLS -->
     {% if total_pages and total_pages > 1 %}
-    <nav class="pagination-nav" aria-label="Threat Journal Pages">
+    <nav class="pagination-nav" aria-label="Article Pages">
         <div class="pagination-info">
             PAGE <span style="color:var(--text); font-weight:700;">{{ current_page }}</span> OF {{ total_pages }} · ({{ total_items }} TOTAL)
         </div>
@@ -136,9 +147,9 @@
     {% endif %}
     {% else %}
     <div style="padding: 5rem 0; text-align: center; border: 1px dashed var(--border);">
-        <p class="meta-label" style="margin-bottom: 0.75rem;">NO MATCHING THREAT DISCLOSURES FOUND</p>
-        <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Try modifying your search or severity filters.</p>
-        <a href="{{ url_for('blog') }}" class="btn btn-dark">RESET FILTERS</a>
+        <p class="meta-label" style="margin-bottom: 0.75rem;">NO MATCHING CVE WRITEUPS FOUND</p>
+        <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Try adjusting your search keywords or CVSS severity filters.</p>
+        <a href="{{ url_for('blog') }}" class="btn btn-dark">SHOW ALL RESEARCH</a>
     </div>
     {% endif %}
 </div>

@@ -2,52 +2,97 @@
     <div class="module-header">
         <div>
             <div style="display:flex; align-items:center; gap:8px;">
-                <span class="badge-tag" style="background:#00e5ff; color:#000; font-weight:800; font-size:10px; padding:2px 8px;">SOURCING INTAKE</span>
-                <h2 class="module-title">// CUSTOM TOOL &amp; EXPLOIT PROCUREMENT REQUESTS</h2>
+                <h2 class="module-title">CUSTOM PRODUCT REQUESTS</h2>
                 {% if pending_tool_requests_count %}
-                <span class="status-pill pending" style="font-size:10px;">{{ pending_tool_requests_count }} NEW PENDING</span>
+                <span class="status-pill pending" style="font-size:10px;">{{ pending_tool_requests_count }} PENDING</span>
                 {% else %}
                 <span class="status-pill completed" style="font-size:10px;">ALL REVIEWED</span>
                 {% endif %}
             </div>
             <p style="font-size:12px; color:var(--admin-muted); margin-top:4px;">
-                Real-time queue of unlisted tools, 0-day exploits, private enterprise seats, and hardware implants requested by visitors.
+                Review and manage custom software or license requests submitted by customers.
             </p>
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
             <a href="{{ url_for('request_tool_page') }}" target="_blank" class="btn-admin btn-admin-outline" style="font-size:11px; display:inline-flex; align-items:center; gap:5px;">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
-                <span>OPEN SOURCING PAGE</span>
+                <span>VIEW REQUEST PAGE</span>
             </a>
             <button type="button" class="btn-admin btn-admin-outline" onclick="location.reload()" style="font-size:11px; display:inline-flex; align-items:center; gap:5px;">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-                <span>REFRESH QUEUE</span>
+                <span>REFRESH</span>
             </button>
         </div>
     </div>
 
     <!-- FILTER & SEARCH CONTROL STRIP -->
+    {% set pending_c = namespace(v=0) %}
+    {% set src_c = namespace(v=0) %}
+    {% set f_c = namespace(v=0) %}
+    {% set rej_c = namespace(v=0) %}
+    {% if tool_requests %}
+        {% for r in tool_requests %}
+            {% if r.status == 'PENDING' %}{% set pending_c.v = pending_c.v + 1 %}
+            {% elif r.status == 'SOURCING' %}{% set src_c.v = src_c.v + 1 %}
+            {% elif r.status == 'FULFILLED' %}{% set f_c.v = f_c.v + 1 %}
+            {% elif r.status == 'REJECTED' %}{% set rej_c.v = rej_c.v + 1 %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem;">
-        <div style="display:flex; align-items:center; gap:0.4rem; flex-wrap:wrap;">
-            <button type="button" class="order-filter-btn active req-filter-btn" onclick="filterToolRequests('ALL', this)">
-                ALL ({{ tool_requests|length }})
+        <div class="req-filter-bar">
+            <button type="button" class="req-filter-btn active" data-filter="ALL" onclick="filterToolRequests('ALL', this)">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                <span>ALL</span>
+                <span class="req-count">{{ tool_requests|length if tool_requests else 0 }}</span>
             </button>
-            <button type="button" class="order-filter-btn req-filter-btn" onclick="filterToolRequests('PENDING', this)" style="border-color:rgba(0,229,255,0.4); color:#00e5ff;">
-                PENDING ({% set pending_c = namespace(v=0) %}{% for r in tool_requests %}{% if r.status == 'PENDING' %}{% set pending_c.v = pending_c.v + 1 %}{% endif %}{% endfor %}{{ pending_c.v }})
+            <button type="button" class="req-filter-btn" data-filter="PENDING" onclick="filterToolRequests('PENDING', this)">
+                <span class="req-dot"></span>
+                <span>PENDING</span>
+                <span class="req-count">{{ pending_c.v }}</span>
             </button>
-            <button type="button" class="order-filter-btn req-filter-btn" onclick="filterToolRequests('SOURCING', this)" style="border-color:rgba(245,158,11,0.4); color:#f59e0b;">
-                SOURCING ({% set src_c = namespace(v=0) %}{% for r in tool_requests %}{% if r.status == 'SOURCING' %}{% set src_c.v = src_c.v + 1 %}{% endif %}{% endfor %}{{ src_c.v }})
+            <button type="button" class="req-filter-btn" data-filter="SOURCING" onclick="filterToolRequests('SOURCING', this)">
+                <span class="req-dot"></span>
+                <span>SOURCING</span>
+                <span class="req-count">{{ src_c.v }}</span>
             </button>
-            <button type="button" class="order-filter-btn req-filter-btn" onclick="filterToolRequests('FULFILLED', this)" style="border-color:rgba(16,185,129,0.4); color:#10b981;">
-                FULFILLED ({% set f_c = namespace(v=0) %}{% for r in tool_requests %}{% if r.status == 'FULFILLED' %}{% set f_c.v = f_c.v + 1 %}{% endif %}{% endfor %}{{ f_c.v }})
+            <button type="button" class="req-filter-btn" data-filter="FULFILLED" onclick="filterToolRequests('FULFILLED', this)">
+                <span class="req-dot"></span>
+                <span>FULFILLED</span>
+                <span class="req-count">{{ f_c.v }}</span>
             </button>
-            <button type="button" class="order-filter-btn req-filter-btn" onclick="filterToolRequests('REJECTED', this)">
-                REJECTED
+            <button type="button" class="req-filter-btn" data-filter="REJECTED" onclick="filterToolRequests('REJECTED', this)">
+                <span class="req-dot"></span>
+                <span>REJECTED</span>
+                <span class="req-count">{{ rej_c.v }}</span>
             </button>
         </div>
 
-        <div style="display:flex; align-items:center; gap:0.5rem;">
-            <input type="text" id="req-search-input" oninput="searchToolRequests(this.value)" placeholder="SEARCH TOOL, TELEGRAM, ID..." class="form-input" style="width:240px; padding:0.45rem 0.75rem; font-size:11px;">
+        <div style="position:relative; display:inline-flex; align-items:center;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--admin-muted)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute; left:11px; pointer-events:none;">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="req-search-input" oninput="searchToolRequests(this.value)" placeholder="SEARCH TOOL, TELEGRAM, TICKET #..." class="form-input" style="width:260px; padding:0.48rem 0.85rem 0.48rem 2.15rem; font-size:11px; font-family:var(--admin-font-mono); border-color:var(--admin-border); background:var(--admin-surface); border-radius:4px;">
+        </div>
+    </div>
+
+    <!-- SIDE-SCROLL NAVIGATION CONTROLS -->
+    <div class="table-scroll-hint" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-family:var(--admin-font-mono); font-size:11px; color:var(--admin-muted);">
+        <span style="display:inline-flex; align-items:center; gap:6px;">
+            <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#00e5ff;"></span>
+            <span>HORIZONTAL SIDE-SCROLL · ACTIONS &amp; STATUS PINNED</span>
+        </span>
+        <div style="display:inline-flex; gap:6px;">
+            <button type="button" class="btn-admin btn-admin-outline" onclick="scrollAdminTable('tool-requests-table', -280)" style="padding:3px 9px; font-size:10px; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                <span>SCROLL LEFT</span>
+            </button>
+            <button type="button" class="btn-admin btn-admin-outline" onclick="scrollAdminTable('tool-requests-table', 280)" style="padding:3px 9px; font-size:10px; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
+                <span>SCROLL RIGHT</span>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
         </div>
     </div>
 
@@ -88,7 +133,7 @@
                         </td>
                         <td>
                             {% if req.contact_telegram %}
-                            <a href="https://t.me/{{ req.contact_telegram.replace('@', '') }}" target="_blank" style="color:#00e5ff; font-family:var(--admin-font-mono); font-size:11px; text-decoration:none; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
+                            <a href="https://t.me/{{ req.contact_telegram.replace('@', '')|urlencode }}" target="_blank" rel="noopener noreferrer" style="color:#00e5ff; font-family:var(--admin-font-mono); font-size:11px; text-decoration:none; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
                                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
                                 {{ req.contact_telegram }}
                             </a>
@@ -121,11 +166,11 @@
                         </td>
                         <td style="text-align:right;">
                             <div style="display:inline-flex; gap:5px; align-items:center;">
-                                <button type="button" class="btn-admin btn-admin-outline" style="padding:0.35rem 0.65rem; font-size:10px;" onclick="viewToolRequestDetail({{ req|tojson }})">
-                                    INSPECT →
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:0.35rem 0.65rem; font-size:10px;" onclick="viewToolRequestDetail({{ req.id }})">
+                                    VIEW DETAILS
                                 </button>
-                                <button type="button" class="btn-admin btn-admin-danger" style="padding:0.35rem 0.5rem; font-size:10px;" onclick="deleteToolRequest({{ req.id }}, '{{ req.request_id }}')">
-                                    ✕
+                                <button type="button" class="btn-admin btn-admin-danger" style="padding:0.35rem 0.5rem; font-size:10px; display:inline-flex; align-items:center; justify-content:center;" onclick="deleteToolRequest({{ req.id }}, {{ req.request_id|tojson|forceescape }})" title="Delete Request">
+                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                                 </button>
                             </div>
                         </td>
@@ -134,7 +179,7 @@
                 {% else %}
                     <tr>
                         <td colspan="7" style="text-align:center; padding:3rem 1rem; color:var(--admin-muted); font-family:var(--admin-font-mono);">
-                            NO CUSTOM TOOL SOURCING REQUESTS IN QUEUE.
+                            No custom product requests found.
                         </td>
                     </tr>
                 {% endif %}
@@ -150,13 +195,15 @@
             <div>
                 <div style="display:flex; align-items:center; gap:8px;">
                     <span class="badge-tag" id="tr-modal-status-badge" style="background:#00e5ff; color:#000; font-weight:800; font-size:10px;">PENDING</span>
-                    <span style="font-family:var(--admin-font-mono); font-size:11px; color:var(--admin-muted);">PROCUREMENT DOSSIER</span>
+                    <span style="font-family:var(--admin-font-mono); font-size:11px; color:var(--admin-muted);">CUSTOM REQUEST</span>
                 </div>
                 <h3 id="tr-modal-title" style="font-size:18px; font-weight:700; color:#fff; margin-top:4px; margin-bottom:0; text-transform:uppercase;">
-                    TOOL SOURCING BRIEF
+                    REQUEST DETAILS
                 </h3>
             </div>
-            <button type="button" onclick="closeModal('modal-tool-request-detail')" class="btn-admin btn-admin-outline" style="width:30px; height:30px; padding:0; display:flex; align-items:center; justify-content:center;">✕</button>
+            <button type="button" onclick="closeModal('modal-tool-request-detail')" class="btn-admin btn-admin-outline" style="width:30px; height:30px; padding:0; display:flex; align-items:center; justify-content:center;" aria-label="Close dossier">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
         </div>
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.25rem;">
@@ -194,14 +241,14 @@
         <form id="tr-modal-notes-form" onsubmit="saveToolRequestAdminNotes(event)">
             <input type="hidden" id="tr-modal-db-id">
             <div class="form-group" style="margin-bottom:1.25rem;">
-                <label class="form-label">INTERNAL ADMIN SOURCING LOGS / NEGOTIATION NOTES</label>
-                <textarea id="tr-modal-admin-notes" rows="3" class="form-textarea" placeholder="Record vendor allocations, broker quotes, tracking numbers, or notes for other operators..."></textarea>
+                <label class="form-label">INTERNAL ADMIN NOTES</label>
+                <textarea id="tr-modal-admin-notes" rows="3" class="form-textarea" placeholder="Add internal notes, vendor quotes, or follow-up details..."></textarea>
             </div>
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
                 <span id="tr-modal-ip" style="font-family:var(--admin-font-mono); font-size:10px; color:var(--admin-muted);">IP: 127.0.0.1</span>
                 <div style="display:flex; gap:0.5rem;">
                     <button type="button" onclick="closeModal('modal-tool-request-detail')" class="btn-admin btn-admin-outline" style="font-size:11px;">CLOSE</button>
-                    <button type="submit" class="btn-admin btn-admin-primary" style="font-size:11px; font-weight:700;">SAVE INTERNAL NOTES →</button>
+                    <button type="submit" class="btn-admin btn-admin-primary" style="font-size:11px; font-weight:700;">SAVE NOTES</button>
                 </div>
             </div>
         </form>

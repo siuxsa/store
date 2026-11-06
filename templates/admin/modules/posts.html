@@ -1,41 +1,64 @@
 <section id="mod-posts" class="admin-module">
             <div class="module-header">
                 <div>
-                    <h2 class="module-title">THREAT INTEL &amp; CVE DISCLOSURES STUDIO</h2>
+                    <h2 class="module-title">ARTICLES &amp; RESEARCH</h2>
                     <p style="font-size:12px; color:var(--admin-muted); margin-top:2px;">
-                        Publish zero-day advisories, technical PoC mitigations, and contextual smart ad product associations.
+                        Create, edit, and publish technical articles, security advisories, and related product links.
                     </p>
                 </div>
                 <div style="display:flex; gap:8px; align-items:center;">
                     {% if current_admin and current_admin.role == 'ADMIN' %}
                     <button type="button" class="btn-admin btn-admin-outline" onclick="switchFeature('journal', 'curation')" style="border-color:#10b981; color:#10b981; display:inline-flex; align-items:center; gap:6px;">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                        <span>HOMEPAGE 4-JOURNAL SHOWCASE</span>
+                        <span>FEATURED ARTICLES</span>
                     </button>
                     {% endif %}
-                    <button type="button" class="btn-admin btn-admin-primary" onclick="openPostStudio()">
-                        + DRAFT ADVISORY (DEDICATED STUDIO)
+                    <button type="button" class="btn-admin btn-admin-primary" onclick="openPostStudio()" style="display:inline-flex; align-items:center; gap:6px;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        <span>NEW ARTICLE</span>
                     </button>
                 </div>
             </div>
 
+            <!-- SEARCH & STATS BAR STRIP -->
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem;">
+                <div style="font-family:var(--admin-font-mono); font-size:11px; color:var(--admin-muted); display:inline-flex; align-items:center; gap:6px;">
+                    <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#00e5ff;"></span>
+                    <span id="posts-search-count">SHOWING {{ posts|length }} ARTICLE{{ 'S' if posts|length != 1 else '' }} (30 / PAGE)</span>
+                </div>
+                <div style="position:relative; display:inline-flex; align-items:center;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--admin-muted)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute; left:11px; pointer-events:none;">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="posts-search-input" oninput="onPostSearchInput(this.value)" onkeydown="if(event.key==='Escape') clearPostSearch()" placeholder="SEARCH CVE, TITLE, CATEGORY, SEVERITY..." class="form-input" style="width:280px; padding:0.48rem 2.2rem 0.48rem 2.15rem; font-size:11px; font-family:var(--admin-font-mono); border-color:var(--admin-border); background:var(--admin-surface); border-radius:4px;">
+                    <button type="button" id="posts-search-clear-btn" onclick="clearPostSearch()" title="Clear search" style="display:none; position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--admin-muted); cursor:pointer; font-size:14px; line-height:1; padding:2px;">&times;</button>
+                </div>
+            </div>
+
             <div class="admin-table-wrap">
-                <table class="admin-table">
+                <table class="admin-table" id="posts-table">
                     <thead>
                         <tr>
-                            <th>CVE / TAG</th>
-                            <th>ADVISORY TITLE</th>
+                            <th>TAG / CVE</th>
+                            <th>TITLE</th>
                             <th>SEVERITY</th>
                             <th>CVSS</th>
                             <th>CATEGORY</th>
                             <th>STATUS</th>
                             <th>DATE</th>
-                            <th style="text-align:right;">ACTION</th>
+                            <th style="text-align:right;">ACTIONS</th>
                         </tr>
                     </thead>
                     <tbody style="font-family: var(--admin-font-mono); font-size:12px;">
+                        <tr id="posts-no-results" style="display:none;">
+                            <td colspan="8" style="text-align:center; padding:2.5rem; color:var(--admin-muted); font-family:var(--admin-font-mono); font-size:12px;">
+                                NO MATCHING ARTICLES FOUND FOR CURRENT FILTER.
+                            </td>
+                        </tr>
                         {% for post in posts %}
-                        <tr>
+                        <tr id="post-row-{{ post.id }}" class="post-row"
+                            data-search="{{ post.cve_id }} {{ post.title }} {{ post.category }} {{ post.severity }} {{ post.status }}">
                             <td style="font-weight:700;">{{ post.cve_id }}</td>
                             <td>
                                 <a href="{{ url_for('post_detail', slug=post.slug) }}" target="_blank" style="color:#fff; text-decoration:none; font-weight:600;">
@@ -63,27 +86,47 @@
                                 <script id="post-data-{{ post.id }}" type="application/json">{{ post|tojson|safe }}</script>
                                 {% if post.status == 'DRAFT' %}
                                 <button type="button" class="btn-admin btn-admin-outline" style="padding:0.35rem 0.65rem; border-color:#10b981; color:#10b981;"
-                                        onclick="togglePostStatusQuick({{ post.id }}, this)" title="Publish this advisory immediately">
+                                        onclick="togglePostStatusQuick({{ post.id }}, this)" title="Publish this article immediately">
                                     PUBLISH
                                 </button>
                                 {% else %}
                                 <button type="button" class="btn-admin btn-admin-outline" style="padding:0.35rem 0.65rem; border-color:#f59e0b; color:#f59e0b;"
-                                        onclick="togglePostStatusQuick({{ post.id }}, this)" title="Unpublish and return to draft">
+                                        onclick="togglePostStatusQuick({{ post.id }}, this)" title="Unpublish and move to draft">
                                     UNPUBLISH
                                 </button>
                                 {% endif %}
                                 <button type="button" class="btn-admin btn-admin-outline" style="padding:0.35rem 0.65rem; margin-left:4px;"
                                         onclick="openPostStudioForId({{ post.id }})">
-                                    EDIT (STUDIO)
+                                    EDIT
                                 </button>
                                 <button type="button" class="btn-admin btn-admin-danger" style="padding:0.35rem 0.65rem; margin-left:4px;"
-                                        onclick="deletePost({{ post.id }}, '{{ post.title }}')">
-                                    DEL
+                                        onclick="deletePost({{ post.id }}, {{ post.title|tojson|forceescape }})">
+                                    DELETE
                                 </button>
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
+            </div>
+
+            <!-- POSTS PAGINATION BAR (30 PER PAGE) -->
+            <div class="matrix-pagination-footer" id="posts-pagination-bar" style="margin-top:0.75rem; border-radius:4px; border:1px solid var(--admin-border);">
+                <div style="font-family:var(--admin-font-mono); font-size:11.5px; color:var(--admin-muted);">
+                    SHOWING <strong id="posts-page-range" style="color:#fff;">1–{{ [posts|length, 30]|min if posts else 0 }}</strong> OF <strong id="posts-total-count" style="color:#00e5ff;">{{ posts|length if posts else 0 }}</strong> TOTAL ARTICLES (30 / PAGE)
+                </div>
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <button type="button" id="btn-posts-prev" class="btn-admin btn-admin-outline" onclick="goToPostsPrevPage()" style="padding:0.35rem 0.85rem; font-size:11px; display:inline-flex; align-items:center; gap:5px;">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                        <span>PREV</span>
+                    </button>
+                    <span style="font-family:var(--admin-font-mono); font-size:11.5px; padding:0 0.5rem; color:#fff; font-weight:700;">
+                        PAGE <span id="posts-current-page" style="color:#00e5ff;">1</span> / <span id="posts-total-pages">1</span>
+                    </span>
+                    <button type="button" id="btn-posts-next" class="btn-admin btn-admin-outline" onclick="goToPostsNextPage()" style="padding:0.35rem 0.85rem; font-size:11px; display:inline-flex; align-items:center; gap:5px;">
+                        <span>NEXT</span>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </div>
             </div>
         </section>

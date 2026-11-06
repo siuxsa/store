@@ -1,0 +1,40 @@
+<div id="modal-confirm" class="admin-modal" style="display:none; z-index:999999;">
+    <div class="admin-modal-box confirm-modal-box">
+        <div class="confirm-modal-header">
+            <div class="confirm-icon-wrap" id="confirm-modal-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+            </div>
+            <div style="flex:1;">
+                <span class="confirm-modal-tag" id="confirm-modal-tag">CONFIRMATION REQUIRED</span>
+                <h3 class="confirm-modal-title" id="confirm-modal-title">CONFIRM ACTION</h3>
+            </div>
+            <button type="button" id="confirm-modal-close-x" class="btn-admin btn-admin-outline" style="padding:0.25rem 0.55rem; border-color:transparent; color:var(--admin-muted);" onclick="if (window._confirmReject) window._confirmReject()">
+                ✕
+            </button>
+        </div>
+        <div class="confirm-modal-body">
+            <p id="confirm-modal-message" class="confirm-modal-text">
+                Are you sure you want to proceed with this operation?
+            </p>
+            <div id="confirm-modal-input-wrap" style="display:none; margin: 1rem 0;">
+                <input type="text" id="confirm-modal-input" class="admin-input" style="width:100%; box-sizing:border-box; background:#07080a; border:1px solid rgba(0,229,255,0.4); color:#fff; padding:0.6rem 0.85rem; font-family:var(--admin-font-mono, monospace); font-size:12px; border-radius:4px;" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="confirm-modal-note" id="confirm-modal-note">
+                WARNING: This action alters persistent database records and cannot be undone.
+            </div>
+        </div>
+        <div class="confirm-modal-footer">
+            <button type="button" class="btn-admin btn-admin-outline" id="confirm-modal-cancel-btn" style="min-width:90px; padding:0.5rem 1rem;">
+                CANCEL
+            </button>
+            <button type="button" class="btn-admin btn-admin-danger" id="confirm-modal-ok-btn" style="min-width:130px; padding:0.5rem 1.25rem; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-weight:700;">
+                <svg id="confirm-modal-ok-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>
+                <span id="confirm-modal-ok-text">DELETE PERMANENTLY</span>
+            </button>
+        </div>
+    </div>
+</div>

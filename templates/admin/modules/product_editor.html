@@ -1,60 +1,64 @@
 <section id="mod-product-editor" class="admin-module">
-            <!-- TOP STICKY COMMAND BAR -->
-            <div style="background:var(--admin-surface); border:1px solid var(--admin-border); padding:1.25rem 1.75rem; margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
-                <div>
-                    <div style="display:flex; align-items:center; gap:0.5rem; font-family:var(--admin-font-mono); font-size:11px; color:var(--admin-muted); margin-bottom:4px;">
-                        <button type="button" onclick="closeProductStudio()" style="background:transparent; border:none; color:#00e5ff; cursor:pointer; font-family:inherit; padding:0; text-transform:uppercase; font-weight:700;">
-                            ← RETURN TO CATALOG
-                        </button>
-                        <span>/</span>
-                        <span id="pse-breadcrumb-title" style="color:#fff;">NEW ARSENAL SYSTEM</span>
+            <!-- TOP STICKY STUDIO PANEL -->
+            <div class="studio-sticky-panel">
+                <div class="studio-command-bar">
+                    <div>
+                        <div style="display:flex; align-items:center; gap:0.5rem; font-family:var(--admin-font-mono); font-size:11px; color:var(--admin-muted); margin-bottom:4px;">
+                            <button type="button" onclick="closeProductStudio()" style="background:transparent; border:none; color:#00e5ff; cursor:pointer; font-family:inherit; padding:0; text-transform:uppercase; font-weight:700;">
+                                ← BACK TO PRODUCTS
+                            </button>
+                            <span>/</span>
+                            <span id="pse-breadcrumb-title" style="color:#fff;">NEW PRODUCT</span>
+                        </div>
+                        <h2 id="pse-heading-title" style="font-size:18px; font-weight:700; text-transform:uppercase; margin:0; letter-spacing:-0.02em;">
+                            ADD NEW PRODUCT
+                        </h2>
                     </div>
-                    <h2 id="pse-heading-title" style="font-size:19px; font-weight:700; text-transform:uppercase; margin:0; letter-spacing:-0.02em;">
-                        ARSENAL SPECIFICATION STUDIO
-                    </h2>
+                    <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
+                        <a id="pse-btn-view-live" href="#" target="_blank" class="btn-admin btn-admin-outline" style="display:none;">
+                            VIEW PRODUCT ↗
+                        </a>
+                        <button type="button" onclick="closeProductStudio()" class="btn-admin btn-admin-outline">
+                            CANCEL
+                        </button>
+                        <button type="button" onclick="submitProductStudio(event, 'DRAFT')" class="btn-admin btn-admin-outline" id="pse-btn-draft" style="border-color:#f59e0b; color:#f59e0b; display:inline-flex; align-items:center; gap:6px;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                            <span>SAVE DRAFT</span>
+                        </button>
+                        <button type="button" onclick="submitProductStudio(event, 'PUBLISHED')" class="btn-admin btn-admin-primary" id="pse-btn-save" style="display:inline-flex; align-items:center; gap:6px;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                            <span>PUBLISH PRODUCT →</span>
+                        </button>
+                    </div>
                 </div>
-                <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
-                    <a id="pse-btn-view-live" href="#" target="_blank" class="btn-admin btn-admin-outline" style="display:none;">
-                        VIEW LIVE / PREVIEW ↗
-                    </a>
-                    <button type="button" onclick="closeProductStudio()" class="btn-admin btn-admin-outline">
-                        CANCEL
-                    </button>
-                    <button type="button" onclick="submitProductStudio(event, 'DRAFT')" class="btn-admin btn-admin-outline" id="pse-btn-draft" style="border-color:#f59e0b; color:#f59e0b;">
-                        💾 SAVE AS DRAFT
-                    </button>
-                    <button type="button" onclick="submitProductStudio(event, 'PUBLISHED')" class="btn-admin btn-admin-primary" id="pse-btn-save">
-                        🚀 PUBLISH TO STOREFRONT →
-                    </button>
-                </div>
-            </div>
 
-            <!-- SUB-NAVIGATION STRIP -->
-            <div class="module-subnav" style="margin-bottom:1.5rem;">
-                <button type="button" class="subnav-btn pse-subnav-btn active" onclick="switchProductStudioTab('specs', this)">
-                    [01] CORE SPECS &amp; PRICING
-                </button>
-                <button type="button" class="subnav-btn pse-subnav-btn" onclick="switchProductStudioTab('media', this)">
-                    [02] MEDIA &amp; COVER ASSET
-                </button>
-                <button type="button" class="subnav-btn pse-subnav-btn" onclick="switchProductStudioTab('tech', this)">
-                    [03] LINE-BY-LINE SPECS &amp; HASH
-                </button>
-                <button type="button" class="subnav-btn pse-subnav-btn" onclick="switchProductStudioTab('manual', this)" style="color:#00e5ff; font-weight:700;">
-                    [04] FULL MARKDOWN MANUAL
-                </button>
-                <button type="button" class="subnav-btn pse-subnav-btn" onclick="switchProductStudioTab('seo', this)">
-                    [05] DEDICATED SEO &amp; SOCIAL CARDS
-                </button>
-                <button type="button" class="subnav-btn pse-subnav-btn" onclick="switchProductStudioTab('ad', this)">
-                    [06] IN-ARTICLE SMART AD BANNER
-                </button>
-                <button type="button" class="subnav-btn pse-subnav-btn" onclick="switchProductStudioTab('faq', this)" style="color:#10b981; font-weight:700;">
-                    [07] PRODUCT FAQ &amp; ACCORDIONS
-                </button>
-                <button type="button" class="subnav-btn pse-subnav-btn" onclick="switchProductStudioTab('preview', this)">
-                    [08] LIVE STORE PREVIEW
-                </button>
+                <!-- SUB-NAVIGATION STRIP -->
+                <div class="studio-subnav-bar">
+                    <button type="button" class="subnav-btn pse-subnav-btn active" onclick="switchProductStudioTab('specs', this)">
+                        GENERAL &amp; PRICING
+                    </button>
+                    <button type="button" class="subnav-btn pse-subnav-btn" onclick="switchProductStudioTab('media', this)">
+                        MEDIA
+                    </button>
+                    <button type="button" class="subnav-btn pse-subnav-btn" onclick="switchProductStudioTab('tech', this)">
+                        SPECIFICATIONS
+                    </button>
+                    <button type="button" class="subnav-btn pse-subnav-btn" onclick="switchProductStudioTab('manual', this)" style="color:#00e5ff; font-weight:700;">
+                        DESCRIPTION
+                    </button>
+                    <button type="button" class="subnav-btn pse-subnav-btn" onclick="switchProductStudioTab('seo', this)">
+                        SEO
+                    </button>
+                    <button type="button" class="subnav-btn pse-subnav-btn" onclick="switchProductStudioTab('ad', this)">
+                        IN-ARTICLE AD
+                    </button>
+                    <button type="button" class="subnav-btn pse-subnav-btn" onclick="switchProductStudioTab('faq', this)" style="color:#10b981; font-weight:700;">
+                        FAQS
+                    </button>
+                    <button type="button" class="subnav-btn pse-subnav-btn" onclick="switchProductStudioTab('preview', this)">
+                        PREVIEW
+                    </button>
+                </div>
             </div>
 
             <form id="product-studio-form" onsubmit="submitProductStudio(event)" style="background:var(--admin-surface); border:1px solid var(--admin-border); padding:1.75rem;">
@@ -145,6 +149,39 @@
                             <input type="text" id="pse-badge" class="form-input" placeholder="INSTANT DELIVERY" oninput="updateProductPreview();">
                         </div>
                     </div>
+
+                    <!-- PRIVATE ORDER DELIVERY LINKS & CUSTOMER MESSAGE (SENT AUTOMATICALLY ON ORDER COMPLETION) -->
+                    <div style="background:rgba(16,185,129,0.04); border:1px solid rgba(16,185,129,0.3); border-radius:4px; padding:1.25rem; margin-top:0.5rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-bottom:0.65rem;">
+                            <div>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <span class="badge-tag" style="background:#10b981; color:#000; font-size:9.5px; font-weight:800; padding:2px 8px;">PRIVATE // SENT ON ORDER COMPLETION</span>
+                                    <span style="font-family:var(--admin-font-mono); font-size:12px; font-weight:800; color:#fff; letter-spacing:0.04em; text-transform:uppercase;">
+                                        ORDER DOWNLOAD LINKS &amp; CUSTOMER MESSAGE
+                                    </span>
+                                </div>
+                                <p style="font-size:11px; color:var(--admin-muted); margin-top:4px; margin-bottom:0;">
+                                    Add one or multiple download links and a default delivery message for this product. These are strictly hidden from public visitors and are sent automatically to the authenticated buyer when their order status is changed to <strong>COMPLETED</strong>.
+                                </p>
+                            </div>
+                            <button type="button" onclick="addPseDeliveryLinkRow()" class="btn-admin btn-admin-outline" style="border-color:#10b981; color:#10b981; padding:0.4rem 0.85rem; font-size:11px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                                <span>ADD DOWNLOAD LINK</span>
+                            </button>
+                        </div>
+
+                        <div id="pse-delivery-links-container" style="display:flex; flex-direction:column; gap:0.6rem; margin-bottom:1.1rem;">
+                            <!-- Dynamic delivery link rows injected by JS -->
+                        </div>
+
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label" style="color:#10b981; font-weight:700;">
+                                <span>CUSTOMER DELIVERY MESSAGE / INSTRUCTIONS</span>
+                                <span style="color:var(--admin-muted); font-size:10px;">AUTO-SENT TO BUYER ON COMPLETION</span>
+                            </label>
+                            <textarea id="pse-delivery-message" rows="3" class="form-textarea" placeholder="Write the delivery message, activation instructions, or notes that will be sent to the buyer when their order for this product is completed..."></textarea>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- TAB 2: MEDIA & COVER ASSET -->
@@ -206,10 +243,7 @@
                         <input type="text" id="pse-sha256" class="form-input" placeholder="e.g. 8f4e2b91a04d3c90e5fa3b82c61099238e83b1dc..." style="font-family:var(--admin-font-mono);">
                     </div>
 
-                    <div class="form-group" style="margin-bottom:1.25rem;">
-                        <label class="form-label">ENCRYPTED ARTIFACT DOWNLOAD URL</label>
-                        <input type="text" id="pse-download-url" class="form-input" placeholder="https://cdn.matrix.security/packages/release-x86_64.tar.gz" style="font-family:var(--admin-font-mono);">
-                    </div>
+                    <input type="hidden" id="pse-download-url">
 
                     <div class="form-group" style="margin-bottom:1.25rem;">
                         <label class="form-label">SHORT ELEVATOR OVERVIEW (CARD &amp; CATALOG DISPLAY)</label>
@@ -421,6 +455,20 @@
                         <div style="height:110px; max-width:280px; margin-top:0.5rem; background:#0c0d0e; border:1px solid var(--admin-border); overflow:hidden; border-radius:4px;">
                             <img id="pse-og-preview" src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=85" alt="OG Preview" style="width:100%; height:100%; object-fit:cover;">
                         </div>
+                    </div>
+
+                    <!-- PRODUCT-SPECIFIC CUSTOM JAVASCRIPT & TRACKING -->
+                    <div class="form-group" style="grid-column: 1 / -1; background:rgba(0,229,255,0.02); border:1px solid rgba(0,229,255,0.2); padding:1.15rem; border-radius:4px; margin-top:0.75rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                            <label class="form-label" style="color:#00e5ff; font-weight:700; margin:0;">
+                                CUSTOM JAVASCRIPT &amp; PRODUCT CONVERSION TRACKING
+                            </label>
+                            <span style="font-family:var(--admin-font-mono); font-size:10px; color:var(--admin-muted);">PDP ISOLATED</span>
+                        </div>
+                        <p style="font-size:11.5px; color:var(--admin-muted); margin-bottom:0.6rem; line-height:1.5;">
+                            Injected exclusively on this product's storefront detail page. Paste Google Ads purchase/conversion tags, Meta Pixel <code>viewContent</code> events, or custom tracking logic. Accepts <code>&lt;script&gt;</code> tags or raw JS.
+                        </p>
+                        <textarea id="pse-custom-js" rows="4" class="form-textarea" style="font-family:var(--admin-font-mono); font-size:11px;" placeholder="<script>&#10;  // Product conversion snippet&#10;  gtag('event', 'view_item', { items: [{ item_name: 'Product' }] });&#10;</script>"></textarea>
                     </div>
                 </div>
 
@@ -645,14 +693,16 @@
 
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; border-top:1px solid var(--admin-border); margin-top:2rem; padding-top:1.25rem;">
                     <button type="button" onclick="closeProductStudio()" class="btn-admin btn-admin-outline">
-                        ← RETURN TO INVENTORY TABLE
+                        ← BACK TO PRODUCTS
                     </button>
                     <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
-                        <button type="button" onclick="submitProductStudio(event, 'DRAFT')" class="btn-admin btn-admin-outline" style="border-color:#f59e0b; color:#f59e0b; padding:0.75rem 1.4rem;">
-                            💾 SAVE AS DRAFT
+                        <button type="button" onclick="submitProductStudio(event, 'DRAFT')" class="btn-admin btn-admin-outline" style="border-color:#f59e0b; color:#f59e0b; padding:0.75rem 1.4rem; display:inline-flex; align-items:center; gap:6px;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                            <span>SAVE DRAFT</span>
                         </button>
-                        <button type="button" onclick="submitProductStudio(event, 'PUBLISHED')" class="btn-admin btn-admin-primary" style="padding:0.75rem 1.75rem; font-size:12px;">
-                            🚀 PUBLISH ALL SYSTEM SPECIFICATIONS →
+                        <button type="button" onclick="submitProductStudio(event, 'PUBLISHED')" class="btn-admin btn-admin-primary" style="padding:0.75rem 1.75rem; font-size:12px; display:inline-flex; align-items:center; gap:6px;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                            <span>PUBLISH PRODUCT →</span>
                         </button>
                     </div>
                 </div>

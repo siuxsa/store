@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>429 Too Many Requests — Rate Limit Active // {{ site_settings.site_name if site_settings and site_settings.site_name else 'ZERO//FORM' }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <!-- MINIMAL ARCHITECTURAL HEADER BAR MATCHING STOREFRONT -->
+    <header class="site-header" style="position: sticky; top: 0; background: rgba(243, 242, 238, 0.96); border-bottom: 1px solid var(--border);">
+        <div class="header-inner">
+            <a href="/" class="brand-logo" style="text-decoration: none;">
+                {{ site_settings.site_name if site_settings and site_settings.site_name else 'ZERO//FORM' }}
+            </a>
+            <div class="header-actions">
+                <span class="badge-tag" style="background: rgba(245, 158, 11, 0.14); color: #b45309; border: 1px solid rgba(245, 158, 11, 0.35); font-weight: 700;">
+                    HTTP 429 · RATE LIMIT ACTIVE
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container" style="padding-top: clamp(2rem, 4vw, 3.25rem); padding-bottom: 6rem;">
+
+            <!-- 1. BREADCRUMBS -->
+            <nav class="breadcrumb-nav" aria-label="Breadcrumbs" style="margin-bottom: 2rem; font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);">
+                <a href="/" style="color: var(--muted); text-decoration: none;">HOME</a>
+                <span style="margin: 0 0.5rem; color: rgba(17,17,17,0.3);">/</span>
+                <span>WAF &amp; RATE LIMIT DEFENSE</span>
+                <span style="margin: 0 0.5rem; color: rgba(17,17,17,0.3);">/</span>
+                <span style="color: #b45309; font-weight: 700;">429 TOO MANY REQUESTS</span>
+            </nav>
+
+            <!-- 2. FULL-WIDTH EDITORIAL PAGE HEADER STRIP -->
+            <div style="border-bottom: 1px solid var(--border); padding-bottom: clamp(1.5rem, 3vw, 2.25rem); margin-bottom: clamp(1.75rem, 3.5vw, 3rem);">
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                    <span class="badge-tag" style="background: rgba(245, 158, 11, 0.14); color: #b45309; border: 1px solid rgba(245, 158, 11, 0.35); font-weight: 800;">
+                        STATUS 429
+                    </span>
+                    <span class="meta-label">// AUTOMATED TRAFFIC &amp; BRUTE-FORCE PROTECTION</span>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1.5rem; margin-top: 0.5rem;">
+                    <h1 class="display-lg" style="margin: 0; font-size: clamp(2rem, 4.8vw, 3.5rem); line-height: 1.1; letter-spacing: -0.025em; text-transform: uppercase;">
+                        RATE LIMIT EXCEEDED.
+                    </h1>
+                    <div class="meta-mono" style="font-size: 0.84rem; color: var(--muted); max-width: 520px; line-height: 1.6;">
+                        Your connection sent too many requests in a short window. Please wait for the security cooldown timer to finish before continuing.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. TWO-COLUMN ARCHITECTURAL LAYOUT -->
+            <div class="orders-layout" style="display: grid; grid-template-columns: 1.45fr 0.85fr; gap: clamp(2rem, 4vw, 4rem); align-items: start;">
+
+                <!-- LEFT COLUMN: RATE LIMIT DIAGNOSTICS & COOLDOWN TIMER -->
+                <div class="orders-main-content">
+                    <div style="border: 1px solid var(--border); background: var(--white); padding: clamp(1.75rem, 3vw, 2.5rem);">
+                        <div style="border-bottom: 1px solid var(--border); padding-bottom: 1.25rem; margin-bottom: 1.75rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                            <div>
+                                <span class="meta-label">// REQUEST THROTTLING TELEMETRY</span>
+                                <h2 style="font-size: 1.25rem; text-transform: uppercase; font-weight: 700; margin: 0.35rem 0 0; letter-spacing: -0.01em;">
+                                    TEMPORARY COOLDOWN IN EFFECT
+                                </h2>
+                            </div>
+                            <span class="meta-mono" id="rl-status-badge" style="font-size: 0.75rem; color: #b45309; font-weight: 700;">● THROTTLED (HTTP 429)</span>
+                        </div>
+
+                        <p style="font-size: 0.94rem; color: var(--muted); line-height: 1.7; margin-bottom: 1.5rem;">
+                            To protect authentication gateways and security tool repositories against automated brute-force attempts and request flooding, our firewall enforces strict per-IP request limits.
+                        </p>
+
+                        <div style="background: var(--bg-alt); border: 1px solid var(--border); padding: 1.15rem 1.35rem; font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.8; color: var(--text); margin-bottom: 1.75rem;">
+                            <div><span style="color: var(--muted);">HTTP_STATUS    :</span> <span style="color: #b45309; font-weight: 700;">429 TOO MANY REQUESTS</span></div>
+                            <div><span style="color: var(--muted);">SCOPE_TRIGGER  :</span> {{ rate_limit_scope or 'GLOBAL PAGE / AUTHENTICATION PROTECTION' }}</div>
+                            <div><span style="color: var(--muted);">POLICY_LIMIT   :</span> {{ rate_limit_max or 'CONFIGURED' }} REQUESTS / 60 SECONDS</div>
+                            <div><span style="color: var(--muted);">COOLDOWN_TIMER :</span> <span id="rl-countdown" style="font-weight: 800; color: var(--text);">{{ retry_after or 60 }}</span> SECONDS REMAINING</div>
+                        </div>
+
+                        <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                            <button type="button" id="rl-retry-btn" onclick="window.location.reload()" class="btn btn-dark" style="padding: 0.85rem 1.65rem; font-size: 0.76rem; font-weight: 700;">
+                                RETRY REQUEST (<span id="rl-btn-timer">{{ retry_after or 60 }}</span>s) →
+                            </button>
+                            <a href="/" class="btn btn-outline" style="padding: 0.85rem 1.4rem; font-size: 0.76rem;">
+                                ← BACK TO HOME
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: SECURITY POLICY & SUPPORT -->
+                <aside class="orders-sidebar">
+                    <div style="border: 1px solid var(--border); background: var(--white); padding: clamp(1.5rem, 2.5vw, 2rem);">
+                        <span class="meta-label" style="display: block; margin-bottom: 0.75rem;">// SECURITY GUIDANCE</span>
+                        <h3 style="font-size: 1.05rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.65rem;">
+                            WHY WAS MY REQUEST THROTTLED?
+                        </h3>
+                        <p style="font-size: 0.84rem; color: var(--muted); line-height: 1.6; margin-bottom: 1.25rem;">
+                            This cooldown is temporary and resets automatically once the timer reaches zero. Avoid rapid page refreshes, automated scrapers, or repeated sign-in submissions.
+                        </p>
+                        <a href="https://t.me/{{ site_settings.telegram_user.lstrip('@') if site_settings and site_settings.telegram_user else 'ZeroFormConcierge' }}" target="_blank" rel="noopener" class="btn btn-dark" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%; padding: 0.9rem 1rem; font-size: 0.76rem; text-align: center;">
+                            <span>CONTACT TELEGRAM DESK ↗</span>
+                        </a>
+                    </div>
+                </aside>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        (function() {
+            var remaining = parseInt("{{ retry_after or 60 }}", 10) || 60;
+            var countEl = document.getElementById('rl-countdown');
+            var btnTimerEl = document.getElementById('rl-btn-timer');
+            var retryBtn = document.getElementById('rl-retry-btn');
+            var badgeEl = document.getElementById('rl-status-badge');
+
+            var interval = setInterval(function() {
+                remaining -= 1;
+                if (remaining <= 0) {
+                    clearInterval(interval);
+                    if (countEl) countEl.textContent = '0';
+                    if (btnTimerEl) btnTimerEl.textContent = '0';
+                    if (retryBtn) retryBtn.innerHTML = 'COOLDOWN COMPLETE — CONTINUE →';
+                    if (badgeEl) {
+                        badgeEl.textContent = '● READY TO RETRY';
+                        badgeEl.style.color = '#10b981';
+                    }
+                } else {
+                    if (countEl) countEl.textContent = String(remaining);
+                    if (btnTimerEl) btnTimerEl.textContent = String(remaining);
+                }
+            }, 1000);
+        })();
+    </script>
+</body>
+</html>

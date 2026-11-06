@@ -50,7 +50,7 @@
                 const cveEl = document.getElementById(`curate-post-cve-${slot}`);
                 if (cveEl) cveEl.textContent = post.cve_id || 'RESEARCH';
                 const authorEl = document.getElementById(`curate-post-author-${slot}`);
-                if (authorEl) authorEl.textContent = post.author_name || '';
+                if (authorEl) authorEl.textContent = post.author || post.author_name || '';
             } else {
                 if (box) box.style.display = 'none';
                 if (emptyBox) emptyBox.style.display = 'flex';

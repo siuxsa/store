@@ -1,54 +1,58 @@
 <section id="mod-post-editor" class="admin-module">
-            <!-- TOP STICKY COMMAND BAR -->
-            <div style="background:var(--admin-surface); border:1px solid var(--admin-border); padding:1.25rem 1.75rem; margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
-                <div>
-                    <div style="display:flex; align-items:center; gap:0.5rem; font-family:var(--admin-font-mono); font-size:11px; color:var(--admin-muted); margin-bottom:4px;">
-                        <button type="button" onclick="closePostStudio()" style="background:transparent; border:none; color:#00e5ff; cursor:pointer; font-family:inherit; padding:0; text-transform:uppercase; font-weight:700;">
-                            ← RETURN TO INTEL REPOSITORY
-                        </button>
-                        <span>/</span>
-                        <span id="jse-breadcrumb-title" style="color:#fff;">DRAFT ADVISORY</span>
+            <!-- TOP STICKY STUDIO PANEL -->
+            <div class="studio-sticky-panel">
+                <div class="studio-command-bar">
+                    <div>
+                        <div style="display:flex; align-items:center; gap:0.5rem; font-family:var(--admin-font-mono); font-size:11px; color:var(--admin-muted); margin-bottom:4px;">
+                            <button type="button" onclick="closePostStudio()" style="background:transparent; border:none; color:#00e5ff; cursor:pointer; font-family:inherit; padding:0; text-transform:uppercase; font-weight:700;">
+                                ← BACK TO ARTICLES
+                            </button>
+                            <span>/</span>
+                            <span id="jse-breadcrumb-title" style="color:#fff;">NEW ARTICLE</span>
+                        </div>
+                        <h2 id="jse-heading-title" style="font-size:18px; font-weight:700; text-transform:uppercase; margin:0; letter-spacing:-0.02em;">
+                            NEW ARTICLE
+                        </h2>
                     </div>
-                    <h2 id="jse-heading-title" style="font-size:19px; font-weight:700; text-transform:uppercase; margin:0; letter-spacing:-0.02em;">
-                        THREAT INTEL ADVISORY STUDIO
-                    </h2>
+                    <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
+                        <a id="jse-btn-view-live" href="#" target="_blank" class="btn-admin btn-admin-outline" style="display:none;">
+                            VIEW ARTICLE ↗
+                        </a>
+                        <button type="button" onclick="closePostStudio()" class="btn-admin btn-admin-outline">
+                            CANCEL
+                        </button>
+                        <button type="button" onclick="submitPostStudio(event, 'DRAFT')" class="btn-admin btn-admin-outline" id="jse-btn-draft" style="border-color:#f59e0b; color:#f59e0b; display:inline-flex; align-items:center; gap:6px;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                            <span>SAVE DRAFT</span>
+                        </button>
+                        <button type="button" onclick="submitPostStudio(event, 'PUBLISHED')" class="btn-admin btn-admin-primary" id="jse-btn-save" style="display:inline-flex; align-items:center; gap:6px;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                            <span>PUBLISH ARTICLE →</span>
+                        </button>
+                    </div>
                 </div>
-                <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
-                    <a id="jse-btn-view-live" href="#" target="_blank" class="btn-admin btn-admin-outline" style="display:none;">
-                        VIEW LIVE / PREVIEW ↗
-                    </a>
-                    <button type="button" onclick="closePostStudio()" class="btn-admin btn-admin-outline">
-                        CANCEL
-                    </button>
-                    <button type="button" onclick="submitPostStudio(event, 'DRAFT')" class="btn-admin btn-admin-outline" id="jse-btn-draft" style="border-color:#f59e0b; color:#f59e0b;">
-                        💾 SAVE AS DRAFT
-                    </button>
-                    <button type="button" onclick="submitPostStudio(event, 'PUBLISHED')" class="btn-admin btn-admin-primary" id="jse-btn-save">
-                        🚀 PUBLISH ADVISORY →
-                    </button>
-                </div>
-            </div>
 
-            <!-- SUB-NAVIGATION STRIP -->
-            <div class="module-subnav" style="margin-bottom:1.5rem;">
-                <button type="button" class="subnav-btn jse-subnav-btn active" onclick="switchPostStudioTab('specs', this)">
-                    [01] RESEARCH &amp; CVE SPECS
-                </button>
-                <button type="button" class="subnav-btn jse-subnav-btn" onclick="switchPostStudioTab('media', this)">
-                    [02] BANNER &amp; COVER MEDIA
-                </button>
-                <button type="button" class="subnav-btn jse-subnav-btn" onclick="switchPostStudioTab('markdown', this)">
-                    [03] TECHNICAL MARKDOWN STUDIO
-                </button>
-                <button type="button" class="subnav-btn jse-subnav-btn" onclick="switchPostStudioTab('monetize', this)">
-                    [04] SMART MONETIZATION &amp; SKUS
-                </button>
-                <button type="button" class="subnav-btn jse-subnav-btn" onclick="switchPostStudioTab('seo', this)" style="color:#00e5ff; font-weight:700;">
-                    [05] DEDICATED SEO &amp; SOCIAL CARDS
-                </button>
-                <button type="button" class="subnav-btn jse-subnav-btn" onclick="switchPostStudioTab('preview', this)">
-                    [06] LIVE ADVISORY PREVIEW
-                </button>
+                <!-- SUB-NAVIGATION STRIP -->
+                <div class="studio-subnav-bar">
+                    <button type="button" class="subnav-btn jse-subnav-btn active" onclick="switchPostStudioTab('specs', this)">
+                        DETAILS
+                    </button>
+                    <button type="button" class="subnav-btn jse-subnav-btn" onclick="switchPostStudioTab('media', this)">
+                        COVER IMAGE
+                    </button>
+                    <button type="button" class="subnav-btn jse-subnav-btn" onclick="switchPostStudioTab('markdown', this)">
+                        CONTENT EDITOR
+                    </button>
+                    <button type="button" class="subnav-btn jse-subnav-btn" onclick="switchPostStudioTab('monetize', this)">
+                        PRODUCT ADS
+                    </button>
+                    <button type="button" class="subnav-btn jse-subnav-btn" onclick="switchPostStudioTab('seo', this)" style="color:#00e5ff; font-weight:700;">
+                        SEO
+                    </button>
+                    <button type="button" class="subnav-btn jse-subnav-btn" onclick="switchPostStudioTab('preview', this)">
+                        PREVIEW
+                    </button>
+                </div>
             </div>
 
             <form id="post-studio-form" onsubmit="submitPostStudio(event)" style="background:var(--admin-surface); border:1px solid var(--admin-border); padding:1.75rem;">
@@ -503,6 +507,20 @@
                             <img id="jse-og-preview" src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1600&q=85" alt="OG Preview" style="width:100%; height:100%; object-fit:cover;">
                         </div>
                     </div>
+
+                    <!-- ADVISORY-SPECIFIC CUSTOM JAVASCRIPT & TRACKING -->
+                    <div class="form-group" style="background:rgba(0,229,255,0.02); border:1px solid rgba(0,229,255,0.2); padding:1.15rem; border-radius:4px; margin-top:1.25rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                            <label class="form-label" style="color:#00e5ff; font-weight:700; margin:0;">
+                                CUSTOM JAVASCRIPT &amp; ADVISORY TRACKING / ANALYTICS
+                            </label>
+                            <span style="font-family:var(--admin-font-mono); font-size:10px; color:var(--admin-muted);">ADVISORY ISOLATED</span>
+                        </div>
+                        <p style="font-size:11.5px; color:var(--admin-muted); margin-bottom:0.6rem; line-height:1.5;">
+                            Injected exclusively on this CVE research advisory page. Paste Google Analytics custom event tags, conversion pixels, or article telemetry. Accepts <code>&lt;script&gt;</code> tags or raw JS.
+                        </p>
+                        <textarea id="jse-custom-js" rows="4" class="form-textarea" style="font-family:var(--admin-font-mono); font-size:11px;" placeholder="<script>&#10;  // Advisory tracking snippet&#10;  gtag('event', 'read_advisory', { cve: 'CVE-2026-XXXX' });&#10;</script>"></textarea>
+                    </div>
                 </div>
 
                 <!-- TAB 6: LIVE ADVISORY PREVIEW -->
@@ -557,14 +575,16 @@
 
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; border-top:1px solid var(--admin-border); margin-top:2rem; padding-top:1.25rem;">
                     <button type="button" onclick="closePostStudio()" class="btn-admin btn-admin-outline">
-                        ← RETURN TO INTEL REPOSITORY
+                        ← BACK TO ARTICLES
                     </button>
                     <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap;">
-                        <button type="button" onclick="submitPostStudio(event, 'DRAFT')" class="btn-admin btn-admin-outline" style="border-color:#f59e0b; color:#f59e0b; padding:0.75rem 1.4rem;">
-                            💾 SAVE AS DRAFT
+                        <button type="button" onclick="submitPostStudio(event, 'DRAFT')" class="btn-admin btn-admin-outline" style="border-color:#f59e0b; color:#f59e0b; padding:0.75rem 1.4rem; display:inline-flex; align-items:center; gap:6px;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                            <span>SAVE DRAFT</span>
                         </button>
-                        <button type="button" onclick="submitPostStudio(event, 'PUBLISHED')" class="btn-admin btn-admin-primary" style="padding:0.75rem 1.75rem; font-size:12px;">
-                            🚀 PUBLISH ALL ADVISORY SPECIFICATIONS →
+                        <button type="button" onclick="submitPostStudio(event, 'PUBLISHED')" class="btn-admin btn-admin-primary" style="padding:0.75rem 1.75rem; font-size:12px; display:inline-flex; align-items:center; gap:6px;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                            <span>PUBLISH ARTICLE →</span>
                         </button>
                     </div>
                 </div>

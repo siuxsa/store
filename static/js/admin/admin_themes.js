@@ -225,7 +225,8 @@
                     if (el.tagName === 'IMG') {
                         el.src = value;
                     } else if (el.dataset.themeFormat === 'multiline') {
-                        el.innerHTML = value.replace(/\n/g, '<br>');
+                        const esc = window.escapeHtml || function(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); };
+                        el.innerHTML = esc(value).replace(/\r?\n/g, '<br>');
                     } else {
                         el.textContent = value;
                     }
@@ -422,6 +423,15 @@
             request_concierge_title: { label: "Concierge Card Headline", page: "request", type: "text" },
             request_concierge_desc: { label: "Concierge Explainer Description", page: "request", type: "multiline" },
             request_concierge_btn: { label: "Concierge Action Button Label", page: "request", type: "text" },
+
+            // 404 Anomaly Error Page
+            error_404_badge: { label: "404 Incident Status Badge", page: "404", type: "text" },
+            error_404_title: { label: "404 Glitch Title Code", page: "404", type: "text" },
+            error_404_headline: { label: "404 Anomaly Sub-Headline", page: "404", type: "text" },
+            error_404_message: { label: "404 Explanatory Message Prose", page: "404", type: "multiline" },
+            error_404_cta_text: { label: "404 Return Button Text", page: "404", type: "text" },
+            error_404_cta_url: { label: "404 Return Button Target URL", page: "404", type: "text" },
+            error_404_show_search: { label: "404 Search Bar Visibility", page: "404", type: "text" },
 
             // Global Footer
             footer_desc: { label: "Footer Brand Description", page: "global", type: "multiline" },
@@ -839,10 +849,10 @@
                     }
                     showThemeToast(`UPLOAD COMPLETE: ${data.filename} applied.`);
                 } else {
-                    alert('Upload failed: ' + (data.error || 'Server error'));
+                    showToast('Upload failed: ' + (data.error || 'Server error'), 'error');
                 }
             } catch(err) {
-                alert('Upload error: ' + err.message);
+                showToast('Upload error: ' + err.message, 'error');
             } finally {
                 if (statusEl) statusEl.style.display = 'none';
                 if (btnText) btnText.textContent = origBtnText;
@@ -857,9 +867,23 @@
             document.querySelectorAll('.seo-page-pane').forEach(el => el.style.display = 'none');
             document.querySelectorAll('.seo-page-subnav-btn').forEach(el => el.classList.remove('active'));
 
-            const target = document.getElementById('seo-pane-' + paneKey);
+            const targetId = paneKey === 'sitemap' ? 'seo-pane-robots' : ('seo-pane-' + paneKey);
+            const target = document.getElementById(targetId);
             if (target) target.style.display = 'block';
             if (btn) btn.classList.add('active');
+
+            const isCrawlerTab = (paneKey === 'robots' || paneKey === 'sitemap');
+            const simCol = document.getElementById('seo-simulators-col');
+            const studioGrid = document.getElementById('seo-studio-grid');
+            if (simCol && studioGrid) {
+                simCol.style.display = isCrawlerTab ? 'none' : 'block';
+                studioGrid.style.gridTemplateColumns = isCrawlerTab ? '1fr' : 'minmax(300px, 400px) minmax(0, 1fr)';
+            }
+
+            const footerSave = document.getElementById('seo-global-save-footer');
+            if (footerSave) {
+                footerSave.style.display = isCrawlerTab ? 'none' : 'flex';
+            }
 
             const badge = document.getElementById('serp-preview-badge');
             const urlEl = document.getElementById('serp-preview-url');
@@ -870,10 +894,14 @@
                 'about': 'https://matrix.security/about',
                 'shop': 'https://matrix.security/shop',
                 'journal': 'https://matrix.security/journal',
-                'request': 'https://matrix.security/request'
+                'request': 'https://matrix.security/request',
+                'robots': 'https://matrix.security/robots.txt',
+                'sitemap': 'https://matrix.security/sitemap.xml'
             };
 
-            if (badge) badge.textContent = paneKey.toUpperCase() + (paneKey === 'global' ? ' FALLBACK' : ' PAGE');
+            if (badge && !isCrawlerTab) {
+                badge.textContent = paneKey.toUpperCase() + (paneKey === 'global' ? ' FALLBACK' : ' PAGE');
+            }
             if (urlEl) urlEl.textContent = pageUrls[paneKey] || 'https://matrix.security/';
 
             updateSeoLivePreview();
@@ -883,25 +911,40 @@
             const pane = window.CURRENT_SEO_PANE || 'global';
             let titleName = 'seo_meta_title';
             let descName = 'seo_meta_description';
+            let imgName = 'seo_og_image';
 
-            if (pane !== 'global') {
+            if (pane !== 'global' && pane !== 'robots' && pane !== 'sitemap') {
                 titleName = `seo_${pane}_title`;
                 descName = `seo_${pane}_desc`;
+                imgName = `seo_${pane}_image`;
             }
 
             const titleInput = document.querySelector(`.theme-field[name="${titleName}"]`);
             const descInput = document.querySelector(`.theme-field[name="${descName}"]`);
+            const imgInput = document.querySelector(`.theme-field[name="${imgName}"]`);
             const globalTitleInput = document.querySelector('.theme-field[name="seo_meta_title"]');
             const globalDescInput = document.querySelector('.theme-field[name="seo_meta_description"]');
+            const globalImgInput = document.querySelector('.theme-field[name="seo_og_image"]');
 
             const serpTitle = document.getElementById('serp-preview-title');
             const serpDesc = document.getElementById('serp-preview-desc');
+            const socialTitle = document.getElementById('seo-social-card-title');
+            const socialDesc = document.getElementById('seo-social-card-desc');
+            const socialImg = document.getElementById('seo-social-card-img');
 
-            let titleVal = (titleInput ? titleInput.value.trim() : '') || (globalTitleInput ? globalTitleInput.value.trim() : '') || '{{ site_settings.site_name }} // Security Systems';
-            let descVal = (descInput ? descInput.value.trim() : '') || (globalDescInput ? globalDescInput.value.trim() : '') || '{{ site_settings.site_tagline }}';
+            const orig = window.ORIGINAL_THEME_SETTINGS || {};
+            const defaultSiteName = orig.site_name || 'ZERO//FORM';
+            const defaultTagline = orig.site_tagline || 'Architectural Security Systems & Verified Enterprise Licenses';
+
+            let titleVal = (titleInput ? titleInput.value.trim() : '') || (globalTitleInput ? globalTitleInput.value.trim() : '') || `${defaultSiteName} // Security Systems`;
+            let descVal = (descInput ? descInput.value.trim() : '') || (globalDescInput ? globalDescInput.value.trim() : '') || defaultTagline;
+            let imgVal = (imgInput ? imgInput.value.trim() : '') || (globalImgInput ? globalImgInput.value.trim() : '') || orig.hero_image || '';
 
             if (serpTitle) serpTitle.textContent = titleVal;
             if (serpDesc) serpDesc.textContent = descVal;
+            if (socialTitle) socialTitle.textContent = titleVal;
+            if (socialDesc) socialDesc.textContent = descVal;
+            if (socialImg && imgVal) socialImg.src = imgVal;
 
             // Update character count badges across all inputs
             ['global', 'home', 'about', 'shop', 'journal', 'request'].forEach(p => {
@@ -963,10 +1006,10 @@
                     closeModal('modal-theme-element');
                     showThemeToast(`UPDATED: ${meta.label || key} saved live to database.`);
                 } else {
-                    alert('Save failed: ' + (data.error || data.message || 'Error'));
+                    showToast('Save failed: ' + (data.error || data.message || 'Error'), 'error');
                 }
             } catch(err) {
-                alert('Save error: ' + err.message);
+                showToast('Save error: ' + err.message, 'error');
             } finally {
                 if (saveBtn) {
                     saveBtn.textContent = origText;
@@ -976,6 +1019,9 @@
         }
 
         function showThemeToast(msg) {
+            if (typeof window.showToast === 'function') {
+                window.showToast(msg, 'success');
+            }
             const toast = document.getElementById('theme-toast');
             if (!toast) return;
             const iconSvg = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px; margin-right:6px;"><polyline points="20 6 9 17 4 12"/></svg>';
@@ -988,11 +1034,11 @@
         }
 
         async function saveThemeStudio() {
-            const saveBtn = document.getElementById('btn-save-theme');
+            const saveBtn = document.getElementById('btn-save-theme-text') || document.getElementById('btn-save-theme');
             const quickSaveBtn = document.getElementById('btn-save-colors-quick');
-            const originalText = saveBtn ? saveBtn.textContent : 'SAVE ALL THEME CHANGES →';
+            const originalText = saveBtn ? saveBtn.textContent : 'SAVE CHANGES';
             if (saveBtn) {
-                saveBtn.textContent = 'PERSISTING CHANGES...';
+                saveBtn.textContent = 'SAVING...';
                 saveBtn.disabled = true;
             }
             if (quickSaveBtn) {
@@ -1038,7 +1084,7 @@
                         }
                     }, 2200);
                 } else {
-                    alert('Theme save failed: ' + (data.error || data.message || 'Unknown error'));
+                    showToast('Theme save failed: ' + (data.error || data.message || 'Unknown error'), 'error');
                     if (saveBtn) {
                         saveBtn.textContent = originalText;
                         saveBtn.disabled = false;
@@ -1049,7 +1095,7 @@
                     }
                 }
             } catch(err) {
-                alert('Network error while saving theme: ' + err.message);
+                showToast('Network error while saving theme: ' + err.message, 'error');
                 if (saveBtn) {
                     saveBtn.textContent = originalText;
                     saveBtn.disabled = false;
@@ -1061,8 +1107,14 @@
             }
         }
 
-        function resetThemeStudio() {
-            if (!confirm('Revert all unsaved theme changes to the latest saved database state?')) return;
+        async function resetThemeStudio() {
+            const ok = await showConfirmModal({
+                title: 'REVERT THEME STUDIO',
+                message: 'Revert all unsaved theme changes to the latest saved database state? Any uncommitted inspector edits will be discarded.',
+                confirmText: 'REVERT CHANGES',
+                danger: true
+            });
+            if (!ok) return;
             if (!window.ORIGINAL_THEME_SETTINGS) return;
 
             document.querySelectorAll('.theme-field').forEach(input => {
@@ -1132,17 +1184,228 @@
                         }
                     }, 2200);
                 } else {
-                    alert('SEO save failed: ' + (data.error || 'Unknown error'));
+                    showToast('SEO save failed: ' + (data.error || 'Unknown error'), 'error');
                     if (saveBtn) {
                         saveBtn.textContent = originalText;
                         saveBtn.disabled = false;
                     }
                 }
             } catch(err) {
-                alert('Network error while saving SEO: ' + err.message);
+                showToast('Network error while saving SEO: ' + err.message, 'error');
                 if (saveBtn) {
                     saveBtn.textContent = originalText;
                     saveBtn.disabled = false;
+                }
+            }
+        }
+
+        // ==========================================
+        // ROBOTS.TXT & SITEMAP.XML STUDIO CONTROLS
+        // ==========================================
+        function syncCanonicalUrlInputs(val) {
+            const rIn = document.getElementById('seo-site-url-input');
+            const sIn = document.getElementById('sitemap-base-url');
+            if (rIn && rIn.value !== val) rIn.value = val;
+            if (sIn && sIn.value !== val) sIn.value = val;
+        }
+
+        function applyRobotsPreset(presetType) {
+            const editor = document.getElementById('seo-robots-txt-editor');
+            if (!editor) return;
+
+            let content = '';
+            if (presetType === 'standard') {
+                content = [
+                    'User-agent: *',
+                    'Allow: /',
+                    'Allow: /shop',
+                    'Allow: /arsenal',
+                    'Allow: /product/',
+                    'Allow: /journal',
+                    'Allow: /intel',
+                    'Allow: /about',
+                    'Allow: /request',
+                    'Disallow: /admin',
+                    'Disallow: /vault',
+                    'Disallow: /api/',
+                    '',
+                    'Sitemap: {{SITE_URL}}/sitemap.xml'
+                ].join('\n');
+            } else if (presetType === 'allow_all') {
+                content = [
+                    'User-agent: *',
+                    'Allow: /',
+                    'Disallow: /admin',
+                    '',
+                    'Sitemap: {{SITE_URL}}/sitemap.xml'
+                ].join('\n');
+            } else if (presetType === 'disallow_all') {
+                content = [
+                    'User-agent: *',
+                    'Disallow: /'
+                ].join('\n');
+            }
+
+            if (content) {
+                editor.value = content;
+                if (typeof showThemeToast === 'function') {
+                    showThemeToast(`PRESET LOADED: ${presetType.toUpperCase()} directives applied to editor.`);
+                }
+            }
+        }
+
+        async function saveRobotsTxt() {
+            const editor = document.getElementById('seo-robots-txt-editor');
+            const siteUrlIn = document.getElementById('seo-site-url-input');
+            const btn = document.getElementById('btn-save-robots');
+            if (!editor) return;
+
+            const origText = btn ? btn.innerHTML : 'SAVE & DEPLOY ROBOTS.TXT';
+            if (btn) {
+                btn.textContent = 'DEPLOYING ROBOTS.TXT...';
+                btn.disabled = true;
+            }
+
+            try {
+                const res = await fetch('/api/admin/seo/robots', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        robots_txt_content: editor.value,
+                        seo_site_url: siteUrlIn ? siteUrlIn.value.trim() : ''
+                    })
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    if (typeof showThemeToast === 'function') {
+                        showThemeToast(data.message || 'robots.txt saved & deployed live at /robots.txt');
+                    }
+                    if (btn) btn.textContent = 'SAVED & LIVE ✓';
+                    setTimeout(() => {
+                        if (btn) {
+                            btn.innerHTML = origText;
+                            btn.disabled = false;
+                        }
+                    }, 2000);
+                } else {
+                    showToast('Failed to save robots.txt: ' + (data.error || 'Error'), 'error');
+                    if (btn) {
+                        btn.innerHTML = origText;
+                        btn.disabled = false;
+                    }
+                }
+            } catch (err) {
+                showToast('Network error saving robots.txt: ' + err.message, 'error');
+                if (btn) {
+                    btn.innerHTML = origText;
+                    btn.disabled = false;
+                }
+            }
+        }
+
+        async function resetRobotsTxtDefault() {
+            const confirmed = await showConfirmModal({
+                title: 'RESET ROBOTS.TXT DIRECTIVES',
+                message: 'Restore default SEO crawler rules for robots.txt? Public pages will be allowed and /admin, /vault, /api/ will be disallowed.',
+                confirmText: 'RESTORE DEFAULT',
+                danger: false
+            });
+            if (!confirmed) return;
+
+            try {
+                const res = await fetch('/api/admin/seo/robots', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reset_default: true })
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    const editor = document.getElementById('seo-robots-txt-editor');
+                    if (editor && data.robots_txt_content) {
+                        editor.value = data.robots_txt_content;
+                    }
+                    if (typeof showThemeToast === 'function') {
+                        showThemeToast('DEFAULT RESTORED: Standard robots.txt rules deployed.');
+                    }
+                }
+            } catch (err) {
+                showToast('Reset error: ' + err.message, 'error');
+            }
+        }
+
+        function copyRobotsTxt() {
+            const editor = document.getElementById('seo-robots-txt-editor');
+            if (!editor) return;
+            navigator.clipboard.writeText(editor.value).then(() => {
+                if (typeof showThemeToast === 'function') {
+                    showThemeToast('COPIED: robots.txt directives copied to clipboard.');
+                }
+            });
+        }
+
+        async function generateSitemapXml() {
+            const genBtn = document.getElementById('btn-generate-sitemap');
+            const headerBtn = document.getElementById('btn-header-generate-sitemap');
+            const statusLine = document.getElementById('sitemap-status-line');
+
+            const origText = genBtn ? genBtn.innerHTML : 'GENERATE SITEMAP.XML';
+            const origHeaderText = headerBtn ? headerBtn.innerHTML : 'GENERATE SITEMAP';
+            if (genBtn) {
+                genBtn.textContent = 'GENERATING...';
+                genBtn.disabled = true;
+            }
+            if (headerBtn) {
+                headerBtn.textContent = 'GENERATING...';
+                headerBtn.disabled = true;
+            }
+
+            try {
+                const res = await fetch('/api/admin/seo/generate-sitemap', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ include_aliases: true })
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    if (data.stats && statusLine) {
+                        const s = data.stats;
+                        statusLine.textContent = `✓ SITEMAP GENERATED & LIVE (${s.total_urls} PUBLIC URLS — ${s.core_routes_count} ROUTES, ${s.products_count} PRODUCTS, ${s.posts_count} JOURNALS) · ${s.generated_at}`;
+                    }
+                    if (typeof showThemeToast === 'function') {
+                        showThemeToast(data.message || 'SITEMAP GENERATED: Deployed live at /sitemap.xml');
+                    }
+                    if (genBtn) genBtn.textContent = 'SITEMAP GENERATED ✓';
+                    if (headerBtn) headerBtn.textContent = 'GENERATED ✓';
+                    setTimeout(() => {
+                        if (genBtn) {
+                            genBtn.innerHTML = origText;
+                            genBtn.disabled = false;
+                        }
+                        if (headerBtn) {
+                            headerBtn.innerHTML = origHeaderText;
+                            headerBtn.disabled = false;
+                        }
+                    }, 2000);
+                } else {
+                    showToast('Sitemap generation failed: ' + (data.error || 'Error'), 'error');
+                    if (genBtn) {
+                        genBtn.innerHTML = origText;
+                        genBtn.disabled = false;
+                    }
+                    if (headerBtn) {
+                        headerBtn.innerHTML = origHeaderText;
+                        headerBtn.disabled = false;
+                    }
+                }
+            } catch (err) {
+                showToast('Network error generating sitemap: ' + err.message, 'error');
+                if (genBtn) {
+                    genBtn.innerHTML = origText;
+                    genBtn.disabled = false;
+                }
+                if (headerBtn) {
+                    headerBtn.innerHTML = origHeaderText;
+                    headerBtn.disabled = false;
                 }
             }
         }

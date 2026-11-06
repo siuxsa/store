@@ -46,6 +46,96 @@
             }
         }
 
+        function updateReviewRowInTable(r) {
+            if (!r || !r.id) return;
+            let row = document.getElementById('review-row-' + r.id) || document.getElementById('review-data-' + r.id)?.closest('tr');
+            const safeAuthor = (r.author_name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const safeRole = (r.author_role || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const safeOrg = (r.author_org || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const safeTitle = (r.title || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const safeContent = (r.content || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const safeSku = (r.product_sku || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const safeBadge = (r.verified_badge || 'VERIFIED ENTERPRISE DEPLOYMENT · PGP SIGNED').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const dateStr = (r.created_at || new Date().toISOString()).substring(0, 10);
+            const rJson = JSON.stringify(r).replace(/</g, '\\u003c');
+
+            const skuHtml = safeSku
+                ? `<span class="badge-tag" style="background:#0c0d0e; color:#00e5ff; border:1px solid rgba(0,229,255,0.4); font-size:10px; font-weight:700;">${safeSku}</span>`
+                : `<span class="badge-tag" style="background:rgba(255,255,255,0.06); color:var(--admin-muted); font-size:10px;">GLOBAL / ALL</span>`;
+
+            const manifestoHtml = r.featured_manifesto
+                ? `<div style="display:flex; flex-direction:column; gap:4px;"><span class="badge-tag" style="background:#10b981; color:#000; font-weight:800; font-size:10px; padding:2px 6px;">★ HOMEPAGE</span><button type="button" class="btn-admin btn-admin-outline" style="padding:2px 6px; font-size:10px; color:#ef4444; border-color:rgba(239,68,68,0.35);" onclick="toggleReviewInShowcase(${r.id})">REMOVE</button></div>`
+                : `<div style="display:flex; flex-direction:column; gap:4px;"><span style="color:var(--admin-muted); font-size:11px;">CATALOG ONLY</span><button type="button" class="btn-admin btn-admin-outline" style="padding:2px 6px; font-size:10px; color:#00e5ff; border-color:rgba(0,229,255,0.4);" onclick="toggleReviewInShowcase(${r.id})">+ PIN TO HOME</button></div>`;
+
+            const innerHtml = `
+                <td style="white-space:nowrap;">
+                    <span class="badge-tag" style="background:rgba(245,158,11,0.12); color:#f59e0b; border:1px solid rgba(245,158,11,0.3); font-weight:700; font-size:11px; padding:2px 6px;">
+                        ${r.rating}.0 / 5.0
+                    </span>
+                </td>
+                <td>
+                    <div style="font-weight:700; color:#fff;">${safeAuthor}</div>
+                    <div style="font-size:11px; color:var(--admin-muted);">${safeRole}${safeOrg ? ' · ' + safeOrg : ''}</div>
+                </td>
+                <td>${skuHtml}</td>
+                <td style="max-width:320px;">
+                    <div style="font-weight:700; color:#fff; font-size:12px; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                        ${safeTitle}
+                    </div>
+                    <div style="font-size:11px; color:var(--admin-muted); line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
+                        "${safeContent}"
+                    </div>
+                </td>
+                <td id="review-row-manifesto-${r.id}" style="white-space:nowrap;">
+                    ${manifestoHtml}
+                </td>
+                <td>
+                    <span style="font-size:10px; color:#00e5ff; font-family:var(--admin-font-mono);">
+                        ${safeBadge}
+                    </span>
+                </td>
+                <td style="color:var(--admin-muted); font-size:11px; white-space:nowrap;">${dateStr}</td>
+                <td style="text-align:right; white-space:nowrap;">
+                    <script id="review-data-${r.id}" type="application/json">${rJson}</script>
+                    <button type="button" class="btn-admin btn-admin-outline" style="padding:0.35rem 0.65rem;" onclick="openReviewModalForId(${r.id})">
+                        EDIT
+                    </button>
+                    <button type="button" class="btn-admin btn-admin-danger" style="padding:0.35rem 0.65rem; margin-left:4px;" onclick="deleteReview(${r.id}, '${safeAuthor.replace(/'/g, "\\'")}')">
+                        DELETE
+                    </button>
+                </td>
+            `;
+
+            const searchData = `${safeAuthor} ${safeRole} ${safeOrg} ${safeSku || 'GLOBAL ALL'} ${safeTitle} ${safeContent} ${safeBadge}`;
+            if (row) {
+                row.className = 'review-row';
+                row.setAttribute('data-rating', r.rating || '5');
+                row.setAttribute('data-homepage', r.featured_manifesto ? '1' : '0');
+                row.setAttribute('data-search', searchData);
+                row.innerHTML = innerHtml;
+            } else {
+                const tbody = document.querySelector('#mod-reviews table.admin-table tbody');
+                if (tbody) {
+                    const tr = document.createElement('tr');
+                    tr.id = 'review-row-' + r.id;
+                    tr.className = 'review-row';
+                    tr.setAttribute('data-rating', r.rating || '5');
+                    tr.setAttribute('data-homepage', r.featured_manifesto ? '1' : '0');
+                    tr.setAttribute('data-search', searchData);
+                    tr.innerHTML = innerHtml;
+                    tbody.insertBefore(tr, tbody.firstChild);
+                }
+            }
+
+            if (window.ADMIN_REVIEWS) {
+                const idx = window.ADMIN_REVIEWS.findIndex(item => item.id === r.id);
+                if (idx !== -1) window.ADMIN_REVIEWS[idx] = r;
+                else window.ADMIN_REVIEWS.unshift(r);
+            }
+            if (typeof recalculateReviewStats === 'function') recalculateReviewStats();
+            if (typeof renderReviewsPagination === 'function') renderReviewsPagination();
+        }
+
         async function submitReviewForm(e) {
             if (e) e.preventDefault();
             const saveBtn = document.getElementById('btn-save-review');
@@ -65,7 +155,7 @@
             };
 
             if (!payload.author_name || !payload.content) {
-                alert('Please enter both Author Name and Assessment Content.');
+                showToast('Please enter both Author Name and Assessment Content.', 'error');
                 return;
             }
 
@@ -82,20 +172,19 @@
                 });
                 const data = await res.json();
                 if (data.ok || data.success) {
-                    try { 
-                        sessionStorage.setItem('activeAdminFeature', 'products'); 
-                        sessionStorage.setItem('activeSubtab_products', 'reviews'); 
-                    } catch(err) {}
-                    window.location.reload();
+                    closeModal('modal-review');
+                    payload.id = data.id || payload.id;
+                    updateReviewRowInTable(payload);
+                    showToast('Verified review saved successfully.', 'success');
                 } else {
-                    alert('Error saving review: ' + (data.error || 'Unknown error'));
+                    showToast('Error saving review: ' + (data.error || 'Unknown error'), 'error');
                     if (saveBtn) {
                         saveBtn.disabled = false;
                         saveBtn.textContent = originalText;
                     }
                 }
             } catch(err) {
-                alert('Network error while saving review: ' + err.message);
+                showToast('Network error while saving review: ' + err.message, 'error');
                 if (saveBtn) {
                     saveBtn.disabled = false;
                     saveBtn.textContent = originalText;
@@ -104,7 +193,13 @@
         }
 
         async function deleteReview(reviewId, authorName) {
-            if (!confirm(`Are you sure you want to permanently delete verified assessment from "${authorName}"? This action cannot be undone.`)) {
+            const confirmed = await showConfirmModal({
+                title: 'DELETE REVIEW',
+                message: `Are you sure you want to permanently delete the review from "${authorName}"?`,
+                confirmText: 'DELETE REVIEW',
+                note: 'WARNING: This review will be permanently removed from the store.'
+            });
+            if (!confirmed) {
                 return;
             }
 
@@ -114,16 +209,19 @@
                 });
                 const data = await res.json();
                 if (data.ok || data.success) {
-                    try { 
-                        sessionStorage.setItem('activeAdminFeature', 'products'); 
-                        sessionStorage.setItem('activeSubtab_products', 'reviews'); 
-                    } catch(err) {}
-                    window.location.reload();
+                    const row = document.getElementById('review-row-' + reviewId) || document.getElementById('review-data-' + reviewId)?.closest('tr');
+                    if (row) row.remove();
+                    if (window.ADMIN_REVIEWS) {
+                        window.ADMIN_REVIEWS = window.ADMIN_REVIEWS.filter(item => item.id !== reviewId);
+                    }
+                    if (typeof recalculateReviewStats === 'function') recalculateReviewStats();
+                    if (typeof renderReviewsPagination === 'function') renderReviewsPagination();
+                    showToast(`Review from "${authorName}" permanently deleted.`, 'info');
                 } else {
-                    alert('Error deleting review: ' + (data.error || 'Unknown error'));
+                    showToast('Error deleting review: ' + (data.error || 'Unknown error'), 'error');
                 }
             } catch(err) {
-                alert('Network error while deleting review: ' + err.message);
+                showToast('Network error while deleting review: ' + err.message, 'error');
             }
         }
 
@@ -274,9 +372,13 @@
         function updateTableShowcaseBadges() {
             const allRevs = window.ADMIN_REVIEWS || [];
             allRevs.forEach(r => {
+                const row = document.getElementById(`review-row-${r.id}`);
+                const slotIdx = window.CURATED_REVIEW_IDS.indexOf(r.id);
+                if (row) {
+                    row.setAttribute('data-homepage', slotIdx !== -1 ? '1' : '0');
+                }
                 const td = document.getElementById(`review-row-manifesto-${r.id}`);
                 if (!td) return;
-                const slotIdx = window.CURATED_REVIEW_IDS.indexOf(r.id);
                 if (slotIdx !== -1) {
                     td.innerHTML = `
                         <div style="display:flex; flex-direction:column; gap:4px;">
@@ -299,6 +401,8 @@
                     `;
                 }
             });
+            if (typeof recalculateReviewStats === 'function') recalculateReviewStats();
+            if (typeof renderReviewsPagination === 'function') renderReviewsPagination();
         }
 
         function onCurateReviewSlotChange(index, newId) {
@@ -400,6 +504,170 @@
             }
         }
 
+        // ==========================================
+        // CUSTOMER REVIEWS PAGINATION & SEARCH SUITE
+        // ==========================================
+        let reviewsCurrentPage = 1;
+        let currentReviewsSegmentFilter = 'ALL';
+        const REVIEWS_PAGE_SIZE = 20;
+
+        function filterReviewsBySegment(segment, btn) {
+            document.querySelectorAll('.review-filter-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            currentReviewsSegmentFilter = segment || 'ALL';
+            reviewsCurrentPage = 1;
+            renderReviewsPagination();
+        }
+
+        function recalculateReviewStats() {
+            const rows = document.querySelectorAll('#mod-reviews table tbody tr.review-row');
+            let total = rows.length;
+            let homepage = 0, fiveStars = 0, catalog = 0;
+            rows.forEach(r => {
+                const isHp = r.getAttribute('data-homepage') === '1';
+                const rating = r.getAttribute('data-rating');
+                if (isHp) homepage++;
+                else catalog++;
+                if (rating === '5') fiveStars++;
+            });
+            const totEl = document.getElementById('rev-stat-total');
+            if (totEl) totEl.textContent = total;
+            const hpEl = document.getElementById('rev-stat-homepage');
+            if (hpEl) hpEl.textContent = homepage;
+            const starEl = document.getElementById('rev-stat-5stars');
+            if (starEl) starEl.textContent = fiveStars;
+            const catEl = document.getElementById('rev-stat-catalog');
+            if (catEl) catEl.textContent = catalog;
+        }
+
+        function goToReviewsPrevPage() {
+            if (reviewsCurrentPage > 1) {
+                reviewsCurrentPage--;
+                renderReviewsPagination();
+                const wrap = document.querySelector('#mod-reviews .admin-table-wrap');
+                if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        function goToReviewsNextPage() {
+            const matchingRows = getMatchingReviewsRows();
+            const totalPages = Math.max(1, Math.ceil(matchingRows.length / REVIEWS_PAGE_SIZE));
+            if (reviewsCurrentPage < totalPages) {
+                reviewsCurrentPage++;
+                renderReviewsPagination();
+                const wrap = document.querySelector('#mod-reviews .admin-table-wrap');
+                if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        function getMatchingReviewsRows() {
+            const searchInput = document.getElementById('reviews-search-input');
+            const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+            const rows = document.querySelectorAll('#mod-reviews table tbody tr.review-row');
+            const matching = [];
+
+            rows.forEach(row => {
+                const searchData = (row.getAttribute('data-search') || row.textContent || '').toLowerCase();
+                const isHomepage = row.getAttribute('data-homepage') === '1';
+                const rating = row.getAttribute('data-rating');
+
+                const matchesQuery = !query || searchData.includes(query);
+                let matchesSegment = true;
+                if (currentReviewsSegmentFilter === 'HOMEPAGE') {
+                    matchesSegment = isHomepage;
+                } else if (currentReviewsSegmentFilter === 'CATALOG') {
+                    matchesSegment = !isHomepage;
+                } else if (currentReviewsSegmentFilter === '5STARS') {
+                    matchesSegment = (rating === '5');
+                }
+
+                if (matchesQuery && matchesSegment) {
+                    matching.push(row);
+                }
+            });
+            return matching;
+        }
+
+        function renderReviewsPagination() {
+            const allRows = document.querySelectorAll('#mod-reviews table tbody tr.review-row');
+            const matchingRows = getMatchingReviewsRows();
+            const total = matchingRows.length;
+            const totalPages = Math.max(1, Math.ceil(total / REVIEWS_PAGE_SIZE));
+
+            if (reviewsCurrentPage > totalPages) reviewsCurrentPage = totalPages;
+            if (reviewsCurrentPage < 1) reviewsCurrentPage = 1;
+
+            const startIndex = (reviewsCurrentPage - 1) * REVIEWS_PAGE_SIZE;
+            const endIndex = Math.min(startIndex + REVIEWS_PAGE_SIZE, total);
+
+            allRows.forEach(row => {
+                row.style.display = 'none';
+            });
+
+            for (let i = startIndex; i < endIndex; i++) {
+                matchingRows[i].style.display = '';
+            }
+
+            const countEl = document.getElementById('reviews-search-count');
+            if (countEl) {
+                countEl.textContent = `SHOWING ${total} REVIEW${total === 1 ? '' : 'S'} (20 / PAGE)`;
+            }
+
+            const noResultsEl = document.getElementById('reviews-no-results');
+            if (noResultsEl) {
+                noResultsEl.style.display = (total === 0) ? '' : 'none';
+            }
+
+            const pageRangeEl = document.getElementById('reviews-page-range');
+            if (pageRangeEl) {
+                pageRangeEl.textContent = total === 0 ? '0–0' : `${startIndex + 1}–${endIndex}`;
+            }
+            const totalCountEl = document.getElementById('reviews-total-count');
+            if (totalCountEl) totalCountEl.textContent = total;
+
+            const curPageEl = document.getElementById('reviews-current-page');
+            if (curPageEl) curPageEl.textContent = reviewsCurrentPage;
+
+            const totPagesEl = document.getElementById('reviews-total-pages');
+            if (totPagesEl) totPagesEl.textContent = totalPages;
+
+            const prevBtn = document.getElementById('btn-reviews-prev');
+            if (prevBtn) {
+                prevBtn.disabled = (reviewsCurrentPage <= 1);
+                prevBtn.style.opacity = (reviewsCurrentPage <= 1) ? '0.4' : '1';
+                prevBtn.style.cursor = (reviewsCurrentPage <= 1) ? 'not-allowed' : 'pointer';
+            }
+
+            const nextBtn = document.getElementById('btn-reviews-next');
+            if (nextBtn) {
+                nextBtn.disabled = (reviewsCurrentPage >= totalPages);
+                nextBtn.style.opacity = (reviewsCurrentPage >= totalPages) ? '0.4' : '1';
+                nextBtn.style.cursor = (reviewsCurrentPage >= totalPages) ? 'not-allowed' : 'pointer';
+            }
+        }
+
+        function onReviewSearchInput(val) {
+            const clearBtn = document.getElementById('reviews-search-clear-btn');
+            if (clearBtn) {
+                clearBtn.style.display = (val && val.trim().length > 0) ? 'inline-block' : 'none';
+            }
+            reviewsCurrentPage = 1;
+            renderReviewsPagination();
+        }
+
+        function clearReviewSearch() {
+            const input = document.getElementById('reviews-search-input');
+            const clearBtn = document.getElementById('reviews-search-clear-btn');
+            if (input) {
+                input.value = '';
+                input.focus();
+            }
+            if (clearBtn) clearBtn.style.display = 'none';
+            reviewsCurrentPage = 1;
+            renderReviewsPagination();
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             initHomepageReviewsCuration();
+            renderReviewsPagination();
         });

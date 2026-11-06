@@ -1,13 +1,12 @@
 <section id="mod-analytics" class="admin-module active">
             <div class="module-header">
                 <div>
-                    <h2 class="module-title">SILENT TRAFFIC TELEMETRY &amp; CONVERSION RADAR</h2>
+                    <h2 class="module-title">ANALYTICS &amp; TRAFFIC OVERVIEW</h2>
                     <p style="font-size:12px; color:var(--admin-muted); margin-top:2px;">
-                        Interactive visualization of reader dwell times, smart ad conversions, client architectures, and revenue velocity.
+                        Track visitor sessions, engagement metrics, ad click-through rates, and store revenue.
                     </p>
                 </div>
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <span class="form-label" style="margin-bottom:0;">TIMEFRAME:</span>
+                <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
                     <div class="time-range-bar">
                         <button type="button" class="btn-range" onclick="loadAnalytics(7, this)">7D</button>
                         <button type="button" class="btn-range active" onclick="loadAnalytics(14, this)">14D</button>
@@ -25,59 +24,59 @@
                 <div class="kpi-grid">
                     <div class="kpi-card">
                         <div class="kpi-label">
-                            <span>TOTAL CLIENT SESSIONS</span>
+                            <span>TOTAL PAGE VIEWS</span>
                             <span class="status-pill" style="font-size:9px;">ALL TIME</span>
                         </div>
                         <div class="kpi-value" id="kpi-total-views">{{ analytics_summary.total_views }}</div>
-                        <div class="kpi-note" id="kpi-uniques-note">{{ analytics_summary.unique_visitors }} Unique Hardware Fingerprints</div>
+                        <div class="kpi-note" id="kpi-uniques-note">{{ analytics_summary.unique_visitors }} Unique Visitors</div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-label">
-                            <span>ACTIVE OPERATORS NOW</span>
+                            <span>ACTIVE VISITORS NOW</span>
                             <span class="live-pulse"></span>
                         </div>
                         <div class="kpi-value" id="kpi-active-now" style="color:var(--admin-accent-green);">
                             {{ analytics_summary.active_visitors_now or 1 }}
                         </div>
-                        <div class="kpi-note">Live Background Pings (&lt;90s)</div>
+                        <div class="kpi-note">Active in Last 90s</div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-label">
-                            <span>AVG READER DWELL</span>
-                            <span style="color:var(--admin-accent-cyan);">DEEP ENGAGE</span>
+                            <span>AVG TIME ON PAGE</span>
+                            <span style="color:var(--admin-accent-cyan);">ENGAGEMENT</span>
                         </div>
                         <div class="kpi-value" id="kpi-avg-dwell">{{ analytics_summary.avg_dwell_seconds }}s</div>
-                        <div class="kpi-note" id="kpi-scroll-note">{{ analytics_summary.avg_scroll_pct }}% Average Page Scroll Depth</div>
+                        <div class="kpi-note" id="kpi-scroll-note">{{ analytics_summary.avg_scroll_pct }}% Avg Scroll Depth</div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-label">
-                            <span>SMART AD CTR</span>
+                            <span>IN-ARTICLE AD CTR</span>
                             <span style="color:var(--admin-accent-amber);">CONVERSION</span>
                         </div>
                         <div class="kpi-value" id="kpi-smart-ctr" style="color:var(--admin-accent-amber);">
                             {{ analytics_summary.smart_ad_ctr_pct }}%
                         </div>
                         <div class="kpi-note" id="kpi-ad-clicks-note">
-                            {{ analytics_summary.smart_ad_clicks }} Clicks / {{ analytics_summary.smart_ad_impressions }} Ad Views
+                            {{ analytics_summary.smart_ad_clicks }} Clicks / {{ analytics_summary.smart_ad_impressions }} Views
                         </div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-label">
-                            <span>TELEGRAM BUY INTENTS</span>
-                            <span style="color:var(--admin-accent-purple);">DISPATCH</span>
+                            <span>CHECKOUT CLICKS</span>
+                            <span style="color:var(--admin-accent-purple);">TELEGRAM</span>
                         </div>
                         <div class="kpi-value" id="kpi-tg-clicks">{{ analytics_summary.telegram_buy_clicks }}</div>
-                        <div class="kpi-note" id="kpi-cart-adds-note">{{ analytics_summary.cart_adds }} Bags Created Across Arsenal</div>
+                        <div class="kpi-note" id="kpi-cart-adds-note">{{ analytics_summary.cart_adds }} Cart Additions</div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-label">
-                            <span>PIPELINE REVENUE</span>
+                            <span>TOTAL REVENUE</span>
                             <span class="status-pill completed" style="font-size:9px;">ORDERS</span>
                         </div>
                         <div class="kpi-value" id="kpi-pipeline-rev" style="color:#ffffff;">
                             ${{ "%.2f"|format(analytics_summary.pipeline_revenue or stats.total_revenue) }}
                         </div>
-                        <div class="kpi-note" id="kpi-orders-note">{{ stats.completed_orders_count }} Fulfilled / {{ stats.pending_orders_count }} Awaiting Transfer</div>
+                        <div class="kpi-note" id="kpi-orders-note">{{ stats.completed_orders_count }} Completed / {{ stats.pending_orders_count }} Pending</div>
                     </div>
                 </div>
             </div>
@@ -87,9 +86,9 @@
                 <div class="chart-card">
                     <div class="chart-card-header">
                         <div>
-                            <span class="chart-card-title">// TRAFFIC &amp; ENGAGEMENT TIMELINE</span>
+                            <span class="chart-card-title">TRAFFIC &amp; ENGAGEMENT TIMELINE</span>
                             <div style="font-size:11px; color:var(--admin-muted); margin-top:2px;">
-                                Daily volume: Product Ingestion vs Threat Intel Reads vs Average Dwell Time
+                                Daily volume: Product Views vs Article Reads vs Average Time on Page
                             </div>
                         </div>
                     </div>
@@ -101,9 +100,9 @@
                 <div class="chart-card">
                     <div class="chart-card-header">
                         <div>
-                            <span class="chart-card-title">// READERSHIP TO REVENUE CONVERSION FUNNEL</span>
+                            <span class="chart-card-title">CONVERSION FUNNEL</span>
                             <div style="font-size:11px; color:var(--admin-muted); margin-top:2px;">
-                                Native Smart Ad Exposure → Clickthrough → Cart Adds → Telegram Buy Inquiries
+                                Ad Impressions → Ad Clicks → Cart Additions → Checkout Inquiries
                             </div>
                         </div>
                     </div>
@@ -118,9 +117,9 @@
                 <div class="chart-card">
                     <div class="chart-card-header">
                         <div>
-                            <span class="chart-card-title">// CLIENT PLATFORM &amp; OPERATING SYSTEM</span>
+                            <span class="chart-card-title">VISITOR BROWSERS &amp; PLATFORMS</span>
                             <div style="font-size:11px; color:var(--admin-muted); margin-top:2px;">
-                                Hardware and kernel profiles detected across client telemetry stream
+                                Browser and operating system distribution across visitor sessions
                             </div>
                         </div>
                     </div>
@@ -132,9 +131,9 @@
                 <div class="chart-card">
                     <div class="chart-card-header">
                         <div>
-                            <span class="chart-card-title">// ENGAGEMENT BY ATTACK SURFACE &amp; DOMAIN</span>
+                            <span class="chart-card-title">ENGAGEMENT BY CATEGORY</span>
                             <div style="font-size:11px; color:var(--admin-muted); margin-top:2px;">
-                                Reader distribution across Kernel, Cloud, Active Directory, and Container security
+                                Traffic distribution across product and article categories
                             </div>
                         </div>
                     </div>
@@ -146,32 +145,30 @@
 
             <!-- DETAILED PERFORMANCE TABLES (SHOWING LATEST 10 RECORDS) -->
             <div style="margin-top: 3rem;" id="analytics-tables-anchor">
-                <div class="module-header" style="margin-bottom: 1.25rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
                     <div>
                         <div style="display:flex; align-items:center; gap:8px;">
                             <h3 style="font-size: 15px; font-weight: 700; text-transform: uppercase;">
-                                // GRANULAR PERFORMANCE &amp; TELEMETRY MATRIX
+                                RECENT PERFORMANCE &amp; VISITOR ACTIVITY
                             </h3>
-                            <span class="status-pill" style="font-size:9px;">SHOWING LAST 10</span>
+                            <span class="status-pill" style="font-size:9px;">TOP 10</span>
                         </div>
                         <p style="font-size:11.5px; color:var(--admin-muted); margin-top:2px;">
-                            Live preview of the latest 10 captured telemetry events. Click Show All for full 20/page audit.
+                            Quick view of the top 10 items and recent sessions. Click View Full Reports for paginated records.
                         </p>
                     </div>
-                    <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
-                        <div class="module-subnav" style="margin-bottom:0;">
-                            <button type="button" class="subnav-btn active" onclick="switchAnalyticsSubTable('products', this)">
-                                CATALOG (10)
-                            </button>
-                            <button type="button" class="subnav-btn" onclick="switchAnalyticsSubTable('blogs', this)">
-                                INTEL REACH (10)
-                            </button>
-                            <button type="button" class="subnav-btn" onclick="switchAnalyticsSubTable('stream', this)">
-                                LIVE STREAM (10)
-                            </button>
-                        </div>
-                        <button type="button" class="btn-admin btn-admin-primary" onclick="switchSubtab('analytics', 'matrix-full')" style="background:#00e5ff; color:#000; font-weight:700; display:inline-flex; align-items:center; gap:5px; padding:0.45rem 1rem;">
-                            <span>SHOW ALL (20 / PAGE)</span>
+                    <div class="module-subnav" style="display: inline-flex; align-items: center; gap: 6px; flex-wrap: nowrap; overflow-x: auto; max-width: 100%; margin-bottom: 0; -webkit-overflow-scrolling: touch;">
+                        <button type="button" class="subnav-btn active" onclick="switchAnalyticsSubTable('products', this)" style="white-space: nowrap; height: 32px;">
+                            PRODUCTS (10)
+                        </button>
+                        <button type="button" class="subnav-btn" onclick="switchAnalyticsSubTable('blogs', this)" style="white-space: nowrap; height: 32px;">
+                            ARTICLES (10)
+                        </button>
+                        <button type="button" class="subnav-btn" onclick="switchAnalyticsSubTable('stream', this)" style="white-space: nowrap; height: 32px;">
+                            VISITOR LOGS (10)
+                        </button>
+                        <button type="button" class="btn-admin btn-admin-primary" onclick="switchSubtab('analytics', 'matrix-full')" style="background: #00e5ff; color: #000; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; padding: 0 0.85rem; height: 32px; white-space: nowrap; border: none; font-size: 11px;">
+                            <span>VIEW FULL REPORTS</span>
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                         </button>
                     </div>
@@ -183,14 +180,14 @@
                         <thead>
                             <tr>
                                 <th>SKU</th>
-                                <th>SECURITY SYSTEM</th>
+                                <th>PRODUCT</th>
                                 <th>PRICE</th>
                                 <th>VIEWS</th>
                                 <th>UNIQUES</th>
-                                <th>AVG DWELL</th>
+                                <th>AVG TIME</th>
                                 <th>SCROLL DEPTH</th>
-                                <th>BAG ADDS</th>
-                                <th>TG BUYS</th>
+                                <th>CART ADDS</th>
+                                <th>CHECKOUTS</th>
                                 <th>CONVERSION</th>
                             </tr>
                         </thead>
@@ -205,14 +202,14 @@
                     <table class="admin-table">
                         <thead>
                             <tr>
-                                <th>CVE ID</th>
-                                <th>ADVISORY RESEARCH TITLE</th>
+                                <th>TAG / CVE</th>
+                                <th>ARTICLE TITLE</th>
                                 <th>SEVERITY</th>
                                 <th>READS</th>
                                 <th>UNIQUES</th>
-                                <th>AVG DWELL</th>
+                                <th>AVG TIME</th>
                                 <th>SCROLL</th>
-                                <th>SMART AD VIEWS</th>
+                                <th>AD VIEWS</th>
                                 <th>AD CLICKS</th>
                                 <th>CTR</th>
                             </tr>
@@ -228,11 +225,12 @@
                     <table class="admin-table">
                         <thead>
                             <tr>
-                                <th>VISIT TOKEN</th>
+                                <th>SESSION ID</th>
                                 <th>PAGE TYPE</th>
-                                <th>SLUG / TARGET</th>
-                                <th>PLATFORM / OS</th>
-                                <th>DWELL</th>
+                                <th>PAGE PATH</th>
+                                <th>BROWSER / OS</th>
+                                <th>IP ADDRESS</th>
+                                <th>DURATION</th>
                                 <th>SCROLL</th>
                                 <th>REFERRER</th>
                                 <th>TIMESTAMP</th>
@@ -251,28 +249,28 @@
             <div class="module-header matrix-header-pinned">
                 <div>
                     <div style="display:flex; align-items:center; gap:8px;">
-                        <h2 class="module-title">// DEDICATED TELEMETRY MATRIX &amp; AUDIT LOGS</h2>
-                        <span class="status-pill completed" style="font-size:10px;">20 RECORDS / PAGE</span>
+                        <h2 class="module-title">DETAILED ANALYTICS REPORTS</h2>
+                        <span class="status-pill completed" style="font-size:10px;">20 / PAGE</span>
                     </div>
                     <p style="font-size:12px; color:var(--admin-muted); margin-top:2px;">
-                        Comprehensive paginated telemetry data with 20 records per page, navigation controls, and deep metrics.
+                        Full paginated performance reports for products, articles, and visitor sessions.
                     </p>
                 </div>
-                <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+                <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:nowrap; overflow-x:auto; max-width:100%;">
                     <div class="module-subnav" style="margin-bottom:0;">
                         <button type="button" class="subnav-btn active" id="btn-full-matrix-products" onclick="switchFullMatrixTable('products', this)">
-                            CATALOG PERFORMANCE
+                            PRODUCTS
                         </button>
                         <button type="button" class="subnav-btn" id="btn-full-matrix-blogs" onclick="switchFullMatrixTable('blogs', this)">
-                            THREAT INTEL REACH
+                            ARTICLES
                         </button>
                         <button type="button" class="subnav-btn" id="btn-full-matrix-stream" onclick="switchFullMatrixTable('stream', this)">
-                            LIVE CLIENT STREAM
+                            VISITOR LOGS
                         </button>
                     </div>
                     <button type="button" class="btn-admin btn-admin-outline" onclick="switchSubtab('analytics', 'overview')" style="display:inline-flex; align-items:center; gap:6px;">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-                        <span>BACK TO RADAR OVERVIEW</span>
+                        <span>BACK TO OVERVIEW</span>
                     </button>
                 </div>
             </div>
@@ -285,14 +283,14 @@
                         <thead>
                             <tr>
                                 <th>SKU</th>
-                                <th>SECURITY SYSTEM</th>
+                                <th>PRODUCT</th>
                                 <th>PRICE</th>
                                 <th>VIEWS</th>
                                 <th>UNIQUES</th>
-                                <th>AVG DWELL</th>
+                                <th>AVG TIME</th>
                                 <th>SCROLL DEPTH</th>
-                                <th>BAG ADDS</th>
-                                <th>TG BUYS</th>
+                                <th>CART ADDS</th>
+                                <th>CHECKOUTS</th>
                                 <th>CONVERSION</th>
                             </tr>
                         </thead>
@@ -305,14 +303,14 @@
                     <table class="admin-table">
                         <thead>
                             <tr>
-                                <th>CVE ID</th>
-                                <th>ADVISORY RESEARCH TITLE</th>
+                                <th>TAG / CVE</th>
+                                <th>ARTICLE TITLE</th>
                                 <th>SEVERITY</th>
                                 <th>READS</th>
                                 <th>UNIQUES</th>
-                                <th>AVG DWELL</th>
+                                <th>AVG TIME</th>
                                 <th>SCROLL</th>
-                                <th>SMART AD VIEWS</th>
+                                <th>AD VIEWS</th>
                                 <th>AD CLICKS</th>
                                 <th>CTR</th>
                             </tr>
@@ -326,11 +324,12 @@
                     <table class="admin-table">
                         <thead>
                             <tr>
-                                <th>VISIT TOKEN</th>
+                                <th>SESSION ID</th>
                                 <th>PAGE TYPE</th>
-                                <th>SLUG / TARGET</th>
-                                <th>PLATFORM / OS</th>
-                                <th>DWELL</th>
+                                <th>PAGE PATH</th>
+                                <th>BROWSER / OS</th>
+                                <th>IP ADDRESS</th>
+                                <th>DURATION</th>
                                 <th>SCROLL</th>
                                 <th>REFERRER</th>
                                 <th>TIMESTAMP</th>

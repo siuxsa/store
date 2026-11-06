@@ -11,9 +11,9 @@ from database import get_db
 from core.helpers import (
     get_settings_dict, row_to_product, row_to_post, render_markdown_prose,
     process_post_smart_ads, log_audit_event, build_telegram_product_url,
-    compute_pagination_pages
+    compute_pagination_pages, render_robots_txt, generate_sitemap_xml
 )
-from core.security import get_current_user, get_current_admin
+from core.security import get_current_user, get_current_admin, get_client_ip
 
 def register_frontend_routes(app):
     
@@ -25,6 +25,20 @@ def register_frontend_routes(app):
             target_slug="about",
             target_title="About // Architecture & Systems"
         )
+    
+    @app.route("/404-preview-live")
+    def preview_404_page():
+        conn = get_db()
+        settings = get_settings_dict(conn)
+        conn.close()
+        return render_template("404.html", site_settings=settings)
+
+    @app.route("/403-preview-live")
+    def preview_403_page():
+        conn = get_db()
+        settings = get_settings_dict(conn)
+        conn.close()
+        return render_template("banned_banner.html", site_settings=settings)
     
     
     
@@ -151,8 +165,18 @@ def register_frontend_routes(app):
         conn.close()
 
         filtered = all_products
+        matched_category_name = category_filter
         if category_filter:
-            filtered = [p for p in filtered if p["category"].lower() == category_filter.lower()]
+            cf = category_filter.lower()
+            for cat_name in categories:
+                cn = cat_name.lower()
+                if cf == cn or cf in cn or cn in cf:
+                    matched_category_name = cat_name
+                    break
+            filtered = [
+                p for p in filtered
+                if cf == p["category"].lower() or cf in p["category"].lower() or p["category"].lower() in cf
+            ]
         if type_filter:
             filtered = [p for p in filtered if p["product_type"].lower() == type_filter.lower()]
         if q:
@@ -209,7 +233,7 @@ def register_frontend_routes(app):
             start_item=start_item,
             end_item=end_item,
             categories=categories,
-            current_category=category_filter,
+            current_category=matched_category_name,
             current_type=type_filter,
             search_query=q,
             current_page=current_page,
@@ -222,8 +246,8 @@ def register_frontend_routes(app):
             page_numbers=page_numbers,
             make_page_url=make_page_url,
             page_type="SHOP",
-            target_slug="arsenal",
-            target_title="Digital Arsenal Catalog"
+            target_slug="shop",
+            target_title="Products Catalog"
         )
     
     
@@ -321,7 +345,11 @@ def register_frontend_routes(app):
         if severity_filter:
             filtered = [p for p in filtered if p["severity"].upper() == severity_filter]
         if category_filter:
-            filtered = [p for p in filtered if p["category"].lower() == category_filter.lower()]
+            cf = category_filter.lower()
+            filtered = [
+                p for p in filtered
+                if cf == p["category"].lower() or cf in p["category"].lower() or p["category"].lower() in cf
+            ]
         if q:
             ql = q.lower()
             filtered = [
@@ -392,8 +420,8 @@ def register_frontend_routes(app):
             page_numbers=page_numbers,
             make_page_url=make_page_url,
             page_type="BLOG_INDEX",
-            target_slug="intel",
-            target_title="Threat Intelligence Wire"
+            target_slug="articles",
+            target_title="Security Articles"
         )
     
     
@@ -471,7 +499,7 @@ def register_frontend_routes(app):
                 return jsonify({
                     "ok": False,
                     "error": "AUTH_REQUIRED",
-                    "message": "Authentication required. Please log in as an operator to submit technical verification notes."
+                    "message": "Please sign in to post a comment."
                 }), 401
             return redirect(url_for("login_page", next=request.referrer or url_for("blog")))
 
@@ -487,11 +515,11 @@ def register_frontend_routes(app):
 
         if admin:
             author_name = (data.get("author_name") or admin["username"]).strip()
-            author_role = "ZERO-DAY RESEARCH UNIT"
+            author_role = "ADMIN"
             user_id = admin["id"]
         else:
             author_name = user["username"]
-            author_role = user.get("role") or "VERIFIED OPERATOR"
+            author_role = user.get("role") or "MEMBER"
             user_id = user["id"]
 
         now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -516,7 +544,7 @@ def register_frontend_routes(app):
             return jsonify({
                 "ok": True,
                 "status": comment_status,
-                "message": "Verification report submitted to operational control. Awaiting administrator approval before publication."
+                "message": "Your comment has been submitted and will appear once approved by a moderator."
             })
         return redirect((request.referrer or url_for("blog")) + "?comment_status=pending#verification-log")
     
@@ -533,8 +561,8 @@ def register_frontend_routes(app):
             site_settings=settings,
             current_user=user,
             page_type="REQUEST",
-            target_slug="request-tool",
-            target_title="Custom Tool & Exploit Sourcing Desk"
+            target_slug="request-product",
+            target_title="Request a Product"
         )
 
     @app.route("/api/request-tool", methods=["POST"])
@@ -550,18 +578,18 @@ def register_frontend_routes(app):
         preferred_contact = (data.get("preferred_contact") or "TELEGRAM").strip()
 
         if not tool_name:
-            return jsonify({"error": "Please enter the tool, license, or exploit name you are requesting."}), 400
+            return jsonify({"error": "Please enter the product or software name you are requesting."}), 400
         if len(tool_name) > 200:
-            return jsonify({"error": "Tool name exceeds maximum length (200 characters)."}), 400
+            return jsonify({"error": "Product name exceeds maximum length (200 characters)."}), 400
         if not contact_telegram and not contact_email:
-            return jsonify({"error": "Please provide your Telegram handle or Email so our concierge desk can reach you."}), 400
+            return jsonify({"error": "Please provide your Telegram username or email so our team can reach you."}), 400
 
         user = get_current_user()
         user_id = user["id"] if user else None
         
         request_id = f"REQ-{secrets.randbelow(90000) + 10000}"
         now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        ip_addr = request.headers.get("X-Forwarded-For", request.remote_addr or "127.0.0.1").split(",")[0].strip()
+        ip_addr = get_client_ip(request)
 
         conn = get_db()
         conn.execute("""
@@ -601,6 +629,26 @@ def register_frontend_routes(app):
             return app.send_static_file("favicon.ico")
         svg_icon = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#050505"/><polygon points="50,15 85,85 15,85" fill="#00e5ff"/></svg>"""
         return Response(svg_icon, mimetype="image/svg+xml")
+
+    @app.route("/robots.txt", methods=["GET"])
+    def site_robots_txt():
+        conn = get_db()
+        content = render_robots_txt(conn)
+        conn.close()
+        return Response(content, mimetype="text/plain; charset=utf-8")
+
+    @app.route("/sitemap.xml", methods=["GET"])
+    def site_sitemap_xml():
+        conn = get_db()
+        settings = get_settings_dict(conn)
+        saved_xml = (settings.get("sitemap_xml_content") or "").strip()
+        if saved_xml:
+            conn.close()
+            return Response(saved_xml, mimetype="application/xml; charset=utf-8")
+        result = generate_sitemap_xml(conn)
+        conn.close()
+        return Response(result["xml"], mimetype="application/xml; charset=utf-8")
+
     
     
     

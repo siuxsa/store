@@ -307,10 +307,18 @@
             updateProductMarkdownStats();
         }
 
-        function loadProductMarkdownTemplate(tmplKey) {
+        async function loadProductMarkdownTemplate(tmplKey) {
             const textarea = document.getElementById('pse-description');
             if (!textarea) return;
-            if (textarea.value.trim() && !confirm('Load template? This will replace your current manual draft.')) return;
+            if (textarea.value.trim()) {
+                const ok = await showConfirmModal({
+                    title: 'LOAD SYSTEM TEMPLATE',
+                    message: 'Load template? This will replace your current manual draft in the specifications editor.',
+                    confirmText: 'REPLACE DRAFT',
+                    danger: false
+                });
+                if (!ok) return;
+            }
             let tmpl = '';
             if (tmplKey === 'arch') {
                 tmpl = `### 01 · SYSTEM ARCHITECTURE & SUBSYSTEMS\n\nComprehensive technical architecture overview engineered for security operators and automated pipeline integration.\n\n> [!NOTE]\n> Fully verified for offline airgap isolation with zero external phone-home telemetry.\n\n---\n\n### 02 · MODULE BREAKDOWN & WORKER THREADS\n\n| Subsystem | Capabilities | Throughput Execution |\n| :--- | :--- | :--- |\n| **Core Engine** | High-throughput multi-threaded pipeline | Unthrottled |\n| **Offline Manifest** | Cryptographic SHA-256 signature validation | Instant |\n\n---\n\n### 03 · RUNTIME VERIFICATION EXAMPLE\n\n\`\`\`bash\n# Verify release archive integrity\nsha256sum -c release_checksum.txt\n\`\`\``;
@@ -374,8 +382,54 @@
             navigator.clipboard.writeText(preview.innerHTML).then(() => {
                 showThemeToast('RENDERED HTML COPIED TO CLIPBOARD');
             }).catch(() => {
-                alert('Copied to clipboard.');
+                showToast('Copied to clipboard.', 'success');
             });
+        }
+
+        function updatePseDeliveryLinksLabels() {
+            const rows = document.querySelectorAll('#pse-delivery-links-container .pse-delivery-link-row');
+            rows.forEach((row, idx) => {
+                const badge = row.querySelector('.pse-dl-index');
+                if (badge) badge.textContent = `LINK #${idx + 1}`;
+            });
+        }
+
+        function addPseDeliveryLinkRow(label = '', url = '') {
+            const container = document.getElementById('pse-delivery-links-container');
+            if (!container) return;
+            const row = document.createElement('div');
+            row.className = 'pse-delivery-link-row';
+            row.style.cssText = 'display:grid; grid-template-columns: 64px 200px 1fr auto; gap:0.5rem; align-items:center; background:#141618; border:1px solid var(--admin-border); padding:0.5rem 0.65rem; border-radius:4px;';
+            row.innerHTML = `
+                <span class="pse-dl-index" style="font-family:var(--admin-font-mono); font-size:10px; font-weight:700; color:#10b981;">LINK #1</span>
+                <input type="text" class="form-input pse-dl-label" placeholder="Label (e.g. Main Archive)" style="font-size:11.5px; padding:0.4rem 0.6rem;">
+                <input type="text" class="form-input pse-dl-url" placeholder="https://cdn.example.com/private-download.zip" style="font-family:var(--admin-font-mono); font-size:11.5px; padding:0.4rem 0.6rem;">
+                <button type="button" class="btn-admin btn-admin-danger" style="padding:0.35rem 0.6rem; font-size:10px;" onclick="this.closest('.pse-delivery-link-row').remove(); updatePseDeliveryLinksLabels();">
+                    REMOVE
+                </button>
+            `;
+            row.querySelector('.pse-dl-label').value = label || '';
+            row.querySelector('.pse-dl-url').value = url || '';
+            container.appendChild(row);
+            updatePseDeliveryLinksLabels();
+        }
+
+        function populatePseDeliveryLinks(links) {
+            const container = document.getElementById('pse-delivery-links-container');
+            if (!container) return;
+            container.innerHTML = '';
+            if (Array.isArray(links) && links.length > 0) {
+                links.forEach(lk => {
+                    if (typeof lk === 'object' && lk !== null) {
+                        addPseDeliveryLinkRow(lk.label || '', lk.url || '');
+                    } else if (typeof lk === 'string' && lk.trim()) {
+                        addPseDeliveryLinkRow('Download Package', lk.trim());
+                    }
+                });
+            } else {
+                addPseDeliveryLinkRow('', '');
+            }
+            updatePseDeliveryLinksLabels();
         }
 
         function updatePseStatusPill(val) {
@@ -387,6 +441,73 @@
             pill.style.color = '#000';
         }
 
+        function updateProductRowInTable(p) {
+            if (!p || !p.id) return;
+            let row = document.getElementById('product-row-' + p.id) || document.getElementById('product-data-' + p.id)?.closest('tr');
+            const isDraft = (p.status || 'PUBLISHED').toUpperCase() === 'DRAFT';
+            const statusHtml = isDraft
+                ? `<span class="badge-tag" style="background:#f59e0b; color:#000; font-weight:800; font-size:10px; padding:2px 7px;">DRAFT</span>`
+                : `<span class="badge-tag" style="background:#10b981; color:#000; font-weight:800; font-size:10px; padding:2px 7px;">PUBLISHED</span>`;
+            const toggleBtnHtml = isDraft
+                ? `<button type="button" class="btn-admin btn-admin-outline" style="padding:0.35rem 0.65rem; border-color:#10b981; color:#10b981;" onclick="toggleProductStatusQuick(${p.id}, this)" title="Publish this product immediately">PUBLISH</button>`
+                : `<button type="button" class="btn-admin btn-admin-outline" style="padding:0.35rem 0.65rem; border-color:#f59e0b; color:#f59e0b;" onclick="toggleProductStatusQuick(${p.id}, this)" title="Unpublish and move to draft">UNPUBLISH</button>`;
+
+            const safeName = (p.name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const safeSku = (p.sku || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const safeCat = (p.category || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const safePlatform = (p.platform || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const safeHash = (p.sha256_hash || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const safeSlug = encodeURIComponent(p.slug || p.sku);
+            const pJson = JSON.stringify(p).replace(/</g, '\\u003c');
+
+            const innerHtml = `
+                <td style="font-weight:700;">${safeSku}</td>
+                <td>
+                    <a href="/product/${safeSlug}" target="_blank" style="color:#fff; text-decoration:none; font-weight:600;">
+                        ${safeName}
+                    </a>
+                </td>
+                <td>${safeCat}</td>
+                <td>
+                    $${Number(p.price || 0).toFixed(0)}
+                    <span style="color:var(--admin-muted); text-decoration:line-through; font-size:11px;">$${Number(p.retail_price || 0).toFixed(0)}</span>
+                </td>
+                <td>${statusHtml}</td>
+                <td>${(p.version || '').replace(/</g, '&lt;')}</td>
+                <td style="font-size:11px; color:var(--admin-muted);">${safePlatform}</td>
+                <td style="font-size:10px; max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--admin-muted);">
+                    ${safeHash}
+                </td>
+                <td style="text-align:right; white-space:nowrap;">
+                    <script id="product-data-${p.id}" type="application/json">${pJson}</script>
+                    ${toggleBtnHtml}
+                    <button type="button" class="btn-admin btn-admin-outline" style="padding:0.35rem 0.65rem; margin-left:4px;" onclick="openProductStudioForId(${p.id})">
+                        EDIT
+                    </button>
+                    <button type="button" class="btn-admin btn-admin-danger" style="padding:0.35rem 0.65rem; margin-left:4px;" onclick="deleteProduct(${p.id}, '${safeName.replace(/'/g, "\\'")}')">
+                        DELETE
+                    </button>
+                </td>
+            `;
+
+            if (row) {
+                row.className = 'product-row';
+                row.setAttribute('data-search', `${p.sku || ''} ${p.name || ''} ${p.category || ''} ${p.platform || ''} ${p.status || ''}`);
+                row.innerHTML = innerHtml;
+            } else {
+                const tbody = document.querySelector('#mod-products table.admin-table tbody');
+                if (tbody) {
+                    const tr = document.createElement('tr');
+                    tr.id = 'product-row-' + p.id;
+                    tr.className = 'product-row';
+                    tr.setAttribute('data-search', `${p.sku || ''} ${p.name || ''} ${p.category || ''} ${p.platform || ''} ${p.status || ''}`);
+                    tr.innerHTML = innerHtml;
+                    tbody.insertBefore(tr, tbody.firstChild);
+                }
+            }
+            renderProductsPagination();
+        }
+
         async function toggleProductStatusQuick(prodId, btn) {
             if (btn) btn.disabled = true;
             try {
@@ -396,22 +517,65 @@
                 });
                 const data = await res.json();
                 if (data.ok) {
-                    showThemeToast(`SYSTEM STATUS UPDATED: ${data.new_status}`);
-                    setTimeout(() => location.reload(), 450);
+                    const newStatus = data.new_status;
+                    const row = document.getElementById('product-row-' + prodId) || document.getElementById('product-data-' + prodId)?.closest('tr');
+                    if (row) {
+                        let s = row.getAttribute('data-search') || '';
+                        s = s.replace(/DRAFT|PUBLISHED/g, newStatus);
+                        row.setAttribute('data-search', s);
+                        if (row.cells && row.cells.length > 4) {
+                            if (newStatus === 'DRAFT') {
+                                row.cells[4].innerHTML = `<span class="badge-tag" style="background:#f59e0b; color:#000; font-weight:800; font-size:10px; padding:2px 7px;">DRAFT</span>`;
+                            } else {
+                                row.cells[4].innerHTML = `<span class="badge-tag" style="background:#10b981; color:#000; font-weight:800; font-size:10px; padding:2px 7px;">PUBLISHED</span>`;
+                            }
+                        }
+                        const toggleBtn = row.querySelector('button[onclick*="toggleProductStatusQuick"]');
+                        if (toggleBtn) {
+                            if (newStatus === 'DRAFT') {
+                                toggleBtn.textContent = 'PUBLISH';
+                                toggleBtn.style.borderColor = '#10b981';
+                                toggleBtn.style.color = '#10b981';
+                                toggleBtn.title = 'Publish this product immediately';
+                            } else {
+                                toggleBtn.textContent = 'UNPUBLISH';
+                                toggleBtn.style.borderColor = '#f59e0b';
+                                toggleBtn.style.color = '#f59e0b';
+                                toggleBtn.title = 'Unpublish and move to draft';
+                            }
+                        }
+                    }
+                    const scriptEl = document.getElementById('product-data-' + prodId);
+                    if (scriptEl) {
+                        try {
+                            const pData = JSON.parse(scriptEl.textContent);
+                            pData.status = newStatus;
+                            scriptEl.textContent = JSON.stringify(pData);
+                        } catch(e) {}
+                    }
+                    if (typeof updatePseStatusPill === 'function') {
+                        const pseId = document.getElementById('pse-id');
+                        if (pseId && pseId.value == prodId) {
+                            updatePseStatusPill(newStatus);
+                        }
+                    }
+                    renderProductsPagination();
+                    showThemeToast(`SYSTEM STATUS UPDATED: ${newStatus}`);
+                    if (btn) btn.disabled = false;
                 } else {
-                    alert('Error changing status: ' + (data.error || 'Server error'));
+                    showToast('Error changing status: ' + (data.error || 'Server error'), 'error');
                     if (btn) btn.disabled = false;
                 }
             } catch(err) {
-                alert('Request failed: ' + err.message);
+                showToast('Request failed: ' + err.message, 'error');
                 if (btn) btn.disabled = false;
             }
         }
 
         function openProductStudio() {
             document.getElementById('pse-id').value = '';
-            document.getElementById('pse-breadcrumb-title').textContent = 'NEW ARSENAL SYSTEM';
-            document.getElementById('pse-heading-title').textContent = 'CREATE NEW ARSENAL SYSTEM';
+            document.getElementById('pse-breadcrumb-title').textContent = 'NEW PRODUCT';
+            document.getElementById('pse-heading-title').textContent = 'ADD NEW PRODUCT';
             document.getElementById('pse-btn-view-live').style.display = 'none';
 
             // Status reset
@@ -440,6 +604,10 @@
             document.getElementById('pse-sha256').value = '';
             document.getElementById('pse-download-url').value = '';
             document.getElementById('pse-desc').value = '';
+            populatePseDeliveryLinks([]);
+            if (document.getElementById('pse-delivery-message')) {
+                document.getElementById('pse-delivery-message').value = '';
+            }
 
             // Reset line-by-line specs
             populatePseSpecs([]);
@@ -453,6 +621,7 @@
             document.getElementById('pse-meta-desc').value = '';
             document.getElementById('pse-meta-keywords').value = '';
             document.getElementById('pse-og-image').value = '';
+            if (document.getElementById('pse-custom-js')) document.getElementById('pse-custom-js').value = '';
             updateProductOgPreview('https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=85');
 
             // In-article smart ad campaign
@@ -492,7 +661,7 @@
         function editProductStudio(p) {
             document.getElementById('pse-id').value = p.id;
             document.getElementById('pse-breadcrumb-title').textContent = 'EDIT: ' + p.sku;
-            document.getElementById('pse-heading-title').textContent = 'EDIT SYSTEM SPECIFICATIONS — ' + p.name;
+            document.getElementById('pse-heading-title').textContent = 'EDIT PRODUCT — ' + p.name;
             
             const liveBtn = document.getElementById('pse-btn-view-live');
             if (liveBtn) {
@@ -525,6 +694,14 @@
             document.getElementById('pse-download-url').value = p.download_url || '';
             document.getElementById('pse-desc').value = p.short_desc || '';
 
+            const initLinks = (Array.isArray(p.delivery_links) && p.delivery_links.length > 0)
+                ? p.delivery_links
+                : (p.download_url ? [{ label: (p.name || 'Download') + ' (' + (p.version || 'Release') + ')', url: p.download_url }] : []);
+            populatePseDeliveryLinks(initLinks);
+            if (document.getElementById('pse-delivery-message')) {
+                document.getElementById('pse-delivery-message').value = p.delivery_message || '';
+            }
+
             // Specifications line by line
             populatePseSpecs(p.specs || []);
 
@@ -538,6 +715,7 @@
             document.getElementById('pse-meta-desc').value = p.meta_desc || '';
             document.getElementById('pse-meta-keywords').value = p.meta_keywords || '';
             document.getElementById('pse-og-image').value = p.og_image || '';
+            if (document.getElementById('pse-custom-js')) document.getElementById('pse-custom-js').value = p.custom_js || '';
             updateProductOgPreview(p.og_image || coverUrl);
 
             // In-article smart ad campaign
@@ -633,8 +811,9 @@
             const countT = document.getElementById('pse-count-title');
             const countD = document.getElementById('pse-count-desc');
 
+            const siteName = (window.ORIGINAL_THEME_SETTINGS && window.ORIGINAL_THEME_SETTINGS.site_name) || 'ZERO//FORM';
             if (serpUrl) serpUrl.textContent = `https://matrix.security/product/${slug}`;
-            if (serpTitle) serpTitle.textContent = customTitle || `${name} (${sku}) — Enterprise License // {{ site_settings.site_name }}`;
+            if (serpTitle) serpTitle.textContent = customTitle || `${name} (${sku}) — Enterprise License // ${siteName}`;
             if (serpDesc) serpDesc.textContent = customDesc || shortDesc || 'Commercial security auditing suites, binary analysis frameworks, and verified enterprise seats.';
 
             if (countT) countT.textContent = customTitle ? `${customTitle.length}/60 chars` : 'AUTO-FALLBACK';
@@ -759,7 +938,7 @@
             const sku = document.getElementById('pse-sku').value.trim();
             const name = document.getElementById('pse-name').value.trim();
             if (!sku || !name) {
-                alert('Please enter both SKU and System Name.');
+                showToast('Please enter both SKU and System Name.', 'error');
                 switchProductStudioTab('specs', document.querySelector('.pse-subnav-btn'));
                 return;
             }
@@ -773,8 +952,19 @@
                 updatePseStatusPill(finalStatus);
             }
 
-            if (saveBtn) { saveBtn.textContent = 'PERSISTING SPECIFICATIONS...'; saveBtn.disabled = true; }
+            if (saveBtn) { saveBtn.textContent = 'SAVING...'; saveBtn.disabled = true; }
             if (draftBtn) { draftBtn.disabled = true; }
+
+            const pseDeliveryLinks = [];
+            document.querySelectorAll('#pse-delivery-links-container .pse-delivery-link-row').forEach(row => {
+                const l = (row.querySelector('.pse-dl-label') ? row.querySelector('.pse-dl-label').value : '').trim();
+                const u = (row.querySelector('.pse-dl-url') ? row.querySelector('.pse-dl-url').value : '').trim();
+                if (u) {
+                    pseDeliveryLinks.append ? pseDeliveryLinks.push({ label: l || 'Download Package', url: u }) : pseDeliveryLinks.push({ label: l || 'Download Package', url: u });
+                }
+            });
+            const firstDlUrl = pseDeliveryLinks.length > 0 ? pseDeliveryLinks[0].url : document.getElementById('pse-download-url').value.trim();
+            const pseDeliveryMsg = document.getElementById('pse-delivery-message') ? document.getElementById('pse-delivery-message').value.trim() : '';
 
             const payload = {
                 sku: sku,
@@ -792,7 +982,9 @@
                 featured: (document.getElementById('pse-featured') && document.getElementById('pse-featured').checked) ? 1 : 0,
                 image_url: document.getElementById('pse-image').value.trim(),
                 sha256_hash: document.getElementById('pse-sha256').value.trim(),
-                download_url: document.getElementById('pse-download-url').value.trim(),
+                download_url: firstDlUrl,
+                delivery_links: pseDeliveryLinks,
+                delivery_message: pseDeliveryMsg,
                 short_desc: document.getElementById('pse-desc').value.trim(),
                 specs: Array.from(document.querySelectorAll('#pse-specs-container .pse-spec-item-input'))
                     .map(i => i.value.trim())
@@ -806,7 +998,8 @@
                 ad_description: document.getElementById('pse-ad-desc') ? document.getElementById('pse-ad-desc').value.trim() : '',
                 ad_badge: document.getElementById('pse-ad-badge') ? document.getElementById('pse-ad-badge').value.trim() : '',
                 ad_cta_text: document.getElementById('pse-ad-cta') ? document.getElementById('pse-ad-cta').value.trim() : '',
-                ad_image_url: document.getElementById('pse-ad-image') ? document.getElementById('pse-ad-image').value.trim() : ''
+                ad_image_url: document.getElementById('pse-ad-image') ? document.getElementById('pse-ad-image').value.trim() : '',
+                custom_js: document.getElementById('pse-custom-js') ? document.getElementById('pse-custom-js').value.trim() : ''
             };
             if (id) payload.id = parseInt(id, 10);
 
@@ -827,14 +1020,25 @@
                 });
                 const data = await res.json();
                 if (data.ok || data.success) {
+                    const savedId = data.id || payload.id;
+                    payload.id = savedId;
+                    document.getElementById('pse-id').value = savedId;
+                    const liveBtn = document.getElementById('pse-btn-view-live');
+                    if (liveBtn) {
+                        liveBtn.href = '/product/' + (payload.slug || payload.sku);
+                        liveBtn.style.display = 'inline-flex';
+                    }
+                    if (typeof updatePseStatusPill === 'function') {
+                        updatePseStatusPill(payload.status);
+                    }
+                    updateProductRowInTable(payload);
                     const statusMsg = payload.status === 'DRAFT' ? 'SAVED AS DRAFT' : 'PUBLISHED TO STOREFRONT';
                     showThemeToast(`SYSTEM SPECIFICATION ${statusMsg}: ${payload.sku}`);
-                    setTimeout(() => location.reload(), 600);
                 } else {
-                    alert('Error saving system: ' + (data.error || 'Server error'));
+                    showToast('Error saving system: ' + (data.error || 'Server error'), 'error');
                 }
             } catch(err) {
-                alert('Save error: ' + err.message);
+                showToast('Save error: ' + err.message, 'error');
             } finally {
                 if (saveBtn) { saveBtn.textContent = origText; saveBtn.disabled = false; }
                 if (draftBtn) { draftBtn.disabled = false; }
@@ -1075,16 +1279,160 @@
                 body: JSON.stringify(payload)
             });
             const data = await res.json();
-            if (data.ok || data.success) location.reload();
-            else alert(data.error || 'Product save error');
+            if (data.ok || data.success) {
+                closeModal('modal-product');
+                payload.id = data.id || payload.id;
+                updateProductRowInTable(payload);
+                showToast(`Product "${payload.name}" saved successfully.`, 'success');
+            } else {
+                showToast(data.error || 'Product save error', 'error');
+            }
         }
 
         async function deleteProduct(id, name) {
-            if (!confirm('Permanently delete ' + name + '?')) return;
+            const confirmed = await showConfirmModal({
+                title: 'DELETE PRODUCT',
+                message: `Are you sure you want to permanently delete "${name}"?`,
+                confirmText: 'DELETE PRODUCT',
+                note: 'WARNING: This product and its configuration will be permanently removed from the store.'
+            });
+            if (!confirmed) return;
             const res = await fetch('/api/admin/products/' + id, { method: 'DELETE' });
             const data = await res.json();
-            if (data.ok || data.success) location.reload();
-            else alert(data.error || 'Delete error');
+            if (data.ok || data.success) {
+                const row = document.getElementById('product-row-' + id) || document.getElementById('product-data-' + id)?.closest('tr');
+                if (row) row.remove();
+                renderProductsPagination();
+                showToast(`Product "${name}" deleted successfully.`, 'info');
+            } else {
+                showToast(data.error || 'Delete error', 'error');
+            }
+        }
+
+        // ==========================================
+        // PRODUCTS PAGINATION & SEARCH (30 / PAGE)
+        // ==========================================
+        let productsCurrentPage = 1;
+        const PRODUCTS_PAGE_SIZE = 30;
+
+        function goToProductsPrevPage() {
+            if (productsCurrentPage > 1) {
+                productsCurrentPage--;
+                renderProductsPagination();
+                const wrap = document.querySelector('#mod-products .admin-table-wrap');
+                if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        function goToProductsNextPage() {
+            const matchingRows = getMatchingProductsRows();
+            const totalPages = Math.max(1, Math.ceil(matchingRows.length / PRODUCTS_PAGE_SIZE));
+            if (productsCurrentPage < totalPages) {
+                productsCurrentPage++;
+                renderProductsPagination();
+                const wrap = document.querySelector('#mod-products .admin-table-wrap');
+                if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        function onProductSearchInput(val) {
+            const clearBtn = document.getElementById('products-search-clear-btn');
+            if (clearBtn) {
+                clearBtn.style.display = (val && val.trim().length > 0) ? 'inline-block' : 'none';
+            }
+            productsCurrentPage = 1;
+            renderProductsPagination();
+        }
+
+        function clearProductSearch() {
+            const input = document.getElementById('products-search-input');
+            const clearBtn = document.getElementById('products-search-clear-btn');
+            if (input) {
+                input.value = '';
+                input.focus();
+            }
+            if (clearBtn) clearBtn.style.display = 'none';
+            productsCurrentPage = 1;
+            renderProductsPagination();
+        }
+
+        function getMatchingProductsRows() {
+            const searchInput = document.getElementById('products-search-input');
+            const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+            const rows = document.querySelectorAll('#mod-products table.admin-table tbody tr.product-row');
+            const matching = [];
+
+            rows.forEach(row => {
+                const searchData = (row.getAttribute('data-search') || row.textContent || '').toLowerCase();
+                if (!query || searchData.includes(query)) {
+                    matching.push(row);
+                }
+            });
+            return matching;
+        }
+
+        function renderProductsPagination() {
+            const allRows = document.querySelectorAll('#mod-products table.admin-table tbody tr.product-row');
+            const matchingRows = getMatchingProductsRows();
+            const total = matchingRows.length;
+            const totalPages = Math.max(1, Math.ceil(total / PRODUCTS_PAGE_SIZE));
+
+            if (productsCurrentPage > totalPages) productsCurrentPage = totalPages;
+            if (productsCurrentPage < 1) productsCurrentPage = 1;
+
+            const startIndex = (productsCurrentPage - 1) * PRODUCTS_PAGE_SIZE;
+            const endIndex = Math.min(startIndex + PRODUCTS_PAGE_SIZE, total);
+
+            allRows.forEach(row => {
+                row.style.display = 'none';
+            });
+
+            for (let i = startIndex; i < endIndex; i++) {
+                matchingRows[i].style.display = '';
+            }
+
+            const countEl = document.getElementById('products-search-count');
+            if (countEl) {
+                countEl.textContent = `SHOWING ${total} PRODUCT${total === 1 ? '' : 'S'} (30 / PAGE)`;
+            }
+
+            const noResultsEl = document.getElementById('products-no-results');
+            if (noResultsEl) {
+                noResultsEl.style.display = (total === 0) ? '' : 'none';
+            }
+
+            const pageRangeEl = document.getElementById('products-page-range');
+            if (pageRangeEl) {
+                pageRangeEl.textContent = total === 0 ? '0–0' : `${startIndex + 1}–${endIndex}`;
+            }
+            const totalCountEl = document.getElementById('products-total-count');
+            if (totalCountEl) totalCountEl.textContent = total;
+
+            const curPageEl = document.getElementById('products-current-page');
+            if (curPageEl) curPageEl.textContent = productsCurrentPage;
+
+            const totPagesEl = document.getElementById('products-total-pages');
+            if (totPagesEl) totPagesEl.textContent = totalPages;
+
+            const prevBtn = document.getElementById('btn-products-prev');
+            if (prevBtn) {
+                prevBtn.disabled = (productsCurrentPage <= 1);
+                prevBtn.style.opacity = (productsCurrentPage <= 1) ? '0.4' : '1';
+                prevBtn.style.cursor = (productsCurrentPage <= 1) ? 'not-allowed' : 'pointer';
+            }
+
+            const nextBtn = document.getElementById('btn-products-next');
+            if (nextBtn) {
+                nextBtn.disabled = (productsCurrentPage >= totalPages);
+                nextBtn.style.opacity = (productsCurrentPage >= totalPages) ? '0.4' : '1';
+                nextBtn.style.cursor = (productsCurrentPage >= totalPages) ? 'not-allowed' : 'pointer';
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', renderProductsPagination);
+        } else {
+            renderProductsPagination();
         }
 
         // ==========================================

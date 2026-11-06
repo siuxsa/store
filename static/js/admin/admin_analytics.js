@@ -1,3 +1,8 @@
+        const escHtml = window.escapeHtml || function(str) {
+            if (str === null || str === undefined) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        };
+
         function initCharts(data) {
             if (typeof Chart === 'undefined') {
                 console.warn('Chart.js not loaded');
@@ -132,20 +137,28 @@
                 });
             }
 
-            // 3. OPERATING SYSTEM DOUGHNUT
+            // 3. CLIENT BROWSER & USER AGENT ARCHITECTURE DOUGHNUT
             const ctxOs = document.getElementById('chart-os');
             if (ctxOs) {
                 if (chartOsInstance) chartOsInstance.destroy();
-                const osBreakdown = data.os_breakdown || [];
-                const osLabels = osBreakdown.map(o => o.os);
-                const osCounts = osBreakdown.map(o => o.count);
+                const browserList = data.browser_breakdown || [];
+                let labels = [];
+                let counts = [];
+                if (browserList.length > 0) {
+                    labels = browserList.map(b => b.browser);
+                    counts = browserList.map(b => b.count);
+                } else {
+                    const osBreakdown = data.os_breakdown || [];
+                    labels = osBreakdown.map(o => o.os);
+                    counts = osBreakdown.map(o => o.count);
+                }
                 chartOsInstance = new Chart(ctxOs, {
                     type: 'doughnut',
                     data: {
-                        labels: osLabels.length ? osLabels : ['Linux', 'Windows', 'macOS', 'Android'],
+                        labels: labels.length ? labels : ['Chrome', 'Firefox', 'Safari', 'Edge', 'Other'],
                         datasets: [{
-                            data: osCounts.length ? osCounts : [55, 30, 10, 5],
-                            backgroundColor: ['#22c55e', '#38bdf8', '#a855f7', '#f59e0b', '#ec4899', '#64748b'],
+                            data: counts.length ? counts : [55, 25, 10, 6, 4],
+                            backgroundColor: ['#00e5ff', '#10b981', '#f59e0b', '#38bdf8', '#a855f7', '#64748b'],
                             borderColor: '#141618',
                             borderWidth: 3
                         }]
@@ -223,18 +236,18 @@
                 const prods = (data.products || []).slice(0, 10);
                 tbodyProds.innerHTML = prods.map(p => `
                     <tr>
-                        <td style="font-weight:700;">${p.sku}</td>
-                        <td style="font-weight:600; color:#fff;">${p.name}</td>
-                        <td>$${Math.round(p.price)}</td>
-                        <td><strong>${p.views}</strong></td>
-                        <td style="color:var(--admin-muted);">${p.uniques}</td>
-                        <td>${p.avg_stay_sec}s</td>
-                        <td>${p.avg_scroll_pct}%</td>
-                        <td>${p.cart_adds}</td>
-                        <td style="color:var(--admin-accent-green); font-weight:700;">${p.tg_buys}</td>
+                        <td style="font-weight:700;">${escHtml(p.sku)}</td>
+                        <td style="font-weight:600; color:#fff;">${escHtml(p.name)}</td>
+                        <td>$${Math.round(p.price || 0)}</td>
+                        <td><strong>${escHtml(p.views)}</strong></td>
+                        <td style="color:var(--admin-muted);">${escHtml(p.uniques)}</td>
+                        <td>${escHtml(p.avg_stay_sec)}s</td>
+                        <td>${escHtml(p.avg_scroll_pct)}%</td>
+                        <td>${escHtml(p.cart_adds)}</td>
+                        <td style="color:var(--admin-accent-green); font-weight:700;">${escHtml(p.tg_buys)}</td>
                         <td>
-                            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${Math.min(100, p.conversion_pct * 3)}%;"></div></div>
-                            ${p.conversion_pct}%
+                            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${Math.min(100, (p.conversion_pct || 0) * 3)}%;"></div></div>
+                            ${escHtml(p.conversion_pct)}%
                         </td>
                     </tr>
                 `).join('') || '<tr><td colspan="10" style="text-align:center; color:var(--admin-muted);">No product telemetry captured.</td></tr>';
@@ -246,16 +259,16 @@
                 const blogs = (data.blogs || []).slice(0, 10);
                 tbodyBlogs.innerHTML = blogs.map(b => `
                     <tr>
-                        <td style="font-weight:700;"><span class="status-pill">${b.cve_id || 'ADVISORY'}</span></td>
-                        <td style="font-weight:600; color:#fff;">${b.title}</td>
-                        <td><span class="status-pill ${b.severity === 'CRITICAL' ? 'critical' : ''}">${b.severity}</span></td>
-                        <td><strong>${b.views}</strong></td>
-                        <td style="color:var(--admin-muted);">${b.uniques}</td>
-                        <td>${b.avg_stay_sec}s</td>
-                        <td>${b.avg_scroll_pct}%</td>
-                        <td>${b.ad_impressions}</td>
-                        <td>${b.ad_clicks}</td>
-                        <td style="color:var(--admin-accent-cyan); font-weight:700;">${b.ad_ctr_pct}%</td>
+                        <td style="font-weight:700;"><span class="status-pill">${escHtml(b.cve_id || 'ADVISORY')}</span></td>
+                        <td style="font-weight:600; color:#fff;">${escHtml(b.title)}</td>
+                        <td><span class="status-pill ${b.severity === 'CRITICAL' ? 'critical' : ''}">${escHtml(b.severity)}</span></td>
+                        <td><strong>${escHtml(b.views)}</strong></td>
+                        <td style="color:var(--admin-muted);">${escHtml(b.uniques)}</td>
+                        <td>${escHtml(b.avg_stay_sec)}s</td>
+                        <td>${escHtml(b.avg_scroll_pct)}%</td>
+                        <td>${escHtml(b.ad_impressions)}</td>
+                        <td>${escHtml(b.ad_clicks)}</td>
+                        <td style="color:var(--admin-accent-cyan); font-weight:700;">${escHtml(b.ad_ctr_pct)}%</td>
                     </tr>
                 `).join('') || '<tr><td colspan="10" style="text-align:center; color:var(--admin-muted);">No advisory telemetry captured.</td></tr>';
             }
@@ -264,20 +277,29 @@
             const tbodyStream = document.getElementById('tbody-stream-analytics');
             if (tbodyStream) {
                 const stream = (data.recent_stream || []).slice(0, 10);
-                tbodyStream.innerHTML = stream.map(s => `
+                tbodyStream.innerHTML = stream.map(s => {
+                    const rawUa = s.user_agent || (s.device_type + ' / ' + s.os_name);
+                    const shortUa = rawUa.length > 38 ? rawUa.substring(0, 35) + '...' : rawUa;
+                    const ipAddr = s.ip_address || '127.0.0.1';
+                    const targetLabel = s.target_title || s.target_slug || '';
+                    return `
                     <tr>
-                        <td style="color:var(--admin-muted); font-family:var(--admin-font-mono);">${s.visit_token}</td>
-                        <td><span class="status-pill">${s.page_type}</span></td>
-                        <td style="font-weight:600; max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                            ${s.target_title || s.target_slug}
+                        <td style="color:var(--admin-muted); font-family:var(--admin-font-mono);">${escHtml(s.visit_token)}</td>
+                        <td><span class="status-pill">${escHtml(s.page_type)}</span></td>
+                        <td style="font-weight:600; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                            ${escHtml(targetLabel)}
                         </td>
-                        <td>${s.device_type} / ${s.os_name}</td>
-                        <td>${s.duration_seconds}s</td>
-                        <td>${s.max_scroll_pct}%</td>
-                        <td style="color:var(--admin-muted);">${s.referrer || 'Direct'}</td>
-                        <td style="color:var(--admin-muted);">${s.created_at}</td>
+                        <td title="${escHtml(rawUa)}" style="max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#00e5ff; font-family:var(--admin-font-mono); font-size:10.5px;">
+                            ${escHtml(shortUa)}
+                        </td>
+                        <td style="font-family:var(--admin-font-mono); color:#10b981; font-weight:700;">${escHtml(ipAddr)}</td>
+                        <td>${escHtml(s.duration_seconds)}s</td>
+                        <td>${escHtml(s.max_scroll_pct)}%</td>
+                        <td style="color:var(--admin-muted);">${escHtml(s.referrer || 'Direct')}</td>
+                        <td style="color:var(--admin-muted);">${escHtml(s.created_at)}</td>
                     </tr>
-                `).join('') || '<tr><td colspan="8" style="text-align:center; color:var(--admin-muted);">No recent stream events.</td></tr>';
+                `;
+                }).join('') || '<tr><td colspan="9" style="text-align:center; color:var(--admin-muted);">No recent stream events.</td></tr>';
             }
 
             // Also update the full matrix paginated table if active
@@ -349,18 +371,18 @@
                     if (tbody) {
                         tbody.innerHTML = pageItems.map(p => `
                             <tr>
-                                <td style="font-weight:700;">${p.sku}</td>
-                                <td style="font-weight:600; color:#fff;">${p.name}</td>
-                                <td>$${Math.round(p.price)}</td>
-                                <td><strong>${p.views}</strong></td>
-                                <td style="color:var(--admin-muted);">${p.uniques}</td>
-                                <td>${p.avg_stay_sec}s</td>
-                                <td>${p.avg_scroll_pct}%</td>
-                                <td>${p.cart_adds}</td>
-                                <td style="color:var(--admin-accent-green); font-weight:700;">${p.tg_buys}</td>
+                                <td style="font-weight:700;">${escHtml(p.sku)}</td>
+                                <td style="font-weight:600; color:#fff;">${escHtml(p.name)}</td>
+                                <td>$${Math.round(p.price || 0)}</td>
+                                <td><strong>${escHtml(p.views)}</strong></td>
+                                <td style="color:var(--admin-muted);">${escHtml(p.uniques)}</td>
+                                <td>${escHtml(p.avg_stay_sec)}s</td>
+                                <td>${escHtml(p.avg_scroll_pct)}%</td>
+                                <td>${escHtml(p.cart_adds)}</td>
+                                <td style="color:var(--admin-accent-green); font-weight:700;">${escHtml(p.tg_buys)}</td>
                                 <td>
-                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${Math.min(100, p.conversion_pct * 3)}%;"></div></div>
-                                    ${p.conversion_pct}%
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${Math.min(100, (p.conversion_pct || 0) * 3)}%;"></div></div>
+                                    ${escHtml(p.conversion_pct)}%
                                 </td>
                             </tr>
                         `).join('') || '<tr><td colspan="10" style="text-align:center; color:var(--admin-muted);">No product records on this page.</td></tr>';
@@ -370,36 +392,45 @@
                     if (tbody) {
                         tbody.innerHTML = pageItems.map(b => `
                             <tr>
-                                <td style="font-weight:700;"><span class="status-pill">${b.cve_id || 'ADVISORY'}</span></td>
-                                <td style="font-weight:600; color:#fff;">${b.title}</td>
-                                <td><span class="status-pill ${b.severity === 'CRITICAL' ? 'critical' : ''}">${b.severity}</span></td>
-                                <td><strong>${b.views}</strong></td>
-                                <td style="color:var(--admin-muted);">${b.uniques}</td>
-                                <td>${b.avg_stay_sec}s</td>
-                                <td>${b.avg_scroll_pct}%</td>
-                                <td>${b.ad_impressions}</td>
-                                <td>${b.ad_clicks}</td>
-                                <td style="color:var(--admin-accent-cyan); font-weight:700;">${b.ad_ctr_pct}%</td>
+                                <td style="font-weight:700;"><span class="status-pill">${escHtml(b.cve_id || 'ADVISORY')}</span></td>
+                                <td style="font-weight:600; color:#fff;">${escHtml(b.title)}</td>
+                                <td><span class="status-pill ${b.severity === 'CRITICAL' ? 'critical' : ''}">${escHtml(b.severity)}</span></td>
+                                <td><strong>${escHtml(b.views)}</strong></td>
+                                <td style="color:var(--admin-muted);">${escHtml(b.uniques)}</td>
+                                <td>${escHtml(b.avg_stay_sec)}s</td>
+                                <td>${escHtml(b.avg_scroll_pct)}%</td>
+                                <td>${escHtml(b.ad_impressions)}</td>
+                                <td>${escHtml(b.ad_clicks)}</td>
+                                <td style="color:var(--admin-accent-cyan); font-weight:700;">${escHtml(b.ad_ctr_pct)}%</td>
                             </tr>
                         `).join('') || '<tr><td colspan="10" style="text-align:center; color:var(--admin-muted);">No advisory records on this page.</td></tr>';
                     }
                 } else if (matrixActiveTable === 'stream') {
                     const tbody = document.getElementById('tbody-stream-full');
                     if (tbody) {
-                        tbody.innerHTML = pageItems.map(s => `
+                        tbody.innerHTML = pageItems.map(s => {
+                            const rawUa = s.user_agent || (s.device_type + ' / ' + s.os_name);
+                            const shortUa = rawUa.length > 40 ? rawUa.substring(0, 37) + '...' : rawUa;
+                            const ipAddr = s.ip_address || '127.0.0.1';
+                            const targetLabel = s.target_title || s.target_slug || '';
+                            return `
                             <tr>
-                                <td style="color:var(--admin-muted); font-family:var(--admin-font-mono);">${s.visit_token}</td>
-                                <td><span class="status-pill">${s.page_type}</span></td>
-                                <td style="font-weight:600; max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                                    ${s.target_title || s.target_slug}
+                                <td style="color:var(--admin-muted); font-family:var(--admin-font-mono);">${escHtml(s.visit_token)}</td>
+                                <td><span class="status-pill">${escHtml(s.page_type)}</span></td>
+                                <td style="font-weight:600; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                    ${escHtml(targetLabel)}
                                 </td>
-                                <td>${s.device_type} / ${s.os_name}</td>
-                                <td>${s.duration_seconds}s</td>
-                                <td>${s.max_scroll_pct}%</td>
-                                <td style="color:var(--admin-muted);">${s.referrer || 'Direct'}</td>
-                                <td style="color:var(--admin-muted);">${s.created_at}</td>
+                                <td title="${escHtml(rawUa)}" style="max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#00e5ff; font-family:var(--admin-font-mono); font-size:10.5px;">
+                                    ${escHtml(shortUa)}
+                                </td>
+                                <td style="font-family:var(--admin-font-mono); color:#10b981; font-weight:700;">${escHtml(ipAddr)}</td>
+                                <td>${escHtml(s.duration_seconds)}s</td>
+                                <td>${escHtml(s.max_scroll_pct)}%</td>
+                                <td style="color:var(--admin-muted);">${escHtml(s.referrer || 'Direct')}</td>
+                                <td style="color:var(--admin-muted);">${escHtml(s.created_at)}</td>
                             </tr>
-                        `).join('') || '<tr><td colspan="8" style="text-align:center; color:var(--admin-muted);">No stream events on this page.</td></tr>';
+                        `;
+                        }).join('') || '<tr><td colspan="9" style="text-align:center; color:var(--admin-muted);">No stream events on this page.</td></tr>';
                     }
                 }
             } catch(e) {

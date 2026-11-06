@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}{{ site_settings.error_404_title or '404' }} — Endpoint Not Found // {{ site_settings.site_name }}{% endblock %}
+{% block meta_description %}{{ site_settings.error_404_message or 'The security tool, license, or research writeup you requested could not be found at this URL.' }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: clamp(1.5rem, 3.5vw, 2.75rem); padding-bottom: 6rem;">
+
+    <!-- 1. BREADCRUMBS (MATCHING SHOP, RESEARCH & REQUEST PAGES) -->
+    <nav class="breadcrumb-nav" aria-label="Breadcrumbs" style="margin-bottom: 2rem; font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);">
+        <a href="{{ url_for('index') }}" style="color: var(--muted); text-decoration: none;">HOME</a>
+        <span style="margin: 0 0.5rem; color: rgba(17,17,17,0.3);">/</span>
+        <a href="{{ url_for('shop') }}" style="color: var(--muted); text-decoration: none;">SECURITY TOOLS</a>
+        <span style="margin: 0 0.5rem; color: rgba(17,17,17,0.3);">/</span>
+        <span style="color: #dc2626; font-weight: 700;" data-theme-bind="error_404_badge">{{ site_settings.error_404_badge or 'HTTP 404 · NOT FOUND' }}</span>
+    </nav>
+
+    <!-- 2. FULL-WIDTH EDITORIAL PAGE HEADER STRIP (MATCHING ALL OTHER PAGES) -->
+    <div style="border-bottom: 1px solid var(--border); padding-bottom: clamp(1.5rem, 3vw, 2.25rem); margin-bottom: clamp(1.75rem, 3.5vw, 3rem);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <span class="badge-tag" style="background: rgba(220, 38, 38, 0.1); color: #dc2626; border: 1px solid rgba(220, 38, 38, 0.3); font-weight: 800;">
+                STATUS {{ site_settings.error_404_title or '404' }}
+            </span>
+            <span class="meta-label" data-theme-bind="error_404_badge">// {{ site_settings.error_404_badge or 'HTTP 404 · ENDPOINT NOT FOUND' }}</span>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1.5rem; margin-top: 0.5rem;">
+            <div>
+                <h1 class="display-lg" style="margin: 0; font-size: clamp(2rem, 4.8vw, 3.5rem); line-height: 1.1; letter-spacing: -0.025em; text-transform: uppercase;" data-theme-bind="error_404_headline">
+                    {{ site_settings.error_404_headline or 'RESOURCE NOT FOUND.' }}
+                </h1>
+            </div>
+            <div class="meta-mono" style="font-size: 0.84rem; color: var(--muted); max-width: 520px; line-height: 1.6;" data-theme-bind="error_404_message" data-theme-format="multiline">
+                {{ (site_settings.error_404_message or 'The security tool, license package, or CVE research writeup you requested has been moved, renamed, or is no longer available at this URL.') | nl2br }}
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. MAIN TWO-COLUMN ARCHITECTURAL LAYOUT (MATCHING REQUEST & VAULT PAGES) -->
+    <div class="orders-layout" style="display: grid; grid-template-columns: 1.45fr 0.85fr; gap: clamp(2rem, 4vw, 4rem); align-items: start;">
+
+        <!-- LEFT COLUMN: DIAGNOSTIC READOUT, SEARCH & NAVIGATION -->
+        <div class="orders-main-content">
+            <div style="border: 1px solid var(--border); background: var(--white); padding: clamp(1.75rem, 3vw, 2.5rem);">
+                <div style="border-bottom: 1px solid var(--border); padding-bottom: 1.25rem; margin-bottom: 1.75rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                    <div>
+                        <span class="meta-label">// REQUEST DIAGNOSTICS</span>
+                        <h2 style="font-size: 1.25rem; text-transform: uppercase; font-weight: 700; margin: 0.35rem 0 0; letter-spacing: -0.01em;">
+                            UNRESOLVED URI PATH
+                        </h2>
+                    </div>
+                    <span class="meta-mono" style="font-size: 0.75rem; color: #dc2626; font-weight: 700;">● ERROR CODE: 404</span>
+                </div>
+
+                <!-- TERMINAL PATH READOUT -->
+                <div style="background: var(--bg-alt); border: 1px solid var(--border); padding: 1.15rem 1.35rem; font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.7; color: var(--text); margin-bottom: 1.75rem;">
+                    <div><span style="color: var(--muted);">REQUEST_PATH :</span> <strong>{{ request.path }}</strong></div>
+                    <div><span style="color: var(--muted);">HTTP_STATUS  :</span> <span style="color: #dc2626; font-weight: 700;">404 NOT_FOUND</span></div>
+                    <div><span style="color: var(--muted);">SUGGESTION   :</span> Search the security catalog below or browse verified tool categories.</div>
+                </div>
+
+                {% if site_settings.error_404_show_search != '0' %}
+                <!-- SEARCH CATALOG FORM -->
+                <div style="margin-bottom: 2rem;">
+                    <label style="display: block; font-family: var(--font-mono); font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem;">
+                        SEARCH SECURITY TOOLS, SKUS OR CVES
+                    </label>
+                    <form action="{{ url_for('shop') }}" method="GET" style="display: flex; gap: 0.65rem; flex-wrap: wrap;">
+                        <input type="text" name="q" placeholder="e.g. Burp Suite, IDA Pro, Cobalt Strike, Metasploit, Splunk..."
+                               style="flex: 1; min-width: 220px; padding: 0.85rem 1.15rem; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.85rem; background: var(--bg); color: var(--text); outline: none;">
+                        <button type="submit" class="btn btn-dark" style="padding: 0.85rem 1.65rem; font-size: 0.76rem; font-weight: 700;">
+                            SEARCH CATALOG →
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+
+                <!-- PRIMARY ACTION LINKS -->
+                <div style="border-top: 1px solid var(--border); padding-top: 1.5rem; display: flex; flex-wrap: wrap; gap: 0.75rem;">
+                    <a href="{{ site_settings.error_404_cta_url or url_for('index') }}" data-theme-bind-href="error_404_cta_url" class="btn btn-dark" style="padding: 0.85rem 1.6rem; font-size: 0.76rem;">
+                        <span data-theme-bind="error_404_cta_text">{{ site_settings.error_404_cta_text or '← BACK TO HOME' }}</span>
+                    </a>
+                    <a href="{{ url_for('shop') }}" class="btn btn-outline-dark" style="padding: 0.85rem 1.5rem; font-size: 0.76rem;">
+                        SECURITY TOOLS →
+                    </a>
+                    <a href="{{ url_for('blog') }}" class="btn btn-outline-dark" style="padding: 0.85rem 1.5rem; font-size: 0.76rem;">
+                        THREAT RESEARCH →
+                    </a>
+                    <a href="{{ url_for('request_tool_page') }}" class="btn btn-outline-dark" style="padding: 0.85rem 1.5rem; font-size: 0.76rem;">
+                        REQUEST CUSTOM TOOL →
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: SECURITY CATEGORIES & CUSTOM TOOL SOURCING -->
+        <aside class="orders-sidebar">
+            <!-- QUICK CATEGORIES CARD -->
+            <div style="border: 1px solid var(--border); background: var(--white); padding: clamp(1.5rem, 2.5vw, 2rem); margin-bottom: 2rem;">
+                <span class="meta-label" style="display: block; margin-bottom: 1rem;">// BROWSE BY SECURITY CATEGORY</span>
+                <div style="display: flex; flex-direction: column; gap: 0.65rem;" class="meta-mono">
+                    <a href="{{ url_for('shop', category='Web & AppSec') }}" style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.85rem; background: var(--bg); border: 1px solid var(--border); text-decoration: none; color: var(--text); font-size: 0.78rem; font-weight: 600;">
+                        <span>WEB &amp; APPSEC TOOLS</span>
+                        <span>→</span>
+                    </a>
+                    <a href="{{ url_for('shop', category='Offensive & Red Team') }}" style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.85rem; background: var(--bg); border: 1px solid var(--border); text-decoration: none; color: var(--text); font-size: 0.78rem; font-weight: 600;">
+                        <span>OFFENSIVE &amp; RED TEAM</span>
+                        <span>→</span>
+                    </a>
+                    <a href="{{ url_for('shop', category='Reverse Engineering') }}" style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.85rem; background: var(--bg); border: 1px solid var(--border); text-decoration: none; color: var(--text); font-size: 0.78rem; font-weight: 600;">
+                        <span>REVERSE ENGINEERING</span>
+                        <span>→</span>
+                    </a>
+                    <a href="{{ url_for('shop', category='SIEM & Blue Team') }}" style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.85rem; background: var(--bg); border: 1px solid var(--border); text-decoration: none; color: var(--text); font-size: 0.78rem; font-weight: 600;">
+                        <span>SIEM &amp; BLUE TEAM</span>
+                        <span>→</span>
+                    </a>
+                    <a href="{{ url_for('shop', category='OSINT & Recon') }}" style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.85rem; background: var(--bg); border: 1px solid var(--border); text-decoration: none; color: var(--text); font-size: 0.78rem; font-weight: 600;">
+                        <span>OSINT &amp; RECONNAISSANCE</span>
+                        <span>→</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- NEED A SPECIFIC TOOL CARD -->
+            <div style="border: 1px solid var(--border); background: var(--bg-alt); padding: clamp(1.5rem, 2.5vw, 2rem);">
+                <span class="meta-label" style="display: block; margin-bottom: 0.65rem;">// UNLISTED TOOL OR EXPLOIT?</span>
+                <h3 style="font-size: 1.05rem; font-weight: 700; text-transform: uppercase; margin: 0 0 0.5rem 0;">
+                    CUSTOM TOOL SOURCING
+                </h3>
+                <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.6; margin-bottom: 1.25rem;">
+                    Looking for a specific security tool, commercial license, or CVE proof-of-concept not in our catalog? Submit a custom sourcing request.
+                </p>
+                <a href="{{ url_for('request_tool_page') }}" class="btn btn-dark" style="display: block; text-align: center; padding: 0.85rem 1rem; font-size: 0.75rem;">
+                    REQUEST UNLISTED TOOL →
+                </a>
+            </div>
+        </aside>
+
+    </div>
+
+    <!-- 4. FEATURED SECURITY TOOLS SECTION (SAME PRODUCT GRID AS SHOP & HOME) -->
+    {% if global_products %}
+    <div style="margin-top: 5rem; border-top: 1px solid var(--border); padding-top: 3.5rem;">
+        <div class="section-header" style="margin-bottom: 2rem;">
+            <div>
+                <span class="meta-label">// VERIFIED SECURITY CATALOG</span>
+                <h2 class="section-title">POPULAR SECURITY TOOLS</h2>
+            </div>
+            <a href="{{ url_for('shop') }}" class="link-arrow">
+                VIEW ALL SECURITY TOOLS ({{ global_products|length }}) <span class="arrow-icon">→</span>
+            </a>
+        </div>
+
+        <div class="product-grid">
+            {% for p in global_products[:4] %}
+            <div class="product-card">
+                <a href="{{ url_for('product_detail', slug=p.slug) }}" class="product-card-image-wrap">
+                    <img src="{{ p.image_url }}" alt="{{ p.name }}" class="product-card-img" loading="lazy">
+                    <span class="product-badge">{{ p.badge_text }}</span>
+                    {% if p.discount_pct and p.discount_pct > 0 %}
+                    <span class="product-discount-badge"><span class="discount-label">DISCOUNT</span><span class="discount-val">-{{ p.discount_pct }}%</span></span>
+                    {% endif %}
+                </a>
+                <div class="product-meta">
+                    <div class="product-meta-header">
+                        <span class="meta-label">{{ p.category }}</span>
+                        <div class="product-price-wrap">
+                            {% if p.retail_price and p.retail_price > p.price %}
+                            <span class="product-price-retail">${{ "%.0f"|format(p.retail_price) }}</span>
+                            {% endif %}
+                            <span class="product-price-current">${{ "%.0f"|format(p.price) }}</span>
+                        </div>
+                    </div>
+                    <h3 class="product-title">
+                        <a href="{{ url_for('product_detail', slug=p.slug) }}">{{ p.name }}</a>
+                    </h3>
+                    <p class="product-desc">
+                        {{ p.short_desc }}
+                    </p>
+                    <div class="product-specs-line">
+                        {{ p.version }} · {{ p.platform }}
+                    </div>
+                    <div class="product-actions">
+                        <button type="button" class="btn btn-outline-dark" style="flex:1; padding:0.55rem 0.5rem; font-size:0.7rem;" onclick="window.NFCart && window.NFCart.quickAdd({{ p.id }}, null, this)">+ ADD TO CART</button>
+                        <a href="{{ url_for('product_detail', slug=p.slug) }}" class="btn btn-dark" style="padding:0.55rem 0.85rem; font-size:0.7rem;">VIEW →</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

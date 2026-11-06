@@ -61,6 +61,14 @@ def register_admin_posts_routes(app):
         meta_desc = (data.get("meta_desc") or "").strip()
         meta_keywords = (data.get("meta_keywords") or "").strip()
         og_image = (data.get("og_image") or "").strip()
+        custom_js = (data.get("custom_js") or "").strip()
+        # RBAC: Only Master Administrator (role=ADMIN) can supply or alter executable custom_js
+        if admin.get("role") != "ADMIN":
+            if post_id:
+                existing_post = conn.execute("SELECT custom_js FROM posts WHERE id=?", (int(post_id),)).fetchone()
+                custom_js = existing_post["custom_js"] if existing_post else ""
+            else:
+                custom_js = ""
         now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         try:
@@ -72,14 +80,14 @@ def register_admin_posts_routes(app):
                     author=?, read_time=?, summary=?, content=?, related_skus=?,
                     ad_mode=?, ad_count=?, ad_placement=?, ad_paragraph_interval=?,
                     ad_custom_pitch=?, featured=?, status=?, image_url=?,
-                    meta_title=?, meta_desc=?, meta_keywords=?, og_image=?
+                    meta_title=?, meta_desc=?, meta_keywords=?, og_image=?, custom_js=?
                 WHERE id=?
                 """, (
                     title, slug, category, severity, cve_id, cvss_score,
                     author, read_time, summary, content, related_skus,
                     ad_mode, ad_count, ad_placement, ad_paragraph_interval,
                     ad_custom_pitch, featured, status, image_url,
-                    meta_title, meta_desc, meta_keywords, og_image, int(post_id)
+                    meta_title, meta_desc, meta_keywords, og_image, custom_js, int(post_id)
                 ))
                 saved_id = int(post_id)
                 log_audit_event(conn, admin["id"], admin["username"], "POST_UPDATED", f"Slug={slug} STATUS={status}")
@@ -90,14 +98,14 @@ def register_admin_posts_routes(app):
                     author, read_time, summary, content, related_skus,
                     ad_mode, ad_count, ad_placement, ad_paragraph_interval,
                     ad_custom_pitch, featured, status, views, published_at, image_url,
-                    meta_title, meta_desc, meta_keywords, og_image
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?)
+                    meta_title, meta_desc, meta_keywords, og_image, custom_js
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     title, slug, category, severity, cve_id, cvss_score,
                     author, read_time, summary, content, related_skus,
                     ad_mode, ad_count, ad_placement, ad_paragraph_interval,
                     ad_custom_pitch, featured, status, now_str, image_url,
-                    meta_title, meta_desc, meta_keywords, og_image
+                    meta_title, meta_desc, meta_keywords, og_image, custom_js
                 ))
                 saved_id = cur.lastrowid
                 action_tag = "POST_PUBLISHED" if status == "PUBLISHED" else "POST_DRAFTED"

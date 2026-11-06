@@ -1,28 +1,87 @@
 <div id="modal-fulfill" class="admin-modal">
-        <div class="admin-modal-box">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; padding-bottom:0.75rem; border-bottom:1px solid var(--admin-border);">
-                <h3 id="fulfill-title" style="font-size:16px; font-weight:700; text-transform:uppercase;">FULFILL ORDER</h3>
+        <div class="admin-modal-box" style="max-width:680px; width:94%;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; padding-bottom:0.75rem; border-bottom:1px solid var(--admin-border);">
+                <div>
+                    <h3 id="fulfill-title" style="font-size:16px; font-weight:700; text-transform:uppercase; margin:0;">FULFILL ORDER</h3>
+                    <div id="fulfill-items-summary" style="font-size:11px; color:var(--admin-muted); font-family:var(--admin-font-mono); margin-top:3px;"></div>
+                </div>
                 <button type="button" onclick="closeModal('modal-fulfill')" class="btn-admin btn-admin-outline" style="padding:0.25rem 0.6rem; display:inline-flex; align-items:center;">
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
-            <form onsubmit="submitFulfillment(event)" style="display:flex; flex-direction:column; gap:1.25rem;">
+            <form onsubmit="submitFulfillment(event)" style="display:flex; flex-direction:column; gap:1.1rem;">
                 <input type="hidden" id="fulfill-order-id">
-                <div class="form-group">
-                    <label class="form-label">ORDER STATUS</label>
-                    <select id="fulfill-status" class="form-select">
-                        <option value="PENDING_TELEGRAM">PENDING_TELEGRAM</option>
-                        <option value="COMPLETED">COMPLETED (PROVISIONED)</option>
-                        <option value="CANCELLED">CANCELLED</option>
-                    </select>
+                <div class="form-grid" style="grid-template-columns:1fr 1fr; gap:1rem;">
+                    <div class="form-group" style="margin:0;">
+                        <label class="form-label">ORDER STATUS</label>
+                        <select id="fulfill-status" class="form-select" style="font-weight:700;">
+                            <option value="PENDING_TELEGRAM">PENDING_TELEGRAM</option>
+                            <option value="COMPLETED">COMPLETED (SEND LINKS &amp; MESSAGE)</option>
+                            <option value="CANCELLED">CANCELLED</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label class="form-label">
+                            <span>AUTHORIZED CUSTOMER ACCOUNT</span>
+                            <span style="color:#10b981; font-size:9.5px;">ONLY THIS USER GETS ACCESS</span>
+                        </label>
+                        <select id="fulfill-user-id" class="form-select">
+                            <option value="">-- Match by Buyer Telegram --</option>
+                            {% for cu in customers_list or [] %}
+                            <option value="{{ cu.id }}">{{ cu.username }} ({{ cu.telegram_handle or cu.email }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">PROVISIONED LICENSE KEY / DOWNLOAD INFO</label>
-                    <textarea id="fulfill-license-info" rows="4" class="form-textarea" placeholder="Paste license key, activation token, or private customer download instructions..."></textarea>
+
+                <!-- DOWNLOAD LINKS SECTION -->
+                <div style="background:rgba(16,185,129,0.04); border:1px solid rgba(16,185,129,0.28); border-radius:4px; padding:1rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.65rem;">
+                        <div>
+                            <span style="font-family:var(--admin-font-mono); font-size:11.5px; font-weight:800; color:#10b981; text-transform:uppercase;">
+                                DOWNLOAD LINKS FOR USER
+                            </span>
+                            <div style="font-size:10.5px; color:var(--admin-muted);">
+                                Pre-loaded from product settings. Add multiple links or customize for this order.
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <button type="button" onclick="loadOrderProductDefaults()" class="btn-admin btn-admin-outline" style="padding:0.35rem 0.65rem; font-size:10.5px;" title="Reload default links & message from the ordered product(s)">
+                                LOAD PRODUCT DEFAULTS
+                            </button>
+                            <button type="button" onclick="addFulfillLinkRow()" class="btn-admin btn-admin-outline" style="border-color:#10b981; color:#10b981; padding:0.35rem 0.75rem; font-size:10.5px; font-weight:700; display:inline-flex; align-items:center; gap:5px;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                                <span>ADD DOWNLOAD LINK</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="fulfill-links-container" style="display:flex; flex-direction:column; gap:0.5rem;">
+                        <!-- Dynamic link rows -->
+                    </div>
                 </div>
-                <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:1rem;">
+
+                <!-- CUSTOMER MESSAGE BOX -->
+                <div class="form-group" style="margin:0;">
+                    <label class="form-label" style="color:#00e5ff; font-weight:700;">
+                        <span>MESSAGE FOR CUSTOMER (SENT AUTOMATICALLY ON COMPLETION)</span>
+                        <span style="color:var(--admin-muted); font-size:10px;">VISIBLE IN USER VAULT</span>
+                    </label>
+                    <textarea id="fulfill-delivery-message" rows="3" class="form-textarea" placeholder="Write a message or delivery instructions for this customer..."></textarea>
+                </div>
+
+                <!-- OPTIONAL LICENSE KEY -->
+                <div class="form-group" style="margin:0;">
+                    <label class="form-label">LICENSE KEY / ACTIVATION TOKEN (OPTIONAL)</label>
+                    <textarea id="fulfill-license-info" rows="2" class="form-textarea" placeholder="Optional license key or activation token..."></textarea>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:0.5rem;">
                     <button type="button" onclick="closeModal('modal-fulfill')" class="btn-admin btn-admin-outline">CANCEL</button>
-                    <button type="submit" class="btn-admin btn-admin-primary">SAVE FULFILLMENT →</button>
+                    <button type="submit" class="btn-admin btn-admin-primary" style="display:inline-flex; align-items:center; gap:6px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>SAVE &amp; SEND TO USER</span>
+                    </button>
                 </div>
             </form>
         </div>

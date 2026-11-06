@@ -11,7 +11,7 @@
         <div class="hero-text-block">
             <div class="hero-eyebrow" data-theme-bind="hero_badge">{{ site_settings.hero_badge }}</div>
             <h1 class="display-xl" style="color: var(--white); margin-bottom: 0.5rem;" data-theme-bind="hero_title" data-theme-format="multiline">
-                {{ site_settings.hero_title | replace('\n', '<br>') | safe }}
+                {{ site_settings.hero_title | nl2br }}
             </h1>
         </div>
         <div class="hero-meta-block">
@@ -34,13 +34,13 @@
             <div class="manifesto-eyebrow-wrap">
                 <span class="meta-label" data-theme-bind="manifesto_eyebrow">{{ site_settings.manifesto_eyebrow }}</span>
                 <span class="manifesto-pill-tag">
-                    <span class="pulse-dot"></span> AIRGAP VERIFIED
+                    <span class="pulse-dot"></span> AIRGAP &amp; OFFLINE READY
                 </span>
             </div>
             <div class="meta-mono" style="margin-top: 0.65rem; color: var(--muted); font-size: 0.76rem;" data-theme-bind="manifesto_sublabel">{{ site_settings.manifesto_sublabel }}</div>
 
             <h2 class="display-lg manifesto-title-heading" data-theme-bind="manifesto_title" data-theme-format="multiline">
-                {{ site_settings.manifesto_title | replace('\n', '<br>') | safe }}
+                {{ site_settings.manifesto_title | nl2br }}
             </h2>
 
             <div class="manifesto-lead-box">
@@ -51,13 +51,13 @@
 
             <!-- Professional Specification Pillars -->
             <div class="manifesto-spec-strip">
-                <span class="manifesto-spec-tag">[01] 100% AIRGAP SAFE</span>
-                <span class="manifesto-spec-tag">[02] CRYPTOGRAPHIC INTEGRITY</span>
-                <span class="manifesto-spec-tag">[03] TELEGRAM CONCIERGE</span>
+                <span class="manifesto-spec-tag">[01] 100% AIRGAP / OFFLINE READY</span>
+                <span class="manifesto-spec-tag">[02] ALL MODULES UNLOCKED</span>
+                <span class="manifesto-spec-tag">[03] TELEGRAM LICENSE DELIVERY</span>
             </div>
 
             <div class="manifesto-crypto-seal">
-                // PROVENANCE: PGP-SIGNED ARCHITECTURE · SYSTEM SPECIFICATION · ZERO TELEMETRY
+                // UNLOCKED COMMERCIAL BUILDS · LINUX / WINDOWS / MACOS · ZERO TELEMETRY
             </div>
         </div>
 
@@ -107,7 +107,7 @@
                                     {% elif rev.author_role %}
                                         {{ rev.author_role }}
                                     {% else %}
-                                        Verified Operator
+                                        Verified Customer
                                     {% endif %}
                                 </div>
                             </div>
@@ -150,7 +150,7 @@
                                     {% elif rev.author_role %}
                                         {{ rev.author_role }}
                                     {% else %}
-                                        Verified Operator
+                                        Verified Customer
                                     {% endif %}
                                 </div>
                             </div>
@@ -167,22 +167,22 @@
 <!-- 3. CATEGORY NAVIGATION STRIP (ONE-LINE TEXT LINK TO SHOP) -->
 <section class="category-strip">
     <div class="container">
-        <a href="{{ url_for('shop') }}" class="category-strip-single-link" data-theme-bind="category_strip_text" title="Click to view all security systems in the shop">
-            {{ site_settings.category_strip_text or 'ALL SYSTEMS // WEB & APPSEC // OFFENSIVE & RED TEAM // SIEM & BLUE TEAM // REVERSE ENGINEERING // OSINT & RECON' }}
+        <a href="{{ url_for('shop') }}" class="category-strip-single-link" data-theme-bind="category_strip_text" title="Click to browse all security tools">
+            {{ site_settings.category_strip_text or 'ALL SECURITY TOOLS // WEB & APPSEC // OFFENSIVE & RED TEAM // SIEM & BLUE TEAM // REVERSE ENGINEERING // OSINT & RECON' }}
         </a>
     </div>
 </section>
 
-<!-- 4. FEATURED SYSTEMS SECTION -->
+<!-- 4. FEATURED SECURITY TOOLS SECTION -->
 <section class="section">
     <div class="container">
         <div class="section-header">
             <div>
-                <span class="meta-label" data-theme-bind="featured_eyebrow">{{ site_settings.featured_eyebrow or '// CURATED ARSENAL' }}</span>
-                <h2 class="section-title" data-theme-bind="featured_title">{{ site_settings.featured_title or 'FEATURED SYSTEMS' }}</h2>
+                <span class="meta-label" data-theme-bind="featured_eyebrow">{{ site_settings.featured_eyebrow or '// SECURITY CATALOG' }}</span>
+                <h2 class="section-title" data-theme-bind="featured_title">{{ site_settings.featured_title or 'FEATURED SECURITY TOOLS' }}</h2>
             </div>
             <a href="{{ url_for('shop') }}" class="link-arrow">
-                <span data-theme-bind="featured_cta">{{ site_settings.featured_cta or 'VIEW ALL SYSTEMS' }}</span> ({{ global_products|length }}) <span class="arrow-icon">→</span>
+                <span data-theme-bind="featured_cta">{{ site_settings.featured_cta or 'VIEW ALL SECURITY TOOLS' }}</span> ({{ global_products|length }}) <span class="arrow-icon">→</span>
             </a>
         </div>
 
@@ -192,15 +192,20 @@
                 <a href="{{ url_for('product_detail', slug=p.slug) }}" class="product-card-image-wrap">
                     <img src="{{ p.image_url }}" alt="{{ p.name }}" class="product-card-img" loading="lazy">
                     <span class="product-badge">{{ p.badge_text }}</span>
+                    {% if p.discount_pct and p.discount_pct > 0 %}
+                    <span class="product-discount-badge"><span class="discount-label">DISCOUNT</span><span class="discount-val">-{{ p.discount_pct }}%</span></span>
+                    {% elif p.retail_price and p.price and p.retail_price > p.price %}
+                    <span class="product-discount-badge"><span class="discount-label">DISCOUNT</span><span class="discount-val">-{{ (((p.retail_price - p.price) / p.retail_price) * 100)|round|int }}%</span></span>
+                    {% endif %}
                 </a>
                 <div class="product-meta">
                     <div class="product-meta-header">
                         <span class="meta-label">{{ p.category }}</span>
-                        <div>
+                        <div class="product-price-wrap">
                             {% if p.retail_price > p.price %}
-                            <span class="meta-mono" style="text-decoration:line-through; color:var(--muted); font-size:0.8rem; margin-right:0.35rem;">${{ "%.0f"|format(p.retail_price) }}</span>
+                            <span class="product-price-retail">${{ "%.0f"|format(p.retail_price) }}</span>
                             {% endif %}
-                            <span class="meta-mono" style="font-weight:700;">${{ "%.0f"|format(p.price) }}</span>
+                            <span class="product-price-current">${{ "%.0f"|format(p.price) }}</span>
                         </div>
                     </div>
                     <h3 class="product-title">
@@ -213,7 +218,7 @@
                         {{ p.version }} · {{ p.platform }}
                     </div>
                     <div class="product-actions">
-                        <button type="button" class="btn btn-outline-dark" style="flex:1; padding:0.55rem 0.5rem; font-size:0.7rem;" onclick="window.NFCart && window.NFCart.quickAdd({{ p.id }})">+ ADD TO BAG</button>
+                        <button type="button" class="btn btn-outline-dark" style="flex:1; padding:0.55rem 0.5rem; font-size:0.7rem;" onclick="window.NFCart && window.NFCart.quickAdd({{ p.id }}, null, this)">+ ADD TO CART</button>
                         <a href="{{ url_for('product_detail', slug=p.slug) }}" class="btn btn-dark" style="padding:0.55rem 0.85rem; font-size:0.7rem;">VIEW →</a>
                     </div>
                 </div>
@@ -230,7 +235,7 @@
             <div style="max-width: 640px;">
                 <span class="meta-label" style="color: #888884;" data-theme-bind="showcase_eyebrow">{{ site_settings.showcase_eyebrow }}</span>
                 <h2 class="display-lg" style="color: var(--white); margin: 0.75rem 0 1.25rem;" data-theme-bind="showcase_title" data-theme-format="multiline">
-                    {{ site_settings.showcase_title | replace('\n', '<br>') | safe }}
+                    {{ site_settings.showcase_title | nl2br }}
                 </h2>
                 <p style="font-size: 1.05rem; color: #a1a1aa; line-height: 1.6; margin-bottom: 2rem;" data-theme-bind="showcase_desc">
                     {{ site_settings.showcase_desc }}
@@ -274,13 +279,13 @@
     </div>
 </section>
 
-<!-- 6. LIVE THREAT INTELLIGENCE JOURNAL SECTION -->
+<!-- 6. THREAT RESEARCH & CVE WRITEUPS SECTION -->
 <section class="section">
     <div class="container">
         <div class="section-header">
             <div>
-                <span class="meta-label" data-theme-bind="journal_section_eyebrow">{{ site_settings.journal_section_eyebrow or '// RESEARCH & CVE DISCLOSURES' }}</span>
-                <h2 class="section-title" data-theme-bind="journal_section_title">{{ site_settings.journal_section_title or 'THREAT JOURNAL' }}</h2>
+                <span class="meta-label" data-theme-bind="journal_section_eyebrow">{{ site_settings.journal_section_eyebrow or '// VULNERABILITY RESEARCH & CVE WRITEUPS' }}</span>
+                <h2 class="section-title" data-theme-bind="journal_section_title">{{ site_settings.journal_section_title or 'THREAT RESEARCH & ADVISORIES' }}</h2>
             </div>
             <a href="{{ url_for('blog') }}" class="link-arrow">
                 <span data-theme-bind="journal_section_cta">{{ site_settings.journal_section_cta or 'VIEW ALL RESEARCH' }}</span> <span class="arrow-icon">→</span>
@@ -313,7 +318,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); padding-top: 1rem; flex-wrap: wrap; gap: 0.75rem;" class="meta-mono">
                         <span style="font-size: 0.74rem; color: var(--muted);">PUBLISHED {{ post.published_at[:10] }}</span>
                         <a href="{{ url_for('post_detail', slug=post.slug) }}" class="link-arrow" style="font-size: 0.75rem; font-weight: 700;">
-                            READ ANALYSIS <span class="arrow-icon">→</span>
+                            READ WRITEUP <span class="arrow-icon">→</span>
                         </a>
                     </div>
                 </div>

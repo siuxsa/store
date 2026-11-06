@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Allow: /shop
+Allow: /arsenal
+Allow: /product/
+Allow: /journal
+Allow: /intel
+Allow: /about
+Allow: /request
+Disallow: /admin
+Disallow: /vault
+Disallow: /api/
+fuckup
+
+Sitemap: http://172.22.227.122:5000/sitemap.xml

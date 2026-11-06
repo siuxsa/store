@@ -26,34 +26,50 @@
     function findProduct(productId) {
         const list = window.NORTHFORM_PRODUCTS || [];
         return list.find(function (p) { 
-            return p.id === productId || p.id === parseInt(productId, 10) || p.sku === productId || p.code === productId; 
+            return p.id === productId || p.id === parseInt(productId, 10) || p.sku === productId || p.code === productId || p.slug === productId; 
         }) || list[0];
     }
 
-    function addToCart(productId, size, color, qty) {
+    function escapeHtml(str) {
+        return String(str == null ? "" : str)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
+    function addToCart(productId, licenseTier, versionLabel, qty) {
         const product = findProduct(productId);
         if (!product) return;
 
-        const chosenSize = size || (product.sizes && product.sizes[0]) || (product.license_duration || "1-Year Pro");
-        const chosenColor = color || product.color || "Enterprise License";
+        const chosenLicense = licenseTier || product.license_duration || "Enterprise License";
+        const chosenVersion = versionLabel || product.version || "Latest Build";
         const addQty = Math.max(1, parseInt(qty || 1, 10));
 
         const cart = getCart();
-        const key = product.id + "__" + chosenSize;
+        const key = String(product.id);
 
-        const existing = cart.find(function (item) { return item.key === key; });
+        const existing = cart.find(function (item) {
+            return String(item.id) === String(product.id) || item.key === key;
+        });
         if (existing) {
             existing.qty += addQty;
+            existing.slug = product.slug || existing.slug;
+            existing.sku = product.sku || product.code || existing.sku;
+            existing.version = chosenVersion;
+            existing.license_duration = chosenLicense;
         } else {
             cart.push({
                 key: key,
                 id: product.id,
+                slug: product.slug || product.sku || String(product.id),
                 code: product.sku || product.code || ("SYS-" + product.id),
-                sku: product.sku || product.code,
+                sku: product.sku || product.code || ("SYS-" + product.id),
                 name: product.name,
-                price: product.price,
-                size: chosenSize,
-                color: chosenColor,
+                price: Number(product.price) || 0,
+                version: chosenVersion,
+                license_duration: chosenLicense,
                 image: product.image || product.image_url || "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=85",
                 qty: addQty
             });
@@ -66,17 +82,25 @@
     function quickAdd(productId, size, btnEl) {
         const product = findProduct(productId);
         if (!product) return;
-        addToCart(product.id, size || "L", product.color, 1);
 
-        if (btnEl) {
-            const labelEl = btnEl.querySelector(".qa-label");
-            if (labelEl) {
-                const orig = labelEl.textContent;
-                labelEl.textContent = "✓ ADDED TO SYSTEM";
-                setTimeout(function () {
-                    labelEl.textContent = orig;
-                }, 1400);
+        let targetBtn = btnEl;
+        if (!targetBtn && typeof window !== "undefined" && window.event && window.event.currentTarget) {
+            targetBtn = window.event.currentTarget;
+        }
+
+        addToCart(product.id, size || product.license_duration, product.version, 1);
+
+        if (targetBtn && targetBtn.tagName === "BUTTON") {
+            const labelEl = targetBtn.querySelector(".qa-label") || targetBtn;
+            if (!targetBtn.dataset.origLabel) {
+                targetBtn.dataset.origLabel = labelEl.textContent;
             }
+            labelEl.textContent = "✓ ADDED TO CART";
+            setTimeout(function () {
+                if (targetBtn.dataset.origLabel) {
+                    labelEl.textContent = targetBtn.dataset.origLabel;
+                }
+            }, 1300);
         }
     }
 
@@ -125,15 +149,35 @@
 
     async function handleCheckout() {
         const cart = getCart();
-        if (!cart.length) return;
+        if (!cart.length) {
+            if (window.showToast) window.showToast("Your bag is empty.", "error");
+            return;
+        }
         const msgEl = document.getElementById("cart-checkout-feedback");
         const tgInput = document.getElementById("cart-buyer-telegram");
         const buyerTg = tgInput ? tgInput.value.trim() : "";
 
+        if (!buyerTg) {
+            if (tgInput) {
+                tgInput.style.borderColor = "#dc2626";
+                tgInput.focus();
+                tgInput.addEventListener("input", function () {
+                    tgInput.style.borderColor = "var(--border)";
+                }, { once: true });
+            }
+            if (msgEl) {
+                msgEl.style.display = "block";
+                msgEl.style.color = "#dc2626";
+                msgEl.textContent = "PLEASE ENTER YOUR TELEGRAM @USERNAME FOR LICENSE DELIVERY.";
+            }
+            if (window.showToast) window.showToast("Please enter your Telegram @username to proceed.", "error");
+            return;
+        }
+
         if (msgEl) {
             msgEl.style.display = "block";
             msgEl.style.color = "var(--text)";
-            msgEl.textContent = "DISPATCHING ORDER TICKET...";
+            msgEl.textContent = "CREATING YOUR ORDER...";
         }
 
         try {
@@ -141,7 +185,7 @@
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    buyer_telegram: buyerTg || "@client_direct",
+                    buyer_telegram: buyerTg,
                     buyer_note: "Direct website checkout",
                     items: cart.map(function(item) {
                         return {
@@ -156,7 +200,8 @@
             const data = await resp.json();
             if (data.success || data.ok) {
                 if (msgEl) {
-                    msgEl.innerHTML = `ORDER <strong>#${data.order_number}</strong> CREATED.<br><span style="font-size:0.75rem; color:#10b981;">TELEGRAM CONCIERGE DISPATCH INITIALIZED.</span>`;
+                    msgEl.style.color = "var(--text)";
+                    msgEl.innerHTML = `ORDER <strong>#${escapeHtml(data.order_number)}</strong> CREATED.<br><span style="font-size:0.75rem; color:#10b981;">OPENING TELEGRAM TO COMPLETE YOUR ORDER...</span>`;
                 }
                 saveCart([]);
                 setTimeout(function() {
@@ -168,12 +213,16 @@
                     }, 1200);
                 }, 1000);
             } else {
-                if (msgEl) msgEl.textContent = data.error || "Order dispatch error.";
+                if (msgEl) {
+                    msgEl.style.color = "#dc2626";
+                    msgEl.textContent = data.error || "Order dispatch error.";
+                }
             }
         } catch (err) {
-            if (msgEl) msgEl.textContent = "DISPATCH INITIALIZED. THANK YOU.";
-            saveCart([]);
-            setTimeout(function() { closeCart(); }, 1500);
+            if (msgEl) {
+                msgEl.style.color = "#dc2626";
+                msgEl.textContent = "Network error while dispatching order.";
+            }
         }
     }
 
@@ -195,13 +244,7 @@
         }
 
         if (shippingNoteEl) {
-            if (subtotal >= 250 || subtotal === 0) {
-                shippingNoteEl.textContent = subtotal >= 250
-                    ? "QUALIFIES FOR COMPLIMENTARY GLOBAL EXPRESS SHIPPING"
-                    : "COMPLIMENTARY GLOBAL SHIPPING ON ORDERS OVER $250";
-            } else {
-                shippingNoteEl.textContent = "ADD $" + (250 - subtotal) + " MORE FOR COMPLIMENTARY GLOBAL SHIPPING";
-            }
+            shippingNoteEl.textContent = "INSTANT LICENSE & DOWNLOAD PROVISIONING VIA TELEGRAM & VAULT";
         }
 
         if (!container) return;
@@ -209,37 +252,43 @@
         if (cart.length === 0) {
             container.innerHTML = `
                 <div style="padding: 4rem 0; text-align: center; color: var(--muted);">
-                    <p class="meta-label" style="margin-bottom: 0.75rem;">YOUR CART IS EMPTY</p>
-                    <p style="font-size: 0.85rem; margin-bottom: 1.75rem;">Explore enterprise security licenses, red team toolkits & threat intelligence.</p>
-                    <a href="/arsenal" class="btn btn-outline-dark" onclick="window.NFCart.close()">EXPLORE ARSENAL →</a>
+                    <p class="meta-label" style="margin-bottom: 0.75rem;">YOUR LICENSE CART IS EMPTY</p>
+                    <p style="font-size: 0.85rem; margin-bottom: 1.75rem;">Browse verified penetration testing suites, reverse engineering tools &amp; SIEM licenses.</p>
+                    <a href="/shop" class="btn btn-outline-dark" onclick="window.NFCart.close()">BROWSE SECURITY TOOLS →</a>
                 </div>
             `;
             return;
         }
 
         container.innerHTML = cart.map(function (item) {
+            const matchedProduct = findProduct(item.id);
+            const productSlug = item.slug || (matchedProduct && matchedProduct.slug) || item.sku || item.code || item.id;
+            const productUrl = "/product/" + encodeURIComponent(productSlug);
+            const skuLabel = item.sku || item.code || (matchedProduct && matchedProduct.sku) || ("SYS-" + item.id);
+            const tierLabel = item.license_duration || (matchedProduct && matchedProduct.license_duration) || item.version || (matchedProduct && matchedProduct.version) || "Enterprise License";
+            const safeKey = escapeHtml(item.key);
             return `
             <div class="cart-item">
-                <a href="product.html?id=${item.id}">
-                    <img src="${item.image}" alt="${item.name}" class="cart-item-img">
+                <a href="${productUrl}" onclick="window.NFCart.close()">
+                    <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}" class="cart-item-img">
                 </a>
                 <div style="display: flex; flex-direction: column; justify-content: space-between;">
                     <div>
                         <div style="display: flex; justify-content: space-between; gap: 0.5rem; align-items: baseline;">
-                            <a href="product.html?id=${item.id}" style="font-size: 0.8rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;">${item.name}</a>
-                            <span class="meta-mono">$${item.price * item.qty}</span>
+                            <a href="${productUrl}" onclick="window.NFCart.close()" style="font-size: 0.8rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;">${escapeHtml(item.name)}</a>
+                            <span class="meta-mono">$${(Number(item.price) * Number(item.qty)).toLocaleString()}</span>
                         </div>
-                        <p style="font-size: 0.72rem; color: var(--muted); margin-top: 0.25rem; text-transform: uppercase; letter-spacing: 0.08em;">
-                            COLOR: ${item.color} &nbsp;/&nbsp; SIZE: ${item.size}
+                        <p class="meta-mono" style="font-size: 0.68rem; color: var(--muted); margin-top: 0.25rem; text-transform: uppercase; letter-spacing: 0.06em;">
+                            SKU: ${escapeHtml(skuLabel)} &nbsp;·&nbsp; ${escapeHtml(tierLabel)}
                         </p>
                     </div>
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 0.75rem;">
                         <div class="qty-control">
-                            <button type="button" class="qty-btn" onclick="window.NFCart.updateQuantity('${item.key}', -1)" aria-label="Decrease quantity">−</button>
-                            <span class="qty-value">${item.qty}</span>
-                            <button type="button" class="qty-btn" onclick="window.NFCart.updateQuantity('${item.key}', 1)" aria-label="Increase quantity">+</button>
+                            <button type="button" class="qty-btn" onclick="window.NFCart.updateQuantity('${safeKey}', -1)" aria-label="Decrease quantity">−</button>
+                            <span class="qty-value">${Number(item.qty)}</span>
+                            <button type="button" class="qty-btn" onclick="window.NFCart.updateQuantity('${safeKey}', 1)" aria-label="Increase quantity">+</button>
                         </div>
-                        <button type="button" onclick="window.NFCart.removeFromCart('${item.key}')"
+                        <button type="button" onclick="window.NFCart.removeFromCart('${safeKey}')"
                                 style="font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); text-decoration: underline;">
                             REMOVE
                         </button>

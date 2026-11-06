@@ -1,275 +1,884 @@
 <section id="mod-settings" class="admin-module">
-            <div class="module-header">
-                <div>
-                    <h2 class="module-title">SYSTEM BRANDING &amp; CONCIERGE CONFIGURATION</h2>
-                    <p style="font-size:12px; color:var(--admin-muted); margin-top:2px;">
-                        Update brand identity, ticker text, and Telegram support channels.
-                    </p>
+    <!-- STICKY SETTINGS COMMAND & SUBNAV PANEL -->
+    <div class="settings-sticky-panel">
+        <div class="settings-sticky-header">
+            <div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <h2 class="module-title" style="margin:0; font-size:17px;">SYSTEM SETTINGS</h2>
                 </div>
+                <p style="font-size:11px; color:var(--admin-muted); margin-top:3px; margin-bottom:0;">
+                    Configure store identity, security & defense, branding, pagination limits, tracking scripts, and database backups.
+                </p>
             </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <button type="button" class="btn-admin btn-admin-primary" onclick="submitSettingsForm()" id="settings-header-save-btn" style="background:#00e5ff; color:#000; font-weight:700; display:inline-flex; align-items:center; gap:6px; height:32px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    <span>SAVE CHANGES</span>
+                </button>
+            </div>
+        </div>
 
-            <form id="settings-form" onsubmit="saveSettings(event)" style="background:var(--admin-surface); border:1px solid var(--admin-border); padding:2rem;">
+        <!-- SETTINGS MODULE SUBNAV STRIP -->
+        <div class="settings-sticky-subnav">
+            <button type="button" class="subnav-btn settings-subnav-btn active" data-tab="general" onclick="switchSettingsTab('general', this)">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                <span>GENERAL</span>
+            </button>
+            <button type="button" class="subnav-btn settings-subnav-btn" data-tab="security" onclick="switchSettingsTab('security', this)">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span>SECURITY &amp; DEFENSE</span>
+            </button>
+            <button type="button" class="subnav-btn settings-subnav-btn" data-tab="branding" onclick="switchSettingsTab('branding', this)">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span>BRANDING</span>
+            </button>
+            <button type="button" class="subnav-btn settings-subnav-btn" data-tab="pagination" onclick="switchSettingsTab('pagination', this)">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                <span>PAGINATION</span>
+            </button>
+            <button type="button" class="subnav-btn settings-subnav-btn" data-tab="tracking" onclick="switchSettingsTab('tracking', this)">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="2.2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                <span>TRACKING &amp; JS</span>
+            </button>
+            <button type="button" class="subnav-btn settings-subnav-btn" data-tab="data" onclick="switchSettingsTab('data', this)">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                <span>DATA &amp; BACKUPS</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN SETTINGS FORM (Spans Tabs 1 through 4) -->
+    <form id="settings-form" onsubmit="saveSettings(event)">
+
+        <!-- ======================================================== -->
+        <!-- TAB PANE 1: GENERAL & TELEGRAM BOT                       -->
+        <!-- ======================================================== -->
+        <div id="settings-pane-general" class="settings-tab-pane" style="display:block;">
+            <div style="background:var(--admin-surface); border:1px solid var(--admin-border); padding:2rem; border-radius:4px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; padding-bottom:1rem; border-bottom:1px solid var(--admin-border);">
+                    <div>
+                        <span class="badge-tag" style="background:#00e5ff; color:#000; font-weight:800; font-size:10px; padding:2px 8px;">STORE IDENTITY</span>
+                        <h3 style="font-size:15px; font-weight:700; color:#fff; margin-top:4px; margin-bottom:0; text-transform:uppercase;">
+                            STORE IDENTITY &amp; SUPPORT CONTACT
+                        </h3>
+                    </div>
+                </div>
+
                 <div class="form-grid" style="margin-bottom:1.5rem;">
                     <div class="form-group">
                         <label class="form-label">SITE BRAND NAME</label>
                         <input type="text" name="site_name" class="form-input" value="{{ site_settings.site_name }}" required>
+                        <span style="font-size:10.5px; color:var(--admin-muted); margin-top:3px; display:block;">Used across storefront header, copyright notices, and system alerts.</span>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">TELEGRAM CONCIERGE HANDLE</label>
+                        <label class="form-label">TELEGRAM SUPPORT HANDLE</label>
                         <input type="text" name="telegram_user" class="form-input" value="{{ site_settings.telegram_user }}" required>
+                        <span style="font-size:10.5px; color:var(--admin-muted); margin-top:3px; display:block;">Recipient for 1-click order fulfillment and customer support inquiries.</span>
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label class="form-label">SITE TAGLINE</label>
                         <input type="text" name="site_tagline" class="form-input" value="{{ site_settings.site_tagline }}" required>
+                        <span style="font-size:10.5px; color:var(--admin-muted); margin-top:3px; display:block;">Primary tagline shown beneath header and in default meta tags.</span>
                     </div>
-
-                    <!-- SITE BRAND LOGO -->
-                    <div class="form-group" style="grid-column: 1 / -1; background:rgba(0,0,0,0.3); border:1px solid var(--admin-border); padding:1.25rem; border-radius:4px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
-                            <label class="form-label" style="margin:0; font-weight:700; color:#00e5ff;">
-                                <span>SITE BRAND LOGO (HEADER &amp; FOOTER)</span>
-                            </label>
-                            <span class="badge-tag" style="background:#00e5ff; color:#000; font-size:9.5px; font-weight:800; padding:2px 6px;">STOREFRONT BRAND</span>
-                        </div>
-                        <p style="font-size:11.5px; color:var(--admin-muted); margin-bottom:0.85rem; line-height:1.5;">
-                            Upload a vector or high-resolution PNG/SVG logo to replace the plaintext brand mark across the storefront header, mobile menu, and footer.
-                        </p>
-                        <div style="display:flex; gap:1.25rem; align-items:center; flex-wrap:wrap;">
-                            <div id="settings-logo-preview-box" style="min-width:180px; height:54px; background:#080808; border:1px dashed var(--admin-border); display:flex; align-items:center; justify-content:center; padding:6px 12px; border-radius:3px;">
-                                {% if site_settings.site_logo %}
-                                <img id="settings-logo-preview" src="{{ site_settings.site_logo }}" alt="Brand Logo Preview" style="max-height:40px; max-width:160px; object-fit:contain;">
-                                {% else %}
-                                <span id="settings-logo-preview-empty" style="font-family:var(--admin-font-mono); font-size:10px; color:var(--admin-muted);">NO LOGO (USING TEXT)</span>
-                                <img id="settings-logo-preview" src="" alt="Brand Logo Preview" style="max-height:40px; max-width:160px; object-fit:contain; display:none;">
-                                {% endif %}
-                            </div>
-                            <div style="flex:1; min-width:280px;">
-                                <div style="display:flex; gap:0.5rem; margin-bottom:0.4rem;">
-                                    <input type="text" id="settings-site_logo" name="site_logo" class="form-input" value="{{ site_settings.site_logo }}" placeholder="https://... or /static/uploads/logo.png" oninput="updateLogoLivePreview(this.value)" style="flex:1;">
-                                    <label class="btn-admin btn-admin-outline" style="cursor:pointer; padding:0.5rem 0.85rem; font-size:11px; white-space:nowrap; display:inline-flex; align-items:center; gap:5px;">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                                        <span>UPLOAD LOGO</span>
-                                        <input type="file" accept="image/*,.svg" style="display:none;" onchange="uploadBrandAsset(this, 'site_logo')">
-                                    </label>
-                                    <button type="button" class="btn-admin btn-admin-outline" onclick="clearBrandAsset('site_logo')" style="font-size:11px; padding:0.5rem 0.75rem;" title="Remove logo and use text brand">
-                                        RESET
-                                    </button>
-                                </div>
-                                <div style="font-size:10.5px; color:var(--admin-muted);">Recommended: Transparent PNG, WebP, or SVG (height ~40-60px).</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- BROWSER FAVICON -->
-                    <div class="form-group" style="grid-column: 1 / -1; background:rgba(0,0,0,0.3); border:1px solid var(--admin-border); padding:1.25rem; border-radius:4px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
-                            <label class="form-label" style="margin:0; font-weight:700; color:#10b981;">
-                                <span>BROWSER TAB FAVICON (APP ICON &amp; BOOKMARKS)</span>
-                            </label>
-                            <span class="badge-tag" style="background:#10b981; color:#000; font-size:9.5px; font-weight:800; padding:2px 6px;">FAVICON MATRIX</span>
-                        </div>
-                        <p style="font-size:11.5px; color:var(--admin-muted); margin-bottom:0.85rem; line-height:1.5;">
-                            Update the browser tab icon and mobile touch shortcut across all visitor and operator browser tabs. Supports <code>.ico</code>, <code>.png</code>, <code>.svg</code>, and <code>.webp</code> formats.
-                        </p>
-                        <div style="display:flex; gap:1.25rem; align-items:center; flex-wrap:wrap;">
-                            <!-- MOCK BROWSER TAB PREVIEW -->
-                            <div style="background:#1e1e1e; border:1px solid #333; border-radius:6px 6px 0 0; padding:8px 14px; display:inline-flex; align-items:center; gap:8px; width:220px;">
-                                <div id="settings-fav-preview-box" style="width:18px; height:18px; display:flex; align-items:center; justify-content:center;">
-                                    {% if site_settings.site_favicon %}
-                                    <img id="settings-fav-preview" src="{{ site_settings.site_favicon }}" alt="Favicon" style="width:16px; height:16px; object-fit:contain;">
-                                    {% else %}
-                                    <svg id="settings-fav-fallback" width="16" height="16" viewBox="0 0 100 100"><rect width="100" height="100" fill="#050505"/><polygon points="50,15 85,85 15,85" fill="#00e5ff"/></svg>
-                                    <img id="settings-fav-preview" src="" alt="Favicon" style="width:16px; height:16px; object-fit:contain; display:none;">
-                                    {% endif %}
-                                </div>
-                                <div style="font-size:11px; color:#ddd; font-family:sans-serif; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:160px;">
-                                    <span id="mock-tab-title">{{ site_settings.site_name }} // Security</span>
-                                </div>
-                            </div>
-
-                            <div style="flex:1; min-width:280px;">
-                                <div style="display:flex; gap:0.5rem; margin-bottom:0.4rem;">
-                                    <input type="text" id="settings-site_favicon" name="site_favicon" class="form-input" value="{{ site_settings.site_favicon }}" placeholder="https://... or /static/uploads/favicon.png" oninput="updateFaviconLivePreview(this.value)" style="flex:1;">
-                                    <label class="btn-admin btn-admin-outline" style="cursor:pointer; padding:0.5rem 0.85rem; font-size:11px; white-space:nowrap; display:inline-flex; align-items:center; gap:5px; border-color:#10b981; color:#10b981;">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                                        <span>UPLOAD FAVICON</span>
-                                        <input type="file" accept=".ico,.png,.svg,.webp,image/*" style="display:none;" onchange="uploadBrandAsset(this, 'site_favicon')">
-                                    </label>
-                                    <button type="button" class="btn-admin btn-admin-outline" onclick="clearBrandAsset('site_favicon')" style="font-size:11px; padding:0.5rem 0.75rem;" title="Reset to default cyberpunk favicon">
-                                        RESET
-                                    </button>
-                                </div>
-                                <div style="font-size:10.5px; color:var(--admin-muted);">Recommended: 32x32 or 64x64 PNG, ICO, or SVG vector file.</div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- CATALOG & JOURNAL PAGINATION ARCHITECTURE -->
-                    <div class="form-group" style="background:rgba(0,0,0,0.25); border:1px solid var(--admin-border); padding:1.15rem; border-radius:4px;">
-                        <label class="form-label" style="color:#00e5ff; font-weight:700;">
-                            PRODUCTS PER PAGE (SHOP / ARSENAL)
-                        </label>
-                        <p style="font-size:11.5px; color:var(--admin-muted); margin-bottom:0.6rem; line-height:1.5;">
-                            Number of security systems displayed per storefront page. Automatic previous/next pagination buttons will activate.
-                        </p>
-                        <input type="number" name="products_per_page" class="form-input" min="1" max="100" value="{{ site_settings.products_per_page or 8 }}" required>
-                    </div>
-
-                    <div class="form-group" style="background:rgba(0,0,0,0.25); border:1px solid var(--admin-border); padding:1.15rem; border-radius:4px;">
-                        <label class="form-label" style="color:#10b981; font-weight:700;">
-                            DISCLOSURES PER PAGE (THREAT JOURNAL)
-                        </label>
-                        <p style="font-size:11.5px; color:var(--admin-muted); margin-bottom:0.6rem; line-height:1.5;">
-                            Number of CVE research advisories displayed per journal page before previous/next buttons appear.
-                        </p>
-                        <input type="number" name="journal_per_page" class="form-input" min="1" max="100" value="{{ site_settings.journal_per_page or 4 }}" required>
-                    </div>
-
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label class="form-label">ANNOUNCEMENT TICKER TEXT</label>
                         <input type="text" name="ticker_text" class="form-input" value="{{ site_settings.ticker_text }}" required>
+                        <span style="font-size:10.5px; color:var(--admin-muted); margin-top:3px; display:block;">Continuous marquee stream displayed along the top edge of every storefront page.</span>
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label class="form-label">LEGAL / COMPLIANCE DISCLAIMER</label>
-                        <textarea name="footer_disclaimer" rows="2" class="form-textarea">{{ site_settings.footer_disclaimer }}</textarea>
+                        <textarea name="footer_disclaimer" rows="3" class="form-textarea">{{ site_settings.footer_disclaimer }}</textarea>
+                        <span style="font-size:10.5px; color:var(--admin-muted); margin-top:3px; display:block;">Mandatory legal disclosure rendered in the storefront footer.</span>
                     </div>
                 </div>
-                <button type="submit" class="btn-admin btn-admin-primary">
-                    SAVE SYSTEM CONFIGURATION →
-                </button>
-            </form>
 
-            <!-- ======================================================== -->
-            <!-- TELEMETRY & ANALYTICS DATA MANAGEMENT & EXPORT SYSTEM     -->
-            <!-- ======================================================== -->
-            <div class="data-mgmt-card" style="margin-top:2rem; background:var(--admin-surface); border:1px solid var(--admin-border); padding:2rem; border-radius:4px;">
+                <div style="display:flex; justify-content:flex-end;">
+                    <button type="submit" class="btn-admin btn-admin-primary" style="background:#00e5ff; color:#000; font-weight:700;">
+                        SAVE GENERAL SETTINGS
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- TAB PANE 1B: SECURITY, RATE LIMITING & ADMIN PATH        -->
+        <!-- ======================================================== -->
+        <div id="settings-pane-security" class="settings-tab-pane" style="display:none;">
+            <!-- SECTION A: CUSTOMIZABLE ADMIN PANEL PATH (STEALTH GATEWAY DEFENSE) -->
+            <div style="background:var(--admin-surface); border:1px solid var(--admin-border); padding:2rem; border-radius:4px; margin-bottom:1.5rem;">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem; padding-bottom:1rem; border-bottom:1px solid var(--admin-border);">
                     <div>
                         <div style="display:flex; align-items:center; gap:8px;">
-                            <span class="badge-tag" style="background:#00e5ff; color:#050505; font-weight:800; font-size:10px; padding:2px 8px;">TELEMETRY &amp; ANALYTICS</span>
-                            <h3 style="font-size:16px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; margin:0; color:#fff;">
-                                // TELEMETRY &amp; ANALYTICS DATA MANAGEMENT &amp; EXPORT SYSTEM
+                            <span class="badge-tag" style="background:#ef4444; color:#fff; font-weight:800; font-size:10px; padding:2px 8px;">STEALTH GATEWAY</span>
+                            <h3 style="font-size:15px; font-weight:700; color:#fff; margin:0; text-transform:uppercase;">
+                                CUSTOMIZABLE ADMIN PANEL PATH
                             </h3>
                         </div>
-                        <p style="font-size:12px; color:var(--admin-muted); margin-top:4px; margin-bottom:0;">
-                            Independent data management strictly decoupled from core site content. Export or purge visitor tracking records with zero impact on reviews, comments, catalog, or orders.
+                        <p style="font-size:11.5px; color:var(--admin-muted); margin-top:4px; margin-bottom:0;">
+                            Change your Admin Panel URL slug anytime to defend against automated scanners and brute-force bots probing <code>/admin</code>. When changed, <code>/admin</code> and <code>/admin/login</code> automatically return <strong>HTTP 404 Not Found</strong>.
                         </p>
                     </div>
-                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                        <button type="button" class="btn-admin btn-admin-outline" onclick="refreshDataStats()" style="display:inline-flex; align-items:center; gap:5px; font-size:11px;">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-                            <span>REFRESH METRICS</span>
-                        </button>
-                        <button type="button" class="btn-admin btn-admin-outline" style="border-color:#10b981; color:#10b981; font-size:11px;" onclick="runDatabaseVacuum()">
-                            ⚡ VACUUM &amp; OPTIMIZE DB
-                        </button>
+                    <div id="admin-stealth-status-pill">
+                        {% if (site_settings.admin_custom_path or 'admin') != 'admin' %}
+                        <span class="status-pill completed" style="background:rgba(16,185,129,0.18); color:#10b981; border:1px solid rgba(16,185,129,0.4); font-size:10px; font-weight:800;">
+                            ● STEALTH PATH ACTIVE (/{{ site_settings.admin_custom_path }})
+                        </span>
+                        {% else %}
+                        <span class="status-pill" style="background:rgba(245,158,11,0.15); color:#f59e0b; border:1px solid rgba(245,158,11,0.35); font-size:10px; font-weight:800;">
+                            ● DEFAULT PATH (/admin)
+                        </span>
+                        {% endif %}
                     </div>
                 </div>
 
-                <!-- STRICT ISOLATION GUARANTEE NOTICE -->
-                <div style="background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.25); border-left:3px solid #10b981; padding:0.85rem 1.15rem; border-radius:3px; margin-bottom:1.5rem; display:flex; align-items:flex-start; gap:10px;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2" style="flex-shrink:0; margin-top:2px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    <div style="font-size:11.5px; line-height:1.6; color:#a1a1aa;">
-                        <span style="color:#10b981; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">Strict Data Isolation Guarantee:</span>
-                        Deleting analytics data <strong style="color:#fff;">ONLY</strong> resets visitor tracking counters and telemetry graphs. Your core website content &mdash; including verified customer reviews, journal comments, product catalog, customer accounts, dispatches, orders, and site configurations &mdash; is maintained separately, kept 100% isolated, and will <strong style="color:#10b981;">NEVER</strong> be touched or modified.
-                    </div>
-                </div>
-
-                <!-- LIVE METRICS READOUT CARDS -->
-                <div class="stat-grid" style="margin-bottom:1.75rem; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));">
-                    <div class="stat-card" style="padding:1rem;">
-                        <div class="stat-label">PAGEVIEWS &amp; SESSIONS</div>
-                        <div class="stat-value" id="dms-count-pageviews" style="color:#00e5ff; font-size:22px;">--</div>
-                        <div class="stat-sub">Telemetry radar stream</div>
-                    </div>
-                    <div class="stat-card" style="padding:1rem;">
-                        <div class="stat-label">TRACKING &amp; AD EVENTS</div>
-                        <div class="stat-value" id="dms-count-events" style="color:#10b981; font-size:22px;">--</div>
-                        <div class="stat-sub">Ad clicks, impressions, buys</div>
-                    </div>
-                    <div class="stat-card" style="padding:1rem;">
-                        <div class="stat-label">UNIQUE AUDIENCE ENTITIES</div>
-                        <div class="stat-value" id="dms-count-visitors" style="color:#f59e0b; font-size:22px;">--</div>
-                        <div class="stat-sub">Unique client fingerprints</div>
-                    </div>
-                    <div class="stat-card" style="padding:1rem;">
-                        <div class="stat-label">DATABASE DISK FOOTPRINT</div>
-                        <div class="stat-value" id="dms-count-dbsize" style="color:#fff; font-size:22px;">-- KB</div>
-                        <div class="stat-sub">cyber.db physical file</div>
-                    </div>
-                </div>
-
-                <!-- CONTROL MODULES: EXPORT & PURGE -->
-                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:1.25rem;">
-                    <!-- MODULE 1: EXPORT SYSTEM -->
-                    <div style="background:rgba(255,255,255,0.02); border:1px solid var(--admin-border); padding:1.25rem; border-radius:4px; display:flex; flex-direction:column; justify-content:space-between;">
-                        <div>
-                            <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                <h4 style="font-size:13px; font-weight:700; text-transform:uppercase; color:#fff; margin:0;">
-                                    EXPORT TELEMETRY DATA (BACKUP)
-                                </h4>
+                <div class="form-grid" style="margin-bottom:1.25rem;">
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label class="form-label" style="color:#00e5ff; font-weight:700;">
+                            ADMIN PANEL URL SLUG (CUSTOM PATH)
+                        </label>
+                        <div style="display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap;">
+                            <div style="display:flex; align-items:center; flex:1; min-width:260px; background:rgba(0,0,0,0.45); border:1px solid var(--admin-border); border-radius:3px; overflow:hidden;">
+                                <span style="padding:0.65rem 0.85rem; background:rgba(255,255,255,0.04); border-right:1px solid var(--admin-border); font-family:var(--admin-font-mono); font-size:12px; color:var(--admin-muted); white-space:nowrap;">
+                                    /
+                                </span>
+                                <input type="text" id="input-admin-custom-path" name="admin_custom_path" class="form-input"
+                                       value="{{ site_settings.admin_custom_path or 'admin' }}"
+                                       placeholder="e.g. admin or secret-ops-gate"
+                                       pattern="[a-zA-Z0-9_-]{2,64}"
+                                       oninput="updateAdminPathPreview(this.value)"
+                                       style="border:none; background:transparent; font-family:var(--admin-font-mono); font-weight:700; color:#fff; flex:1;" required>
                             </div>
-                            <p style="font-size:11.5px; color:var(--admin-muted); line-height:1.5; margin-bottom:1rem;">
-                                Download structured visitor traffic and conversion event telemetry prior to executing a purge or for external data analysis.
-                            </p>
-                        </div>
-                        <div style="display:flex; flex-direction:column; gap:0.5rem;">
-                            <button type="button" class="btn-admin btn-admin-outline" style="border-color:#10b981; color:#10b981; font-size:11.5px; font-weight:700; padding:0.6rem; display:flex; align-items:center; justify-content:center; gap:6px;" onclick="exportAnalyticsData('json')">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                <span>EXPORT COMPLETE TELEMETRY (JSON)</span>
+                            <button type="button" class="btn-admin btn-admin-outline" onclick="generateRandomAdminPath()" style="border-color:#00e5ff; color:#00e5ff; font-size:11px; padding:0.6rem 0.9rem; white-space:nowrap;">
+                                GENERATE SECRET SLUG
                             </button>
-                            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-                                <button type="button" class="btn-admin btn-admin-outline" style="flex:1; min-width:140px; font-size:11px;" onclick="exportAnalyticsData('csv', 'pageviews')">
-                                    ⬇ PAGEVIEWS (CSV)
-                                </button>
-                                <button type="button" class="btn-admin btn-admin-outline" style="flex:1; min-width:140px; font-size:11px;" onclick="exportAnalyticsData('csv', 'events')">
-                                    ⬇ AD EVENTS (CSV)
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- MODULE 2: SAFE TELEMETRY PURGE -->
-                    <div style="background:rgba(255,255,255,0.02); border:1px solid var(--admin-border); padding:1.25rem; border-radius:4px; display:flex; flex-direction:column; justify-content:space-between;">
-                        <div>
-                            <div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.3"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                                <h4 style="font-size:13px; font-weight:700; text-transform:uppercase; color:#fff; margin:0;">
-                                    PURGE &amp; RESET TELEMETRY LOGS
-                                </h4>
-                            </div>
-                            <p style="font-size:11.5px; color:var(--admin-muted); line-height:1.5; margin-bottom:1rem;">
-                                Clear historical traffic and event logs to reclaim space. Resets telemetry counts to zero without touching core content.
-                            </p>
-                        </div>
-                        <div style="display:flex; flex-direction:column; gap:0.5rem;">
-                            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-                                <button type="button" class="btn-admin btn-admin-outline" style="flex:1; min-width:90px; font-size:11px;" onclick="purgeDataAction('analytics_all', 7)">
-                                    &gt; 7 DAYS OLD
-                                </button>
-                                <button type="button" class="btn-admin btn-admin-outline" style="flex:1; min-width:90px; font-size:11px;" onclick="purgeDataAction('analytics_all', 30)">
-                                    &gt; 30 DAYS OLD
-                                </button>
-                                <button type="button" class="btn-admin btn-admin-outline" style="flex:1; min-width:90px; font-size:11px;" onclick="purgeDataAction('analytics_all', 90)">
-                                    &gt; 90 DAYS OLD
-                                </button>
-                            </div>
-                            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-                                <button type="button" class="btn-admin btn-admin-outline" style="flex:1; font-size:11px;" onclick="purgeDataAction('analytics_pageviews', null)">
-                                    PURGE PAGEVIEWS ONLY
-                                </button>
-                                <button type="button" class="btn-admin btn-admin-outline" style="flex:1; font-size:11px;" onclick="purgeDataAction('analytics_events', null)">
-                                    PURGE AD EVENTS ONLY
-                                </button>
-                            </div>
-                            <button type="button" class="btn-admin btn-admin-danger" style="margin-top:0.25rem; font-size:11.5px; font-weight:700; padding:0.6rem;" onclick="purgeDataAction('analytics_all', null)">
-                                ⚠ PURGE ALL TELEMETRY (CLEAN METRICS RESET)
+                            <button type="button" class="btn-admin btn-admin-outline" onclick="resetAdminPathDefault()" style="font-size:11px; padding:0.6rem 0.9rem; white-space:nowrap;">
+                                RESET TO /admin
                             </button>
                         </div>
+                        <span style="font-size:10.5px; color:var(--admin-muted); margin-top:5px; display:block;">
+                            Allowed characters: letters, numbers, hyphens (<code>-</code>), and underscores (<code>_</code>), 2–64 characters. Do not use reserved storefront paths (<code>shop</code>, <code>journal</code>, <code>vault</code>, <code>login</code>, <code>api</code>).
+                        </span>
                     </div>
                 </div>
 
-                <!-- PURGE STATUS READOUT NOTIFIER -->
-                <div id="dms-status-banner" style="display:none; margin-top:1.25rem; padding:0.85rem 1rem; border-radius:3px; font-family:var(--admin-font-mono); font-size:12px;"></div>
+                <!-- LIVE ADMIN GATEWAY URL PREVIEW CARDS -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:1rem; margin-bottom:1.25rem;">
+                    <div style="background:rgba(0,0,0,0.35); border:1px solid var(--admin-border); padding:1rem 1.2rem; border-radius:4px; display:flex; justify-content:space-between; align-items:center; gap:0.75rem;">
+                        <div>
+                            <div style="font-size:10px; font-family:var(--admin-font-mono); color:var(--admin-muted); text-transform:uppercase;">ACTIVE DASHBOARD URL</div>
+                            <div id="preview-admin-dashboard-url" style="font-size:13px; font-family:var(--admin-font-mono); font-weight:700; color:#00e5ff; margin-top:3px;">
+                                /{{ site_settings.admin_custom_path or 'admin' }}
+                            </div>
+                        </div>
+                        <button type="button" class="btn-admin btn-admin-outline" onclick="copyAdminGatewayUrl('dashboard')" style="font-size:10px; padding:0.35rem 0.65rem;">
+                            COPY URL
+                        </button>
+                    </div>
+                    <div style="background:rgba(0,0,0,0.35); border:1px solid var(--admin-border); padding:1rem 1.2rem; border-radius:4px; display:flex; justify-content:space-between; align-items:center; gap:0.75rem;">
+                        <div>
+                            <div style="font-size:10px; font-family:var(--admin-font-mono); color:var(--admin-muted); text-transform:uppercase;">ACTIVE ADMIN LOGIN URL</div>
+                            <div id="preview-admin-login-url" style="font-size:13px; font-family:var(--admin-font-mono); font-weight:700; color:#10b981; margin-top:3px;">
+                                /{{ site_settings.admin_custom_path or 'admin' }}/login
+                            </div>
+                        </div>
+                        <button type="button" class="btn-admin btn-admin-outline" onclick="copyAdminGatewayUrl('login')" style="font-size:10px; padding:0.35rem 0.65rem;">
+                            COPY URL
+                        </button>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end;">
+                    <button type="submit" class="btn-admin btn-admin-primary" style="background:#00e5ff; color:#000; font-weight:700;">
+                        SAVE ADMIN PATH &amp; SECURITY SETTINGS
+                    </button>
+                </div>
             </div>
-        </section>
+
+            <!-- SECTION B: CONFIGURABLE RATE LIMITING (LOGIN, EVERY PAGE & API) -->
+            <div style="background:var(--admin-surface); border:1px solid var(--admin-border); padding:2rem; border-radius:4px; margin-bottom:1.5rem;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem; padding-bottom:1rem; border-bottom:1px solid var(--admin-border);">
+                    <div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span class="badge-tag" style="background:#00e5ff; color:#000; font-weight:800; font-size:10px; padding:2px 8px;">WAF &amp; FLOOD PROTECTION</span>
+                            <h3 style="font-size:15px; font-weight:700; color:#fff; margin:0; text-transform:uppercase;">
+                                REQUEST RATE LIMITING (LOGIN &amp; EVERY PAGE)
+                            </h3>
+                        </div>
+                        <p style="font-size:11.5px; color:var(--admin-muted); margin-top:4px; margin-bottom:0;">
+                            Control per-IP request thresholds across customer/admin sign-in endpoints, storefront pages, and API routes. Exceeding a threshold triggers an automatic HTTP 429 cooldown.
+                        </p>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <select name="rate_limit_enabled" id="select-rate-limit-enabled" class="form-select" style="font-family:var(--admin-font-mono); font-size:11.5px; font-weight:700; padding:0.45rem 0.85rem; width:auto; border-color:#00e5ff; color:#fff;">
+                            <option value="1" {% if (site_settings.rate_limit_enabled or '1') != '0' %}selected{% endif %}>● RATE LIMITING: ENABLED</option>
+                            <option value="0" {% if site_settings.rate_limit_enabled == '0' %}selected{% endif %}>○ RATE LIMITING: DISABLED</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-grid" style="margin-bottom:1.5rem; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));">
+                    <!-- LOGIN / AUTH RATE LIMIT -->
+                    <div class="form-group" style="background:rgba(0,0,0,0.28); border:1px solid var(--admin-border); padding:1.2rem; border-radius:4px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                            <label class="form-label" style="color:#ef4444; font-weight:700; margin:0;">
+                                LOGIN &amp; AUTH LIMIT (REQ / MIN)
+                            </label>
+                            <span class="badge-tag" style="background:rgba(239,68,68,0.15); color:#ef4444; font-size:9px;">BRUTE-FORCE</span>
+                        </div>
+                        <p style="font-size:11px; color:var(--admin-muted); margin-bottom:0.75rem; line-height:1.45;">
+                            Max requests per 60s per IP on <code>/login</code>, <code>/register</code>, and <code>/{{ site_settings.admin_custom_path or 'admin' }}/login</code>.
+                        </p>
+                        <input type="number" name="rate_limit_login_max" id="input-rate-limit-login" class="form-input" min="1" max="10000" value="{{ site_settings.rate_limit_login_max or 8 }}" required style="font-family:var(--admin-font-mono); font-weight:700;">
+                    </div>
+
+                    <!-- EVERY PAGE RATE LIMIT -->
+                    <div class="form-group" style="background:rgba(0,0,0,0.28); border:1px solid var(--admin-border); padding:1.2rem; border-radius:4px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                            <label class="form-label" style="color:#00e5ff; font-weight:700; margin:0;">
+                                EVERY PAGE LIMIT (REQ / MIN)
+                            </label>
+                            <span class="badge-tag" style="background:rgba(0,229,255,0.12); color:#00e5ff; font-size:9px;">STOREFRONT</span>
+                        </div>
+                        <p style="font-size:11px; color:var(--admin-muted); margin-bottom:0.75rem; line-height:1.45;">
+                            Max page requests per 60s per IP across all storefront pages (<code>/</code>, <code>/shop</code>, <code>/journal</code>, <code>/vault</code>, etc.).
+                        </p>
+                        <input type="number" name="rate_limit_page_max" id="input-rate-limit-page" class="form-input" min="1" max="100000" value="{{ site_settings.rate_limit_page_max or 120 }}" required style="font-family:var(--admin-font-mono); font-weight:700;">
+                    </div>
+
+                    <!-- API RATE LIMIT -->
+                    <div class="form-group" style="background:rgba(0,0,0,0.28); border:1px solid var(--admin-border); padding:1.2rem; border-radius:4px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                            <label class="form-label" style="color:#10b981; font-weight:700; margin:0;">
+                                API ENDPOINT LIMIT (REQ / MIN)
+                            </label>
+                            <span class="badge-tag" style="background:rgba(16,185,129,0.12); color:#10b981; font-size:9px;">/api/*</span>
+                        </div>
+                        <p style="font-size:11px; color:var(--admin-muted); margin-bottom:0.75rem; line-height:1.45;">
+                            Max requests per 60s per IP across public and customer API endpoints (checkout, tool requests, comments).
+                        </p>
+                        <input type="number" name="rate_limit_api_max" id="input-rate-limit-api" class="form-input" min="1" max="100000" value="{{ site_settings.rate_limit_api_max or 60 }}" required style="font-family:var(--admin-font-mono); font-weight:700;">
+                    </div>
+
+                    <!-- COOLDOWN / BLOCK DURATION -->
+                    <div class="form-group" style="background:rgba(0,0,0,0.28); border:1px solid var(--admin-border); padding:1.2rem; border-radius:4px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                            <label class="form-label" style="color:#f59e0b; font-weight:700; margin:0;">
+                                COOLDOWN DURATION (SECONDS)
+                            </label>
+                            <span class="badge-tag" style="background:rgba(245,158,11,0.15); color:#f59e0b; font-size:9px;">HTTP 429</span>
+                        </div>
+                        <p style="font-size:11px; color:var(--admin-muted); margin-bottom:0.75rem; line-height:1.45;">
+                            How many seconds an offending IP stays blocked (HTTP 429 Too Many Requests) after exceeding a limit.
+                        </p>
+                        <input type="number" name="rate_limit_block_seconds" id="input-rate-limit-block" class="form-input" min="1" max="86400" value="{{ site_settings.rate_limit_block_seconds or 60 }}" required style="font-family:var(--admin-font-mono); font-weight:700;">
+                    </div>
+                </div>
+
+                <!-- LIVE RATE LIMIT TELEMETRY & RESET CONTROLS -->
+                <div style="background:rgba(0,0,0,0.35); border:1px solid var(--admin-border); padding:1.25rem; border-radius:4px; margin-bottom:1.25rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-bottom:1rem;">
+                        <div>
+                            <span style="font-family:var(--admin-font-mono); font-size:12px; font-weight:700; color:#fff;">
+                                LIVE RATE-LIMIT MONITOR &amp; ACTIVE COOLDOWNS
+                            </span>
+                            <div style="font-size:11px; color:var(--admin-muted); margin-top:2px;">
+                                Real-time view of throttled connections. Authenticated Admin Panel sessions are never throttled.
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                            <button type="button" class="btn-admin btn-admin-outline" onclick="refreshSecurityTelemetry()" style="font-size:11px; padding:0.45rem 0.8rem;">
+                                REFRESH MONITOR
+                            </button>
+                            <button type="button" class="btn-admin btn-admin-danger" onclick="resetActiveRateLimits()" style="font-size:11px; font-weight:700; padding:0.45rem 0.9rem;">
+                                RESET ACTIVE RATE LIMITS / UNBLOCK ALL IPs
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="stat-grid" style="grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:0.85rem; margin-bottom:1rem;">
+                        <div class="stat-card" style="padding:0.85rem 1rem;">
+                            <div class="stat-label">CURRENTLY THROTTLED IPs</div>
+                            <div class="stat-value" id="rl-stat-active-blocks" style="font-size:20px; color:#ef4444;">
+                                {{ rate_limit_telemetry.active_blocks_count if rate_limit_telemetry else 0 }}
+                            </div>
+                        </div>
+                        <div class="stat-card" style="padding:0.85rem 1rem;">
+                            <div class="stat-label">ACTIVE 60S IP BUCKETS</div>
+                            <div class="stat-value" id="rl-stat-tracked-buckets" style="font-size:20px; color:#00e5ff;">
+                                {{ rate_limit_telemetry.tracked_buckets_count if rate_limit_telemetry else 0 }}
+                            </div>
+                        </div>
+                        <div class="stat-card" style="padding:0.85rem 1rem;">
+                            <div class="stat-label">TOTAL REQUESTS THROTTLED</div>
+                            <div class="stat-value" id="rl-stat-total-throttled" style="font-size:20px; color:#f59e0b;">
+                                {{ rate_limit_telemetry.total_throttled if rate_limit_telemetry else 0 }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="rl-recent-events-box" style="font-family:var(--admin-font-mono); font-size:11px; color:var(--admin-muted);">
+                        {% if rate_limit_telemetry and rate_limit_telemetry.active_blocks %}
+                            <div style="color:#ef4444; font-weight:700; margin-bottom:0.4rem;">ACTIVE COOLDOWN BLOCKS:</div>
+                            {% for b in rate_limit_telemetry.active_blocks %}
+                            <div style="padding:0.35rem 0; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; justify-content:space-between;">
+                                <span>IP: <strong style="color:#fff;">{{ b.ip }}</strong> · Scope: <span style="color:#00e5ff;">{{ b.scope }}</span> · Path: {{ b.path }}</span>
+                                <span style="color:#f59e0b;">{{ b.remaining_seconds }}s remaining</span>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div>No IP addresses are currently in an active HTTP 429 cooldown block.</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end;">
+                    <button type="submit" class="btn-admin btn-admin-primary" style="background:#00e5ff; color:#000; font-weight:700;">
+                        SAVE RATE LIMIT &amp; SECURITY SETTINGS
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- TAB PANE 2: BRAND LOGO & FAVICON                         -->
+        <!-- ======================================================== -->
+        <div id="settings-pane-branding" class="settings-tab-pane" style="display:none;">
+            <div style="background:var(--admin-surface); border:1px solid var(--admin-border); padding:2rem; border-radius:4px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; padding-bottom:1rem; border-bottom:1px solid var(--admin-border);">
+                    <div>
+                        <span class="badge-tag" style="background:#10b981; color:#000; font-weight:800; font-size:10px; padding:2px 8px;">BRAND ASSETS</span>
+                        <h3 style="font-size:15px; font-weight:700; color:#fff; margin-top:4px; margin-bottom:0; text-transform:uppercase;">
+                            BRAND LOGO &amp; FAVICON
+                        </h3>
+                    </div>
+                </div>
+
+                <!-- SITE BRAND LOGO -->
+                <div class="form-group" style="background:rgba(0,0,0,0.3); border:1px solid var(--admin-border); padding:1.25rem; border-radius:4px; margin-bottom:1.5rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                        <label class="form-label" style="margin:0; font-weight:700; color:#00e5ff;">
+                            SITE BRAND LOGO (HEADER &amp; FOOTER)
+                        </label>
+                        <span class="badge-tag" style="background:#00e5ff; color:#000; font-size:9.5px; font-weight:800; padding:2px 6px;">HEADER / FOOTER BRAND</span>
+                    </div>
+                    <p style="font-size:11.5px; color:var(--admin-muted); margin-bottom:0.85rem; line-height:1.5;">
+                        Upload a vector or high-resolution PNG/SVG logo to replace the plaintext brand mark across the storefront header, mobile menu, and footer.
+                    </p>
+                    <div style="display:flex; gap:1.25rem; align-items:center; flex-wrap:wrap;">
+                        <div id="settings-logo-preview-box" style="min-width:180px; height:54px; background:#080808; border:1px dashed var(--admin-border); display:flex; align-items:center; justify-content:center; padding:6px 12px; border-radius:3px;">
+                            {% if site_settings.site_logo %}
+                            <img id="settings-logo-preview" src="{{ site_settings.site_logo }}" alt="Brand Logo Preview" style="max-height:40px; max-width:160px; object-fit:contain;">
+                            {% else %}
+                            <span id="settings-logo-preview-empty" style="font-family:var(--admin-font-mono); font-size:10px; color:var(--admin-muted);">NO LOGO (USING TEXT)</span>
+                            <img id="settings-logo-preview" src="" alt="Brand Logo Preview" style="max-height:40px; max-width:160px; object-fit:contain; display:none;">
+                            {% endif %}
+                        </div>
+                        <div style="flex:1; min-width:280px;">
+                            <div style="display:flex; gap:0.5rem; margin-bottom:0.4rem;">
+                                <input type="text" id="settings-site_logo" name="site_logo" class="form-input" value="{{ site_settings.site_logo }}" placeholder="https://... or /static/uploads/logo.png" oninput="updateLogoLivePreview(this.value)" style="flex:1;">
+                                <label class="btn-admin btn-admin-outline" style="cursor:pointer; padding:0.5rem 0.85rem; font-size:11px; white-space:nowrap; display:inline-flex; align-items:center; gap:5px;">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                    <span>UPLOAD LOGO</span>
+                                    <input type="file" accept="image/*,.svg" style="display:none;" onchange="uploadBrandAsset(this, 'site_logo')">
+                                </label>
+                                <button type="button" class="btn-admin btn-admin-outline" onclick="clearBrandAsset('site_logo')" style="font-size:11px; padding:0.5rem 0.75rem;" title="Remove logo and use text brand">
+                                    RESET
+                                </button>
+                            </div>
+                            <div style="font-size:10.5px; color:var(--admin-muted);">Recommended: Transparent PNG, WebP, or SVG (height ~40-60px).</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BROWSER FAVICON -->
+                <div class="form-group" style="background:rgba(0,0,0,0.3); border:1px solid var(--admin-border); padding:1.25rem; border-radius:4px; margin-bottom:1.5rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                        <label class="form-label" style="margin:0; font-weight:700; color:#10b981;">
+                            BROWSER TAB FAVICON (APP ICON &amp; BOOKMARKS)
+                        </label>
+                        <span class="badge-tag" style="background:#10b981; color:#000; font-size:9.5px; font-weight:800; padding:2px 6px;">TAB IDENTITY</span>
+                    </div>
+                    <p style="font-size:11.5px; color:var(--admin-muted); margin-bottom:0.85rem; line-height:1.5;">
+                        Update the browser tab icon and mobile touch shortcut across all visitor and operator browser tabs. Supports <code>.ico</code>, <code>.png</code>, <code>.svg</code>, and <code>.webp</code> formats.
+                    </p>
+                    <div style="display:flex; gap:1.25rem; align-items:center; flex-wrap:wrap;">
+                        <!-- MOCK BROWSER TAB PREVIEW -->
+                        <div style="background:#1e1e1e; border:1px solid #333; border-radius:6px 6px 0 0; padding:8px 14px; display:inline-flex; align-items:center; gap:8px; width:220px;">
+                            <div id="settings-fav-preview-box" style="width:18px; height:18px; display:flex; align-items:center; justify-content:center;">
+                                {% if site_settings.site_favicon %}
+                                <img id="settings-fav-preview" src="{{ site_settings.site_favicon }}" alt="Favicon" style="width:16px; height:16px; object-fit:contain;">
+                                {% else %}
+                                <svg id="settings-fav-fallback" width="16" height="16" viewBox="0 0 100 100"><rect width="100" height="100" fill="#050505"/><polygon points="50,15 85,85 15,85" fill="#00e5ff"/></svg>
+                                <img id="settings-fav-preview" src="" alt="Favicon" style="width:16px; height:16px; object-fit:contain; display:none;">
+                                {% endif %}
+                            </div>
+                            <div style="font-size:11px; color:#ddd; font-family:sans-serif; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:160px;">
+                                <span id="mock-tab-title">{{ site_settings.site_name }} // Security</span>
+                            </div>
+                        </div>
+
+                        <div style="flex:1; min-width:280px;">
+                            <div style="display:flex; gap:0.5rem; margin-bottom:0.4rem;">
+                                <input type="text" id="settings-site_favicon" name="site_favicon" class="form-input" value="{{ site_settings.site_favicon }}" placeholder="https://... or /static/uploads/favicon.png" oninput="updateFaviconLivePreview(this.value)" style="flex:1;">
+                                <label class="btn-admin btn-admin-outline" style="cursor:pointer; padding:0.5rem 0.85rem; font-size:11px; white-space:nowrap; display:inline-flex; align-items:center; gap:5px; border-color:#10b981; color:#10b981;">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                    <span>UPLOAD FAVICON</span>
+                                    <input type="file" accept=".ico,.png,.svg,.webp,image/*" style="display:none;" onchange="uploadBrandAsset(this, 'site_favicon')">
+                                </label>
+                                <button type="button" class="btn-admin btn-admin-outline" onclick="clearBrandAsset('site_favicon')" style="font-size:11px; padding:0.5rem 0.75rem;" title="Reset to default cyberpunk favicon">
+                                    RESET
+                                </button>
+                            </div>
+                            <div style="font-size:10.5px; color:var(--admin-muted);">Recommended: 32x32 or 64x64 PNG, ICO, or SVG vector file.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end;">
+                    <button type="submit" class="btn-admin btn-admin-primary" style="background:#00e5ff; color:#000; font-weight:700;">
+                        SAVE BRANDING
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- TAB PANE 3: PAGINATION ARCHITECTURE                      -->
+        <!-- ======================================================== -->
+        <div id="settings-pane-pagination" class="settings-tab-pane" style="display:none;">
+            <div style="background:var(--admin-surface); border:1px solid var(--admin-border); padding:2rem; border-radius:4px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; padding-bottom:1rem; border-bottom:1px solid var(--admin-border);">
+                    <div>
+                        <span class="badge-tag" style="background:#f59e0b; color:#000; font-weight:800; font-size:10px; padding:2px 8px;">CATALOG CONTROLS</span>
+                        <h3 style="font-size:15px; font-weight:700; color:#fff; margin-top:4px; margin-bottom:0; text-transform:uppercase;">
+                            PAGINATION &amp; DISPLAY LIMITS
+                        </h3>
+                    </div>
+                </div>
+
+                <p style="font-size:12px; color:var(--admin-muted); margin-bottom:1.5rem; line-height:1.6;">
+                    Control how many items render per page on the public storefront. When items exceed these limits, pagination buttons (&laquo; PREV, 1, 2, 3... NEXT &raquo;) automatically activate while preserving all category and search filters.
+                </p>
+
+                <div class="form-grid" style="margin-bottom:1.5rem;">
+                    <!-- PRODUCTS PER PAGE -->
+                    <div class="form-group" style="background:rgba(0,0,0,0.25); border:1px solid var(--admin-border); padding:1.25rem; border-radius:4px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                            <label class="form-label" style="color:#00e5ff; font-weight:700; margin:0;">
+                                PRODUCTS PER PAGE (/shop)
+                            </label>
+                            <span class="badge-tag" style="background:rgba(0,229,255,0.1); color:#00e5ff; font-size:9.5px;">DEFAULT: 8</span>
+                        </div>
+                        <p style="font-size:11.5px; color:var(--admin-muted); margin-bottom:0.75rem; line-height:1.5;">
+                            Number of products shown per page on <code>/shop</code>.
+                        </p>
+                        <input type="number" name="products_per_page" class="form-input" min="1" max="100" value="{{ site_settings.products_per_page or 8 }}" required style="font-family:var(--admin-font-mono); font-weight:700;">
+                    </div>
+
+                    <!-- ARTICLES PER PAGE -->
+                    <div class="form-group" style="background:rgba(0,0,0,0.25); border:1px solid var(--admin-border); padding:1.25rem; border-radius:4px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                            <label class="form-label" style="color:#10b981; font-weight:700; margin:0;">
+                                ARTICLES PER PAGE (/journal)
+                            </label>
+                            <span class="badge-tag" style="background:rgba(16,185,129,0.1); color:#10b981; font-size:9.5px;">DEFAULT: 4</span>
+                        </div>
+                        <p style="font-size:11.5px; color:var(--admin-muted); margin-bottom:0.75rem; line-height:1.5;">
+                            Number of articles rendered per page on <code>/journal</code>.
+                        </p>
+                        <input type="number" name="journal_per_page" class="form-input" min="1" max="100" value="{{ site_settings.journal_per_page or 4 }}" required style="font-family:var(--admin-font-mono); font-weight:700;">
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end;">
+                    <button type="submit" class="btn-admin btn-admin-primary" style="background:#00e5ff; color:#000; font-weight:700;">
+                        SAVE PAGINATION LIMITS
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- TAB PANE 4: GOOGLE TRACKING & CUSTOM JS                  -->
+        <!-- ======================================================== -->
+        <div id="settings-pane-tracking" class="settings-tab-pane" style="display:none; width:100%;">
+            <div style="background:var(--admin-surface); border:1px solid var(--admin-border); padding:2rem; border-radius:4px; width:100%; box-sizing:border-box;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-bottom:1.25rem; padding-bottom:1rem; border-bottom:1px solid var(--admin-border);">
+                    <div>
+                        <span class="badge-tag" style="background:#00e5ff; color:#000; font-weight:800; font-size:10px; padding:2px 8px;">INTEGRATIONS</span>
+                        <h3 style="font-size:15px; font-weight:700; color:#fff; margin-top:4px; margin-bottom:0; text-transform:uppercase;">
+                            CUSTOM JAVASCRIPT &amp; THIRD-PARTY TRACKING
+                        </h3>
+                    </div>
+                    <span class="status-pill completed" style="font-size:9.5px;">RUNS ON STOREFRONT PAGES</span>
+                </div>
+
+                <p style="font-size:12px; color:var(--admin-muted); line-height:1.6; margin-bottom:1.5rem;">
+                    Inject custom Google Analytics (GA4 / gtag.js), Google Tag Manager, Meta Pixel, Plausible, PostHog, or custom event tracking scripts. You can inject scripts globally across every single page, or configure tailored scripts for specific storefront sections. Supports both raw JavaScript and full <code>&lt;script&gt;</code> tags.
+                </p>
+
+                <!-- GLOBAL SCRIPTS (FULL-WIDTH 2-COLUMN GRID) -->
+                <div style="margin-bottom:1.75rem;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem;">
+                        <span style="font-family:var(--admin-font-mono); font-size:12px; font-weight:700; color:#fff; text-transform:uppercase;">
+                            GLOBAL SCRIPTS (STOREFRONT-WIDE)
+                        </span>
+                        <span style="font-size:10.5px; color:var(--admin-muted); font-family:var(--admin-font-mono);">INJECTED SITELOCK-WIDE</span>
+                    </div>
+
+                    <div class="tracking-grid-global">
+                        <!-- GLOBAL HEAD SCRIPT -->
+                        <div class="tracking-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; flex-wrap:wrap; gap:6px;">
+                                <label class="form-label" style="color:#00e5ff; font-weight:700; margin:0;">
+                                    GLOBAL &lt;HEAD&gt; TRACKING JAVASCRIPT
+                                </label>
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <button type="button" class="btn-admin btn-admin-outline" onclick="insertTrackingTemplate('custom_head_js', 'ga4')" style="font-size:9.5px; padding:2px 6px;">+ GA4</button>
+                                    <button type="button" class="btn-admin btn-admin-outline" onclick="insertTrackingTemplate('custom_head_js', 'gtm')" style="font-size:9.5px; padding:2px 6px;">+ GTM</button>
+                                    <button type="button" class="btn-admin btn-admin-outline" onclick="clearTrackingField('custom_head_js')" style="font-size:9.5px; padding:2px 6px;">CLEAR</button>
+                                </div>
+                            </div>
+                            <p style="font-size:11px; color:var(--admin-muted); margin-bottom:0.75rem; line-height:1.5;">
+                                Injected directly into the <code>&lt;head&gt;</code> section. Ideal for Google Tag Manager, GA4 (gtag.js), Meta Pixel base code, and search console verification tags.
+                            </p>
+                            <textarea name="custom_head_js" rows="8" class="form-textarea tracking-code-input" placeholder="<!-- Google tag (gtag.js) -->&#10;<script async src=&quot;https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX&quot;></script>&#10;<script>&#10;  window.dataLayer = window.dataLayer || [];&#10;  function gtag(){dataLayer.push(arguments);}&#10;  gtag('js', new Date());&#10;  gtag('config', 'G-XXXXXXXXXX');&#10;</script>">{{ site_settings.custom_head_js }}</textarea>
+                        </div>
+
+                        <!-- GLOBAL FOOTER SCRIPT -->
+                        <div class="tracking-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; flex-wrap:wrap; gap:6px;">
+                                <label class="form-label" style="color:#10b981; font-weight:700; margin:0;">
+                                    GLOBAL BODY / FOOTER JAVASCRIPT
+                                </label>
+                                <div style="display:flex; align-items:center; gap:6px;">
+                                    <button type="button" class="btn-admin btn-admin-outline" onclick="insertTrackingTemplate('custom_footer_js', 'script')" style="font-size:9.5px; padding:2px 6px;">+ SCRIPT TAG</button>
+                                    <button type="button" class="btn-admin btn-admin-outline" onclick="clearTrackingField('custom_footer_js')" style="font-size:9.5px; padding:2px 6px;">CLEAR</button>
+                                </div>
+                            </div>
+                            <p style="font-size:11px; color:var(--admin-muted); margin-bottom:0.75rem; line-height:1.5;">
+                                Injected right before the closing <code>&lt;/body&gt;</code> tag. Ideal for event listeners, conversion heatmaps, interactive trackers, or customer support widgets.
+                            </p>
+                            <textarea name="custom_footer_js" rows="8" class="form-textarea tracking-code-input" placeholder="<script>&#10;  // Custom JS executed before closing </body> tag across all pages&#10;  console.log('ZeroDay security telemetry active');&#10;</script>">{{ site_settings.custom_footer_js }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PER-PAGE TARGETED SCRIPTS (RESPONSIVE FULL-WIDTH GRID) -->
+                <div style="background:rgba(0,0,0,0.25); border:1px solid var(--admin-border); padding:1.5rem; border-radius:4px; margin-bottom:1.75rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.75rem;">
+                        <div>
+                            <span style="font-family:var(--admin-font-mono); font-size:12px; font-weight:700; color:#f59e0b; text-transform:uppercase;">
+                                TARGETED PER-PAGE SCRIPTS &amp; FUNNEL CONVERSIONS
+                            </span>
+                        </div>
+                        <span class="badge-tag" style="background:rgba(245,158,11,0.15); color:#f59e0b; font-size:9.5px;">ROUTE ISOLATED</span>
+                    </div>
+                    <p style="font-size:11.5px; color:var(--admin-muted); margin-bottom:1.25rem; line-height:1.5;">
+                        Injects scripts exclusively on the selected storefront page route (e.g. tracking specific funnel stages, add-to-cart actions, or lead generation forms). Each field automatically spans and fits cleanly within the grid.
+                    </p>
+
+                    <div class="tracking-grid-perpage">
+                        <!-- HOMEPAGE SCRIPT -->
+                        <div class="tracking-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                                <div style="font-family:var(--admin-font-mono); font-size:11px; font-weight:700; color:#fff;">
+                                    HOMEPAGE (/)
+                                </div>
+                                <div style="display:flex; gap:4px;">
+                                    <button type="button" class="btn-admin btn-admin-outline" onclick="insertTrackingTemplate('custom_js_home', 'script')" style="font-size:9px; padding:1px 5px;">+ TAG</button>
+                                    <button type="button" class="btn-admin btn-admin-outline" onclick="clearTrackingField('custom_js_home')" style="font-size:9px; padding:1px 5px;">CLR</button>
+                                </div>
+                            </div>
+                            <div style="font-size:10px; color:var(--admin-muted); margin-bottom:0.5rem;">Route: <code>/</code> &mdash; Landing page conversions &amp; brand awareness</div>
+                            <textarea name="custom_js_home" rows="6" class="form-textarea tracking-code-input" placeholder="<script>/* Homepage tracking */</script>">{{ site_settings.custom_js_home }}</textarea>
+                        </div>
+
+                        <!-- SHOP / CATALOG SCRIPT -->
+                        <div class="tracking-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                                <div style="font-family:var(--admin-font-mono); font-size:11px; font-weight:700; color:#fff;">
+                                    SHOP CATALOG (/shop)
+                                </div>
+                                <div style="display:flex; gap:4px;">
+                                    <button type="button" class="btn-admin btn-admin-outline" onclick="insertTrackingTemplate('custom_js_shop', 'script')" style="font-size:9px; padding:1px 5px;">+ TAG</button>
+                                    <button type="button" class="btn-admin btn-admin-outline" onclick="clearTrackingField('custom_js_shop')" style="font-size:9px; padding:1px 5px;">CLR</button>
+                                </div>
+                            </div>
+                            <div style="font-size:10px; color:var(--admin-muted); margin-bottom:0.5rem;">Route: <code>/shop</code> &mdash; Catalog view_item_list &amp; tool discovery</div>
+                            <textarea name="custom_js_shop" rows="6" class="form-textarea tracking-code-input" placeholder="<script>/* E-commerce view_item_list */</script>">{{ site_settings.custom_js_shop }}</textarea>
+                        </div>
+
+                        <!-- THREAT JOURNAL SCRIPT -->
+                        <div class="tracking-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                                <div style="font-family:var(--admin-font-mono); font-size:11px; font-weight:700; color:#fff;">
+                                    THREAT JOURNAL (/journal)
+                                </div>
+                                <div style="display:flex; gap:4px;">
+                                    <button type="button" class="btn-admin btn-admin-outline" onclick="insertTrackingTemplate('custom_js_journal', 'script')" style="font-size:9px; padding:1px 5px;">+ TAG</button>
+                                    <button type="button" class="btn-admin btn-admin-outline" onclick="clearTrackingField('custom_js_journal')" style="font-size:9px; padding:1px 5px;">CLR</button>
+                                </div>
+                            </div>
+                            <div style="font-size:10px; color:var(--admin-muted); margin-bottom:0.5rem;">Route: <code>/journal</code> &mdash; CVE disclosures &amp; blog reader retention</div>
+                            <textarea name="custom_js_journal" rows="6" class="form-textarea tracking-code-input" placeholder="<script>/* Journal index telemetry */</script>">{{ site_settings.custom_js_journal }}</textarea>
+                        </div>
+
+                        <!-- TOOL PROCUREMENT SCRIPT -->
+                        <div class="tracking-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                                <div style="font-family:var(--admin-font-mono); font-size:11px; font-weight:700; color:#fff;">
+                                    TOOL PROCUREMENT (/request)
+                                </div>
+                                <div style="display:flex; gap:4px;">
+                                    <button type="button" class="btn-admin btn-admin-outline" onclick="insertTrackingTemplate('custom_js_request', 'script')" style="font-size:9px; padding:1px 5px;">+ TAG</button>
+                                    <button type="button" class="btn-admin btn-admin-outline" onclick="clearTrackingField('custom_js_request')" style="font-size:9px; padding:1px 5px;">CLR</button>
+                                </div>
+                            </div>
+                            <div style="font-size:10px; color:var(--admin-muted); margin-bottom:0.5rem;">Route: <code>/request</code> &mdash; Custom exploit procurement lead events</div>
+                            <textarea name="custom_js_request" rows="6" class="form-textarea tracking-code-input" placeholder="<script>/* Lead generation conversion */</script>">{{ site_settings.custom_js_request }}</textarea>
+                        </div>
+
+                        <!-- VAULT SCRIPT -->
+                        <div class="tracking-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                                <div style="font-family:var(--admin-font-mono); font-size:11px; font-weight:700; color:#fff;">
+                                    OPERATOR VAULT (/vault)
+                                </div>
+                                <div style="display:flex; gap:4px;">
+                                    <button type="button" class="btn-admin btn-admin-outline" onclick="insertTrackingTemplate('custom_js_vault', 'script')" style="font-size:9px; padding:1px 5px;">+ TAG</button>
+                                    <button type="button" class="btn-admin btn-admin-outline" onclick="clearTrackingField('custom_js_vault')" style="font-size:9px; padding:1px 5px;">CLR</button>
+                                </div>
+                            </div>
+                            <div style="font-size:10px; color:var(--admin-muted); margin-bottom:0.5rem;">Route: <code>/vault</code> &mdash; Private operator locker activation events</div>
+                            <textarea name="custom_js_vault" rows="6" class="form-textarea tracking-code-input" placeholder="<script>/* Vault activation tracking */</script>">{{ site_settings.custom_js_vault }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end;">
+                    <button type="submit" class="btn-admin btn-admin-primary" style="background:#00e5ff; color:#000; font-weight:700;">
+                        SAVE TRACKING SETTINGS
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </form>
+
+    <!-- ======================================================== -->
+    <!-- TAB PANE 5: ANALYTICS DATA & DATABASE OPS                -->
+    <!-- ======================================================== -->
+    <div id="settings-pane-data" class="settings-tab-pane" style="display:none;">
+        <div class="data-mgmt-card" style="background:var(--admin-surface); border:1px solid var(--admin-border); padding:2rem; border-radius:4px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem; padding-bottom:1rem; border-bottom:1px solid var(--admin-border);">
+                <div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span class="badge-tag" style="background:#00e5ff; color:#050505; font-weight:800; font-size:10px; padding:2px 8px;">DATABASE &amp; EXPORTS</span>
+                        <h3 style="font-size:16px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; margin:0; color:#fff;">
+                            ANALYTICS DATA &amp; DATABASE MAINTENANCE
+                        </h3>
+                    </div>
+                    <p style="font-size:12px; color:var(--admin-muted); margin-top:4px; margin-bottom:0;">
+                        Export or reset visitor analytics and order history without affecting products, articles, reviews, or user accounts.
+                    </p>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                    <button type="button" class="btn-admin btn-admin-outline" onclick="refreshDataStats()" style="display:inline-flex; align-items:center; gap:5px; font-size:11px;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                        <span>REFRESH STATS</span>
+                    </button>
+                    <button type="button" class="btn-admin btn-admin-outline" style="border-color:#10b981; color:#10b981; font-size:11px; display:inline-flex; align-items:center; gap:5px;" onclick="runDatabaseVacuum()">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        <span>OPTIMIZE DATABASE</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STRICT ISOLATION GUARANTEE NOTICE -->
+            <div style="background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.25); border-left:3px solid #10b981; padding:0.85rem 1.15rem; border-radius:3px; margin-bottom:1.5rem; display:flex; align-items:flex-start; gap:10px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2" style="flex-shrink:0; margin-top:2px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <div style="font-size:11.5px; line-height:1.6; color:#a1a1aa;">
+                    <span style="color:#10b981; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">Safe Reset Notice:</span>
+                    Resetting analytics clears visitor counts and order totals to <strong style="color:#fff;">$0.00</strong> while keeping your store content (products, articles, reviews, comments, user accounts, and settings) completely untouched.
+                </div>
+            </div>
+
+            <!-- LIVE METRICS READOUT DECK (ORGANIZED TELEMETRY & DATABASE FOOTPRINT) -->
+            <div style="margin-bottom:1.75rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.85rem; padding-bottom:0.5rem; border-bottom:1px solid rgba(255,255,255,0.06);">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#00e5ff; box-shadow:0 0 8px rgba(0,229,255,0.7);"></span>
+                        <span style="font-family:var(--admin-font-mono); font-size:11px; font-weight:700; color:var(--admin-muted); letter-spacing:0.06em; text-transform:uppercase;">
+                            LIVE STORE TELEMETRY &amp; DATABASE FOOTPRINT
+                        </span>
+                    </div>
+                    <span style="font-family:var(--admin-font-mono); font-size:10px; color:var(--admin-muted); background:rgba(255,255,255,0.04); padding:2px 8px; border-radius:3px; border:1px solid var(--admin-border);">
+                        SYNCHRONIZED
+                    </span>
+                </div>
+
+                <div class="stat-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem; margin-bottom:0;">
+                    <!-- 1. PAGEVIEWS & SESSIONS -->
+                    <div class="stat-card" style="padding:1.15rem; background:rgba(0,0,0,0.3); border:1px solid rgba(0,229,255,0.22); border-radius:4px; display:flex; flex-direction:column; justify-content:space-between; transition:all 0.2s ease;">
+                        <div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                                <span class="stat-label" style="font-size:10px; font-weight:700; color:var(--admin-muted); letter-spacing:0.05em; margin:0;">PAGEVIEWS &amp; SESSIONS</span>
+                                <div style="width:24px; height:24px; border-radius:4px; background:rgba(0,229,255,0.1); display:flex; align-items:center; justify-content:center;">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="dms-count-pageviews" style="font-size:24px; font-weight:800; color:#00e5ff; font-family:var(--admin-font-mono); margin:0.35rem 0;">{{ analytics_summary.total_views or 0 }}</div>
+                        </div>
+                        <div style="font-size:10.5px; color:var(--admin-muted); font-family:var(--admin-font-mono); display:flex; align-items:center; gap:5px; margin-top:0.4rem; padding-top:0.4rem; border-top:1px solid rgba(255,255,255,0.04);">
+                            <span style="display:inline-block; width:5px; height:5px; border-radius:50%; background:#00e5ff;"></span>
+                            Total pageviews logged
+                        </div>
+                    </div>
+
+                    <!-- 2. IN-ARTICLE AD CLICKS -->
+                    <div class="stat-card" style="padding:1.15rem; background:rgba(0,0,0,0.3); border:1px solid rgba(16,185,129,0.22); border-radius:4px; display:flex; flex-direction:column; justify-content:space-between; transition:all 0.2s ease;">
+                        <div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                                <span class="stat-label" style="font-size:10px; font-weight:700; color:var(--admin-muted); letter-spacing:0.05em; margin:0;">IN-ARTICLE AD CLICKS</span>
+                                <div style="width:24px; height:24px; border-radius:4px; background:rgba(16,185,129,0.1); display:flex; align-items:center; justify-content:center;">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14L21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="dms-count-events" style="font-size:24px; font-weight:800; color:#10b981; font-family:var(--admin-font-mono); margin:0.35rem 0;">{{ analytics_summary.total_clicks or 0 }}</div>
+                        </div>
+                        <div style="font-size:10.5px; color:var(--admin-muted); font-family:var(--admin-font-mono); display:flex; align-items:center; gap:5px; margin-top:0.4rem; padding-top:0.4rem; border-top:1px solid rgba(255,255,255,0.04);">
+                            <span style="display:inline-block; width:5px; height:5px; border-radius:50%; background:#10b981;"></span>
+                            Conversion click events
+                        </div>
+                    </div>
+
+                    <!-- 3. UNIQUE VISITORS -->
+                    <div class="stat-card" style="padding:1.15rem; background:rgba(0,0,0,0.3); border:1px solid rgba(245,158,11,0.22); border-radius:4px; display:flex; flex-direction:column; justify-content:space-between; transition:all 0.2s ease;">
+                        <div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                                <span class="stat-label" style="font-size:10px; font-weight:700; color:var(--admin-muted); letter-spacing:0.05em; margin:0;">UNIQUE VISITORS</span>
+                                <div style="width:24px; height:24px; border-radius:4px; background:rgba(245,158,11,0.1); display:flex; align-items:center; justify-content:center;">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="dms-count-visitors" style="font-size:24px; font-weight:800; color:#f59e0b; font-family:var(--admin-font-mono); margin:0.35rem 0;">{{ analytics_summary.unique_visitors or 0 }}</div>
+                        </div>
+                        <div style="font-size:10.5px; color:var(--admin-muted); font-family:var(--admin-font-mono); display:flex; align-items:center; gap:5px; margin-top:0.4rem; padding-top:0.4rem; border-top:1px solid rgba(255,255,255,0.04);">
+                            <span style="display:inline-block; width:5px; height:5px; border-radius:50%; background:#f59e0b;"></span>
+                            Tracked visitor sessions
+                        </div>
+                    </div>
+
+                    <!-- 4. TOTAL REVENUE & ORDERS -->
+                    <div class="stat-card" style="padding:1.15rem; background:rgba(0,0,0,0.3); border:1px solid rgba(245,158,11,0.22); border-radius:4px; display:flex; flex-direction:column; justify-content:space-between; transition:all 0.2s ease;">
+                        <div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                                <span class="stat-label" style="font-size:10px; font-weight:700; color:var(--admin-muted); letter-spacing:0.05em; margin:0;">TOTAL REVENUE &amp; ORDERS</span>
+                                <div style="width:24px; height:24px; border-radius:4px; background:rgba(245,158,11,0.1); display:flex; align-items:center; justify-content:center;">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="dms-count-revenue" style="font-size:20px; font-weight:800; color:#f59e0b; font-family:var(--admin-font-mono); margin:0.35rem 0;">${{ "%.2f"|format(analytics_summary.pipeline_revenue or stats.total_revenue) }} ({{ orders|length }} ord)</div>
+                        </div>
+                        <div style="font-size:10.5px; color:var(--admin-muted); font-family:var(--admin-font-mono); display:flex; align-items:center; gap:5px; margin-top:0.4rem; padding-top:0.4rem; border-top:1px solid rgba(255,255,255,0.04);">
+                            <span style="display:inline-block; width:5px; height:5px; border-radius:50%; background:#f59e0b;"></span>
+                            Total store order earnings
+                        </div>
+                    </div>
+
+                    <!-- 5. DATABASE SIZE -->
+                    <div class="stat-card" style="padding:1.15rem; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.18); border-radius:4px; display:flex; flex-direction:column; justify-content:space-between; transition:all 0.2s ease;">
+                        <div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                                <span class="stat-label" style="font-size:10px; font-weight:700; color:var(--admin-muted); letter-spacing:0.05em; margin:0;">DATABASE SIZE</span>
+                                <div style="width:24px; height:24px; border-radius:4px; background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center;">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="dms-count-dbsize" style="font-size:24px; font-weight:800; color:#ffffff; font-family:var(--admin-font-mono); margin:0.35rem 0;">{{ db_size_kb if db_size_kb is defined else '360' }} KB</div>
+                        </div>
+                        <div style="font-size:10.5px; color:var(--admin-muted); font-family:var(--admin-font-mono); display:flex; align-items:center; gap:5px; margin-top:0.4rem; padding-top:0.4rem; border-top:1px solid rgba(255,255,255,0.04);">
+                            <span style="display:inline-block; width:5px; height:5px; border-radius:50%; background:#10b981;"></span>
+                            SQLite disk usage
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXPORT & PURGE DUAL OPERATIONAL PANELS -->
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:1.25rem;">
+                <!-- PANEL A: COMPLIANCE EXPORT -->
+                <div style="background:rgba(0,0,0,0.3); border:1px solid var(--admin-border); padding:1.25rem; border-radius:4px; display:flex; flex-direction:column; justify-content:space-between;">
+                    <div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                            <span style="font-family:var(--admin-font-mono); font-size:12px; font-weight:700; color:#fff;">EXPORT ANALYTICS DATA</span>
+                            <span class="badge-tag" style="background:#00e5ff; color:#000; font-size:9.5px; font-weight:800;">CSV / JSON</span>
+                        </div>
+                        <p style="font-size:11.5px; color:var(--admin-muted); margin-bottom:1rem; line-height:1.5;">
+                            Download analytics logs in CSV or JSON format for offline reporting or backup archives.
+                        </p>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                            <button type="button" class="btn-admin btn-admin-outline" style="flex:1; min-width:120px; font-size:11px;" onclick="exportAnalyticsData('csv', 'pageviews')">
+                                EXPORT PAGEVIEWS (CSV)
+                            </button>
+                            <button type="button" class="btn-admin btn-admin-outline" style="flex:1; min-width:120px; font-size:11px;" onclick="exportAnalyticsData('csv', 'events')">
+                                EXPORT AD CLICKS (CSV)
+                            </button>
+                        </div>
+                        <button type="button" class="btn-admin btn-admin-primary" style="font-size:11px; font-weight:700; padding:0.6rem;" onclick="exportAnalyticsData('json', null)">
+                            EXPORT FULL ANALYTICS (JSON)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PANEL B: SELECTIVE PURGE & METRICS RESET -->
+                <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(239,68,68,0.25); padding:1.25rem; border-radius:4px; display:flex; flex-direction:column; justify-content:space-between;">
+                    <div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                            <span style="font-family:var(--admin-font-mono); font-size:12px; font-weight:700; color:#ef4444;">CLEAR ANALYTICS &amp; ORDER LOGS</span>
+                            <span class="badge-tag" style="background:rgba(239,68,68,0.2); color:#ef4444; font-size:9.5px; font-weight:800;">DATA RESET</span>
+                        </div>
+                        <p style="font-size:11.5px; color:var(--admin-muted); margin-bottom:1rem; line-height:1.5;">
+                            Clear old analytics logs to reduce database size or reset reporting metrics. Store products, articles, and users are preserved.
+                        </p>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                            <button type="button" class="btn-admin btn-admin-outline" style="flex:1; min-width:90px; font-size:11px;" onclick="purgeDataAction('analytics_all', 7)">
+                                &gt; 7 DAYS OLD
+                            </button>
+                            <button type="button" class="btn-admin btn-admin-outline" style="flex:1; min-width:90px; font-size:11px;" onclick="purgeDataAction('analytics_all', 30)">
+                                &gt; 30 DAYS OLD
+                            </button>
+                            <button type="button" class="btn-admin btn-admin-outline" style="flex:1; min-width:90px; font-size:11px;" onclick="purgeDataAction('analytics_all', 90)">
+                                &gt; 90 DAYS OLD
+                            </button>
+                        </div>
+                        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                            <button type="button" class="btn-admin btn-admin-outline" style="flex:1; font-size:11px;" onclick="purgeDataAction('analytics_pageviews', null)">
+                                CLEAR PAGEVIEWS ONLY
+                            </button>
+                            <button type="button" class="btn-admin btn-admin-outline" style="flex:1; font-size:11px;" onclick="purgeDataAction('analytics_events', null)">
+                                CLEAR AD CLICKS ONLY
+                            </button>
+                        </div>
+                        <button type="button" class="btn-admin btn-admin-outline" style="border-color:#f59e0b; color:#f59e0b; font-size:11px; padding:0.5rem; display:inline-flex; align-items:center; justify-content:center; gap:6px;" onclick="purgeDataAction('analytics_orders', null)">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                            <span>CLEAR ORDERS &amp; RESET REVENUE ($0.00)</span>
+                        </button>
+                        <button type="button" class="btn-admin btn-admin-danger" style="margin-top:0.25rem; font-size:11.5px; font-weight:700; padding:0.6rem; display:inline-flex; align-items:center; justify-content:center; gap:6px;" onclick="purgeDataAction('analytics_all', null)">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            <span>RESET ALL ANALYTICS &amp; REVENUE</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PURGE STATUS READOUT NOTIFIER -->
+            <div id="dms-status-banner" style="display:none; margin-top:1.25rem; padding:0.85rem 1rem; border-radius:3px; font-family:var(--admin-font-mono); font-size:12px;"></div>
+        </div>
+    </div>
+</section>

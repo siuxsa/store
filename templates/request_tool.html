@@ -1,36 +1,36 @@
 {% extends "base.html" %}
 
-{% block title %}{{ site_settings.seo_request_title or ('Custom Tool Sourcing & Exploit Procurement // ' ~ (site_settings.site_name or 'ZERO//FORM')) }}{% endblock %}
-{% block meta_description %}{{ site_settings.seo_request_desc or site_settings.request_desc or 'Need an enterprise penetration suite, zero-day exploit module, reverse-engineering seat, or hardware implant not listed in our catalog? Submit an intake brief.' }}{% endblock %}
+{% block title %}{{ site_settings.seo_request_title or ('Request a Product | ' ~ (site_settings.site_name or 'ZERO//FORM')) }}{% endblock %}
+{% block meta_description %}{{ site_settings.seo_request_desc or site_settings.request_desc or 'Looking for a specific software license or security tool not listed in our store? Send us a request.' }}{% endblock %}
 {% block meta_keywords %}{{ site_settings.seo_request_keywords or site_settings.seo_meta_keywords }}{% endblock %}
-{% block og_title %}{{ site_settings.seo_request_title or ('Custom Tool Sourcing Desk // ' ~ (site_settings.site_name or 'ZERO//FORM')) }}{% endblock %}
+{% block og_title %}{{ site_settings.seo_request_title or ('Request a Product | ' ~ (site_settings.site_name or 'ZERO//FORM')) }}{% endblock %}
 {% block og_description %}{{ site_settings.seo_request_desc or site_settings.request_desc }}{% endblock %}
 {% block og_image %}{{ site_settings.seo_request_image or site_settings.seo_og_image or site_settings.hero_image }}{% endblock %}
-{% block twitter_title %}{{ site_settings.seo_request_title or ('Custom Tool Sourcing Desk // ' ~ (site_settings.site_name or 'ZERO//FORM')) }}{% endblock %}
+{% block twitter_title %}{{ site_settings.seo_request_title or ('Request a Product | ' ~ (site_settings.site_name or 'ZERO//FORM')) }}{% endblock %}
 {% block twitter_description %}{{ site_settings.seo_request_desc or site_settings.request_desc }}{% endblock %}
 {% block twitter_image %}{{ site_settings.seo_request_image or site_settings.seo_og_image or site_settings.hero_image }}{% endblock %}
 
 {% block content %}
-<div class="container" style="padding-top: 3rem; padding-bottom: 6rem;">
+<div class="container" style="padding-top: clamp(1.5rem, 3.5vw, 2.75rem); padding-bottom: 6rem;">
 
     <!-- 1. BREADCRUMBS -->
     <nav class="breadcrumb-nav" aria-label="Breadcrumbs" style="margin-bottom: 2rem; font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);">
         <a href="{{ url_for('index') }}" style="color: var(--muted); text-decoration: none;">HOME</a>
         <span style="margin: 0 0.5rem; color: rgba(17,17,17,0.3);">/</span>
-        <a href="{{ url_for('shop') }}" style="color: var(--muted); text-decoration: none;">ARSENAL</a>
+        <a href="{{ url_for('shop') }}" style="color: var(--muted); text-decoration: none;">SECURITY TOOLS</a>
         <span style="margin: 0 0.5rem; color: rgba(17,17,17,0.3);">/</span>
-        <span style="color: var(--text); font-weight: 600;" data-theme-bind="request_breadcrumb">{{ site_settings.request_breadcrumb or 'CUSTOM SOURCING & TOOL PROCUREMENT' }}</span>
+        <span style="color: var(--text); font-weight: 600;" data-theme-bind="request_breadcrumb">{{ site_settings.request_breadcrumb or 'REQUEST CUSTOM TOOL' }}</span>
     </nav>
 
     <!-- 2. FULL-WIDTH EDITORIAL PAGE HEADER STRIP -->
-    <div style="border-bottom: 1px solid var(--border); padding-bottom: 2.25rem; margin-bottom: 3rem;">
-        <span class="meta-label" data-theme-bind="request_eyebrow">{{ site_settings.request_eyebrow or '// PRIVATE SOURCING & EXPLOIT PROCUREMENT PROTOCOL' }}</span>
+    <div style="border-bottom: 1px solid var(--border); padding-bottom: clamp(1.5rem, 3vw, 2.25rem); margin-bottom: clamp(1.75rem, 3.5vw, 3rem);">
+        <span class="meta-label" data-theme-bind="request_eyebrow">{{ site_settings.request_eyebrow or 'CUSTOM PRODUCT REQUEST' }}</span>
         <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1.5rem; margin-top: 0.75rem;">
-            <h1 class="display-lg" style="margin: 0; font-size: clamp(2.2rem, 4vw, 3.5rem); line-height: 1.1; letter-spacing: -0.025em; text-transform: uppercase;" data-theme-bind="request_title">
-                {{ site_settings.request_title or 'REQUEST UNLISTED TOOLS.' }}
+            <h1 class="display-lg" style="margin: 0; font-size: clamp(1.75rem, 4.5vw, 3.25rem); line-height: 1.15; letter-spacing: -0.025em; text-transform: uppercase;" data-theme-bind="request_title">
+                {{ site_settings.request_title or 'REQUEST A PRODUCT.' }}
             </h1>
             <div class="meta-mono" style="font-size: 0.84rem; color: var(--muted); max-width: 520px; line-height: 1.6;" data-theme-bind="request_desc">
-                {{ site_settings.request_desc or 'Need an enterprise penetration suite, zero-day exploit module, reverse-engineering seat, or hardware implant not listed in our digital catalog? Submit your operational brief below.' }}
+                {{ site_settings.request_desc or 'Looking for a specific software license, security utility, or tool not listed in our store? Fill out the form below and our team will get back to you.' }}
             </div>
         </div>
     </div>
@@ -38,27 +38,27 @@
     <!-- 3. MAIN TWO-COLUMN FULL-WIDTH LAYOUT -->
     <div class="orders-layout" style="display: grid; grid-template-columns: 1.45fr 0.85fr; gap: clamp(2rem, 4vw, 4rem); align-items: start;">
 
-        <!-- LEFT COLUMN: SOURCING REQUEST SUBMISSION FORM -->
+        <!-- LEFT COLUMN: REQUEST SUBMISSION FORM -->
         <div class="orders-main-content">
 
             <!-- SUCCESS CONFIRMATION BOX (HIDDEN BY DEFAULT) -->
             <div id="request-success-box" style="display: none; border: 1px solid #10b981; background: rgba(16,185,129,0.06); padding: clamp(1.75rem, 3vw, 2.5rem); margin-bottom: 2.5rem; border-left: 4px solid #10b981;">
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.5rem;">
-                    <span class="badge-tag" style="background: #10b981; color: #000; font-weight: 800; font-size: 10px; padding: 2px 8px;">REQUEST LOGGED</span>
-                    <span style="font-family: var(--font-mono); font-size: 0.76rem; color: #10b981; font-weight: 700; letter-spacing: 0.08em;">ACQUISITION TICKET GENERATED</span>
+                    <span class="badge-tag" style="background: #10b981; color: #000; font-weight: 800; font-size: 10px; padding: 2px 8px;">REQUEST RECEIVED</span>
+                    <span style="font-family: var(--font-mono); font-size: 0.76rem; color: #10b981; font-weight: 700; letter-spacing: 0.08em;">WE HAVE RECEIVED YOUR REQUEST</span>
                 </div>
                 <h3 style="font-size: 1.45rem; text-transform: uppercase; font-weight: 700; margin: 0.5rem 0 0.85rem; letter-spacing: -0.01em;">
-                    SOURCING TICKET: <span id="success-request-id" style="color: #10b981;">REQ-XXXXX</span>
+                    REQUEST ID: <span id="success-request-id" style="color: #10b981;">REQ-XXXXX</span>
                 </h3>
                 <p style="font-size: 0.88rem; color: var(--muted); line-height: 1.65; margin-bottom: 1.25rem;">
-                    Your custom procurement brief has been securely dispatched to our broker desk. An operator will review specifications and establish contact via your chosen channel within <strong>24–48 hours</strong>.
+                    Your request has been sent to our team. We will check availability and contact you on Telegram within <strong>24–48 hours</strong>.
                 </p>
                 <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
                     <a id="success-telegram-link" href="https://t.me/{{ site_settings.telegram_user or 'ZeroDayMatrixSupport' }}" target="_blank" class="btn btn-dark" style="background:#10b981; color:#000; font-weight:700; padding: 0.75rem 1.4rem;">
-                        OPEN TELEGRAM DESK →
+                        CONTACT US ON TELEGRAM →
                     </a>
                     <button type="button" onclick="resetRequestForm()" class="btn btn-outline-dark" style="padding: 0.75rem 1.25rem;">
-                        + SUBMIT ANOTHER BRIEF
+                        + SUBMIT ANOTHER REQUEST
                     </button>
                 </div>
             </div>
@@ -66,9 +66,9 @@
             <!-- MAIN SUBMISSION FORM CARD -->
             <div id="request-form-card" style="border: 1px solid var(--border); background: var(--white); padding: clamp(1.75rem, 3vw, 2.5rem);">
                 <div style="border-bottom: 1px solid var(--border); padding-bottom: 1.25rem; margin-bottom: 1.75rem;">
-                    <span class="meta-label" data-theme-bind="request_form_eyebrow">{{ site_settings.request_form_eyebrow or '// PROCUREMENT INTAKE SPECIFICATIONS' }}</span>
+                    <span class="meta-label" data-theme-bind="request_form_eyebrow">{{ site_settings.request_form_eyebrow or 'PRODUCT DETAILS' }}</span>
                     <h2 style="font-size: 1.25rem; text-transform: uppercase; font-weight: 700; margin: 0.4rem 0 0; letter-spacing: -0.01em;" data-theme-bind="request_form_title">
-                        {{ site_settings.request_form_title or 'OPERATIONAL TOOL REQUIREMENTS' }}
+                        {{ site_settings.request_form_title or 'TELL US WHAT YOU NEED' }}
                     </h2>
                 </div>
 
@@ -76,65 +76,65 @@
                     <!-- ROW 1: TOOL NAME -->
                     <div style="margin-bottom: 1.5rem;">
                         <label style="display: block; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem;">
-                            TOOL / SOFTWARE / EXPLOIT NAME <span style="color: #ef4444;">*</span>
+                            SECURITY TOOL / EXPLOIT / LICENSE NAME <span style="color: #ef4444;">*</span>
                         </label>
-                        <input type="text" id="req-tool-name" name="tool_name" required placeholder="e.g. Cobalt Strike 4.9, IDA Pro 9.0 Enterprise, Custom Windows Kernel EoP..."
+                        <input type="text" id="req-tool-name" name="tool_name" required placeholder="e.g. Cobalt Strike 4.9, IDA Pro 9.0, Burp Suite Enterprise, Custom CVE PoC..."
                                style="width: 100%; padding: 0.85rem 1.15rem; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.9rem; background: var(--bg); box-sizing: border-box;">
                         <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted); margin-top: 0.35rem;">
-                            Be as specific as possible regarding version, build, or required extensions.
+                            Specify the exact version, build number, or required modules.
                         </div>
                     </div>
 
                     <!-- ROW 2: CATEGORY & URGENCY (TWO COLUMNS) -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem;">
+                    <div class="req-grid-2col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem;">
                         <div>
                             <label style="display: block; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem;">
-                                ASSET CATEGORY <span style="color: #ef4444;">*</span>
+                                SECURITY CATEGORY <span style="color: #ef4444;">*</span>
                             </label>
                             <select id="req-category" name="category" style="width: 100%; padding: 0.85rem 1.15rem; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.85rem; background: var(--bg); box-sizing: border-box; cursor: pointer;">
-                                <option value="EXPLOIT_TOOLKIT">0-Day Research / Exploit Toolkit</option>
-                                <option value="LICENSE_SEAT" selected>Commercial Software License Seat</option>
+                                <option value="LICENSE_SEAT" selected>Enterprise Security Tool License</option>
+                                <option value="EXPLOIT_TOOLKIT">Red Team / Pentesting Suite</option>
                                 <option value="REVERSE_ENG">Reverse Engineering / Decompiler</option>
-                                <option value="HARDWARE_C2">Physical C2 / RF Hardware Implant</option>
-                                <option value="INTEL_FEED">Private Threat Intel / Breach Feed</option>
-                                <option value="CUSTOM_DEV">Bespoke Payload / C2 Engineering</option>
-                                <option value="OTHER">General Security Asset Sourcing</option>
+                                <option value="HARDWARE_C2">C2 Framework / Network Tool</option>
+                                <option value="INTEL_FEED">CVE PoC / Vulnerability Research</option>
+                                <option value="CUSTOM_DEV">Custom Payload / Tool Development</option>
+                                <option value="OTHER">Other Security Software</option>
                             </select>
                         </div>
                         <div>
                             <label style="display: block; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem;">
-                                PROCUREMENT URGENCY
+                                PRIORITY
                             </label>
                             <select id="req-urgency" name="urgency" style="width: 100%; padding: 0.85rem 1.15rem; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.85rem; background: var(--bg); box-sizing: border-box; cursor: pointer;">
-                                <option value="STANDARD" selected>Standard Intake (3–7 Days)</option>
-                                <option value="HIGH">Priority Allocation (24–48 Hours)</option>
-                                <option value="IMMEDIATE">Immediate Deployment (&lt; 24 Hours)</option>
+                                <option value="STANDARD" selected>Standard (3–7 Days)</option>
+                                <option value="HIGH">High Priority (24–48 Hours)</option>
+                                <option value="IMMEDIATE">Urgent (&lt; 24 Hours)</option>
                             </select>
                         </div>
                     </div>
 
                     <!-- ROW 3: CONTACT INFORMATION (TELEGRAM & EMAIL) -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem;">
+                    <div class="req-grid-2col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem;">
                         <div>
                             <label style="display: block; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem;">
-                                TELEGRAM CALLSIGN / HANDLE <span style="color: #ef4444;">*</span>
+                                TELEGRAM USERNAME <span style="color: #ef4444;">*</span>
                             </label>
-                            <input type="text" id="req-telegram" name="contact_telegram" required placeholder="@YourHandle"
+                            <input type="text" id="req-telegram" name="contact_telegram" required placeholder="@yourusername"
                                    value="{% if current_user and current_user.telegram_handle %}{{ current_user.telegram_handle }}{% endif %}"
                                    style="width: 100%; padding: 0.85rem 1.15rem; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.88rem; background: var(--bg); box-sizing: border-box;">
                             <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted); margin-top: 0.35rem;">
-                                Used for encrypted concierge handoff &amp; payment.
+                                We'll contact you on Telegram with availability and pricing.
                             </div>
                         </div>
                         <div>
                             <label style="display: block; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem;">
                                 EMAIL ADDRESS (OPTIONAL)
                             </label>
-                            <input type="email" id="req-email" name="contact_email" placeholder="operator@proton.me"
+                            <input type="email" id="req-email" name="contact_email" placeholder="you@example.com"
                                    value="{% if current_user and current_user.email %}{{ current_user.email }}{% endif %}"
                                    style="width: 100%; padding: 0.85rem 1.15rem; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.88rem; background: var(--bg); box-sizing: border-box;">
                             <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted); margin-top: 0.35rem;">
-                                Alternative channel for dispatch confirmations.
+                                Optional backup contact email.
                             </div>
                         </div>
                     </div>
@@ -142,23 +142,23 @@
                     <!-- ROW 4: BUDGET ALLOCATION -->
                     <div style="margin-bottom: 1.5rem;">
                         <label style="display: block; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem;">
-                            TARGET BUDGET RANGE
+                            ESTIMATED BUDGET
                         </label>
                         <select id="req-budget" name="budget_range" style="width: 100%; padding: 0.85rem 1.15rem; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.85rem; background: var(--bg); box-sizing: border-box; cursor: pointer;">
-                            <option value="FLEXIBLE" selected>Flexible / Market Competitive</option>
-                            <option value="UNDER_1K">Sub-$1,000 USD (Individual Seat / Tool)</option>
-                            <option value="1K_TO_5K">$1,000 – $5,000 USD (Pro Suite / Hardware Pack)</option>
-                            <option value="5K_TO_20K">$5,000 – $20,000 USD (Enterprise Sourcing / Zero-Day)</option>
-                            <option value="OVER_20K">$20,000+ USD (Exclusive Research &amp; Private Exploit)</option>
+                            <option value="FLEXIBLE" selected>Flexible / Standard Pricing</option>
+                            <option value="UNDER_1K">Under $1,000 USD</option>
+                            <option value="1K_TO_5K">$1,000 – $5,000 USD</option>
+                            <option value="5K_TO_20K">$5,000 – $20,000 USD</option>
+                            <option value="OVER_20K">$20,000+ USD</option>
                         </select>
                     </div>
 
                     <!-- ROW 5: TECHNICAL SPECIFICATIONS & NOTES -->
                     <div style="margin-bottom: 2rem;">
                         <label style="display: block; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem;">
-                            TECHNICAL REQUIREMENTS &amp; ARCHITECTURE NOTES
+                            ADDITIONAL DETAILS OR REQUIREMENTS
                         </label>
-                        <textarea id="req-specs" name="technical_specs" rows="4" placeholder="Detail operational parameters (e.g. Target OS, required modules, offline mirror requirements, Python versions, or expected deliverables)..."
+                        <textarea id="req-specs" name="technical_specs" rows="4" placeholder="Let us know your operating system, required plugins/modules, or any other details..."
                                   style="width: 100%; padding: 0.85rem 1.15rem; border: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.88rem; line-height: 1.55; background: var(--bg); resize: vertical; box-sizing: border-box;"></textarea>
                     </div>
 
@@ -168,63 +168,63 @@
                     <!-- SUBMIT BUTTON -->
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                         <span style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted); display: inline-flex; align-items: center; gap: 6px;">
-                            <span class="live-pulse"></span> <span data-theme-bind="request_security_badge">{{ site_settings.request_security_badge or 'PGP / TLS ENCRYPTED INTAKE' }}</span>
+                            <span class="live-pulse"></span> <span data-theme-bind="request_security_badge">{{ site_settings.request_security_badge or 'FAST RESPONSE VIA TELEGRAM' }}</span>
                         </span>
                         <button type="submit" id="btn-submit-request" class="btn btn-dark" style="padding: 0.95rem 2.25rem; font-size: 0.82rem; font-weight: 700;" data-theme-bind="request_submit_btn">
-                            {{ site_settings.request_submit_btn or 'DISPATCH SOURCING REQUEST →' }}
+                            {{ site_settings.request_submit_btn or 'SUBMIT REQUEST →' }}
                         </button>
                     </div>
                 </form>
             </div>
         </div>
 
-        <!-- RIGHT COLUMN: SOURCING PROTOCOL & CONCIERGE ASSISTANCE -->
+        <!-- RIGHT COLUMN: HOW IT WORKS & DIRECT SUPPORT -->
         <div class="orders-sidebar">
 
             <!-- PROTOCOL CARD -->
             <div style="border: 1px solid var(--border); background: var(--white); padding: clamp(1.5rem, 2.5vw, 2rem); margin-bottom: 2rem;">
-                <span class="meta-label" style="display: block; margin-bottom: 1rem;" data-theme-bind="request_timeline_eyebrow">{{ site_settings.request_timeline_eyebrow or '// SOURCING TIMELINE & PROTOCOL' }}</span>
+                <span class="meta-label" style="display: block; margin-bottom: 1rem;" data-theme-bind="request_timeline_eyebrow">{{ site_settings.request_timeline_eyebrow or 'HOW IT WORKS' }}</span>
                 <div style="display: flex; flex-direction: column; gap: 1.5rem;">
                     <div>
                         <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
                             <span style="font-family: var(--font-mono); font-size: 0.72rem; font-weight: 800; color: var(--cyan); background: rgba(0,229,255,0.1); padding: 1px 6px;">01</span>
-                            <h4 style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; margin: 0;" data-theme-bind="request_step1_title">{{ site_settings.request_step1_title or 'INTAKE & SCOPING' }}</h4>
+                            <h4 style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; margin: 0;" data-theme-bind="request_step1_title">{{ site_settings.request_step1_title or 'REVIEW REQUEST' }}</h4>
                         </div>
                         <p style="font-size: 0.78rem; color: var(--muted); line-height: 1.55; margin: 0;" data-theme-bind="request_step1_desc">
-                            {{ site_settings.request_step1_desc or 'Our broker desk analyzes version requirements, build constraints, and vendor license compatibility within 4 hours.' }}
+                            {{ site_settings.request_step1_desc or 'Our team reviews your version requirements, OS compatibility, and licensing needs within a few hours.' }}
                         </p>
                     </div>
 
                     <div>
                         <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
                             <span style="font-family: var(--font-mono); font-size: 0.72rem; font-weight: 800; color: #10b981; background: rgba(16,185,129,0.1); padding: 1px 6px;">02</span>
-                            <h4 style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; margin: 0;" data-theme-bind="request_step2_title">{{ site_settings.request_step2_title or 'ALLOCATION & BENCHMARK' }}</h4>
+                            <h4 style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; margin: 0;" data-theme-bind="request_step2_title">{{ site_settings.request_step2_title or 'SOURCE & VERIFY' }}</h4>
                         </div>
                         <p style="font-size: 0.78rem; color: var(--muted); line-height: 1.55; margin: 0;" data-theme-bind="request_step2_desc">
-                            {{ site_settings.request_step2_desc or 'We secure perpetual enterprise seats, commercial licenses, or private zero-day proof-of-concepts from vetted brokers.' }}
+                            {{ site_settings.request_step2_desc or 'We source and test the requested software build to ensure it is clean, complete, and ready for offline use.' }}
                         </p>
                     </div>
 
                     <div>
                         <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
                             <span style="font-family: var(--font-mono); font-size: 0.72rem; font-weight: 800; color: #f59e0b; background: rgba(245,158,11,0.1); padding: 1px 6px;">03</span>
-                            <h4 style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; margin: 0;" data-theme-bind="request_step3_title">{{ site_settings.request_step3_title or 'TELEGRAM HANDOFF & VAULT' }}</h4>
+                            <h4 style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; margin: 0;" data-theme-bind="request_step3_title">{{ site_settings.request_step3_title or 'DELIVERY ON TELEGRAM' }}</h4>
                         </div>
                         <p style="font-size: 0.78rem; color: var(--muted); line-height: 1.55; margin: 0;" data-theme-bind="request_step3_desc">
-                            {{ site_settings.request_step3_desc or 'Cryptographic keys and deployment guides are transferred directly via our verified Telegram desk with escrow support.' }}
+                            {{ site_settings.request_step3_desc or 'Download links and license keys are delivered directly to your account and via Telegram.' }}
                         </p>
                     </div>
                 </div>
             </div>
 
-            <!-- DIRECT CONCIERGE CARD -->
+            <!-- DIRECT SUPPORT CARD -->
             <div style="border: 1px solid var(--border); background: var(--white); padding: clamp(1.5rem, 2.5vw, 2rem); margin-bottom: 2rem;">
-                <span class="meta-label" style="display: block; margin-bottom: 0.75rem;" data-theme-bind="request_concierge_eyebrow">{{ site_settings.request_concierge_eyebrow or '// DIRECT PRIVATE BROKERAGE' }}</span>
+                <span class="meta-label" style="display: block; margin-bottom: 0.75rem;" data-theme-bind="request_concierge_eyebrow">{{ site_settings.request_concierge_eyebrow or 'DIRECT SUPPORT' }}</span>
                 <h3 style="font-size: 1.05rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.65rem;" data-theme-bind="request_concierge_title">
-                    {{ site_settings.request_concierge_title or 'TALK TO OUR SOURCING DESK' }}
+                    {{ site_settings.request_concierge_title or 'CHAT WITH SUPPORT' }}
                 </h3>
                 <p style="font-size: 0.8rem; color: var(--muted); line-height: 1.6; margin-bottom: 1.25rem;" data-theme-bind="request_concierge_desc">
-                    {{ site_settings.request_concierge_desc or 'For confidential high-value acquisitions ($25k+) or time-critical mission zero-days, message our lead procurement concierge directly on Telegram:' }}
+                    {{ site_settings.request_concierge_desc or 'Have questions or need urgent assistance? Message our support team directly on Telegram:' }}
                 </p>
                 <a href="https://t.me/{{ site_settings.telegram_user or 'ZeroDayMatrixSupport' }}" target="_blank" class="btn btn-outline-dark" style="display: block; text-align: center; font-size: 0.82rem; padding: 0.85rem 1rem; border-color: #00e5ff; color: #00e5ff;" data-theme-bind="request_concierge_btn">
                     {{ site_settings.request_concierge_btn or ('TELEGRAM: @' ~ (site_settings.telegram_user or 'ZeroDayMatrixSupport') ~ ' →') }}
@@ -245,7 +245,7 @@ async function submitToolRequest(e) {
 
     errBox.style.display = 'none';
     errBox.textContent = '';
-    btn.textContent = 'DISPATCHING BRIEF...';
+    btn.textContent = 'SUBMITTING...';
     btn.disabled = true;
 
     const payload = {

@@ -1,97 +1,185 @@
 <section id="mod-users" class="admin-module">
-            <div class="module-header">
+            <!-- MODULE HEADER -->
+            <div class="module-header" style="margin-bottom:1.25rem;">
                 <div>
-                    <h2 class="module-title">OPERATOR ACCOUNTS &amp; ACCESS CONTROL (RBAC)</h2>
+                    <h2 class="module-title">OPERATOR REGISTRY &amp; CLEARANCE</h2>
                     <p style="font-size:12px; color:var(--admin-muted); margin-top:2px;">
-                        Manage customer accounts, promote staff moderators, toggle instant hardware/network bans, and reset passwords.
+                        Manage verified operators, assign staff moderator clearances, reset credentials, and review telemetry identities.
                     </p>
                 </div>
             </div>
 
+            <!-- DYNAMIC ROLE COUNTS -->
+            {% set admin_c = namespace(v=0) %}
+            {% set mod_c = namespace(v=0) %}
+            {% set cust_c = namespace(v=0) %}
+            {% set ban_c = namespace(v=0) %}
+            {% if users_list %}
+                {% for u in users_list %}
+                    {% if not u.is_active %}{% set ban_c.v = ban_c.v + 1 %}
+                    {% elif u.role == 'ADMIN' %}{% set admin_c.v = admin_c.v + 1 %}
+                    {% elif u.role == 'MODERATOR' %}{% set mod_c.v = mod_c.v + 1 %}
+                    {% else %}{% set cust_c.v = cust_c.v + 1 %}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+
+            <!-- SEGMENTED FILTER CONTROLS & SEARCH BAR STRIP -->
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem;">
+                <div class="user-filter-bar">
+                    <button type="button" class="user-filter-btn active" data-filter="ALL" onclick="filterUsersByRole('ALL', this)">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                        <span>ALL</span>
+                        <span class="user-count">{{ users_list|length if users_list else 0 }}</span>
+                    </button>
+                    <button type="button" class="user-filter-btn" data-filter="ADMIN" onclick="filterUsersByRole('ADMIN', this)">
+                        <span class="user-dot"></span>
+                        <span>ADMINS</span>
+                        <span class="user-count">{{ admin_c.v }}</span>
+                    </button>
+                    <button type="button" class="user-filter-btn" data-filter="MODERATOR" onclick="filterUsersByRole('MODERATOR', this)">
+                        <span class="user-dot"></span>
+                        <span>MODERATORS</span>
+                        <span class="user-count">{{ mod_c.v }}</span>
+                    </button>
+                    <button type="button" class="user-filter-btn" data-filter="CUSTOMER" onclick="filterUsersByRole('CUSTOMER', this)">
+                        <span class="user-dot" style="background:#a1a1aa;"></span>
+                        <span>CUSTOMERS</span>
+                        <span class="user-count">{{ cust_c.v }}</span>
+                    </button>
+                    <button type="button" class="user-filter-btn" data-filter="BANNED" onclick="filterUsersByRole('BANNED', this)">
+                        <span class="user-dot"></span>
+                        <span>BANNED</span>
+                        <span class="user-count">{{ ban_c.v }}</span>
+                    </button>
+                </div>
+
+                <!-- TACTICAL SEARCH BOX -->
+                <div style="position:relative; display:inline-flex; align-items:center;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--admin-muted)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute; left:11px; pointer-events:none;">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="users-search-input" oninput="onUserSearchInput(this.value)" onkeydown="if(event.key==='Escape') clearUsersSearch()" placeholder="SEARCH USER, EMAIL, @TG, ID..." class="form-input" style="width:280px; padding:0.48rem 2.2rem 0.48rem 2.15rem; font-size:11px; font-family:var(--admin-font-mono); border-color:var(--admin-border); background:var(--admin-surface); border-radius:4px;">
+                    <button type="button" id="users-search-clear-btn" onclick="clearUsersSearch()" title="Clear search" style="display:none; position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--admin-muted); cursor:pointer; font-size:14px; line-height:1; padding:2px;">&times;</button>
+                </div>
+            </div>
+
+            <!-- SIDE-SCROLL NAVIGATION CONTROLS -->
+            <div class="table-scroll-hint" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-family:var(--admin-font-mono); font-size:11px; color:var(--admin-muted);">
+                <span style="display:inline-flex; align-items:center; gap:6px;">
+                    <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#00e5ff;"></span>
+                    <span>HORIZONTAL SIDE-SCROLL · CLEARANCE &amp; COMMAND ACTIONS PINNED</span>
+                </span>
+                <span id="users-search-count" style="color:var(--admin-accent-cyan); font-weight:700;">
+                    SHOWING {{ users_list|length if users_list else 0 }} OF {{ users_list|length if users_list else 0 }} OPERATORS
+                </span>
+            </div>
+
+            <!-- USERS TABLE WRAP -->
             <div class="admin-table-wrap">
-                <table class="admin-table">
+                <table class="admin-table" id="users-table">
                     <thead>
                         <tr>
-                            <th>UID</th>
-                            <th>CALLSIGN / USERNAME</th>
-                            <th>EMAIL &amp; TELEGRAM</th>
-                            <th>ROLE</th>
-                            <th>HARDWARE ID &amp; IP</th>
-                            <th>STATUS</th>
-                            <th>JOINED</th>
-                            <th style="text-align:right;">ACTION</th>
+                            <th style="width:90px;">OPERATOR ID</th>
+                            <th>CALLSIGN</th>
+                            <th>COMMUNICATION CHANNELS</th>
+                            <th style="width:130px;">CLEARANCE</th>
+                            <th>ORIGIN TELEMETRY</th>
+                            <th style="width:110px;">STATE</th>
+                            <th style="width:105px;">ENLISTED</th>
+                            <th style="width:230px; text-align:right;">COMMAND ACTIONS</th>
                         </tr>
                     </thead>
                     <tbody style="font-family: var(--admin-font-mono); font-size:12px;">
+                        <tr id="users-no-results" style="display:none;">
+                            <td colspan="8" style="text-align:center; padding:2.5rem; color:var(--admin-muted); font-family:var(--admin-font-mono); font-size:12px;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="margin-bottom:0.5rem; opacity:0.6; display:block; margin:0 auto 0.5rem;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                NO MATCHING OPERATORS FOUND FOR CURRENT FILTER.
+                            </td>
+                        </tr>
                         {% for u in users_list %}
-                        <tr>
-                            <td style="font-weight:700;">#{{ u.id }}</td>
-                            <td style="font-weight:700; color:#fff;">{{ u.username }}</td>
+                        <tr class="user-row" id="user-row-{{ u.id }}" data-user-id="{{ u.id }}"
+                            data-search="{{ u.id }} {{ u.username }} {{ u.email }} {{ u.telegram_handle or '' }} {{ u.role }} {{ u.last_ip or '' }} {{ u.device_hwid or '' }} {{ 'ACTIVE' if u.is_active else 'BANNED' }}"
+                            data-role="{{ u.role }}"
+                            data-status="{{ 'ACTIVE' if u.is_active else 'BANNED' }}">
+                            <td style="font-weight:700; color:#00e5ff;">#{{ u.id }}</td>
                             <td>
-                                <div>{{ u.email }}</div>
+                                <strong style="color:#fff; font-size:13px; letter-spacing:0.02em;">{{ u.username }}</strong>
+                            </td>
+                            <td>
+                                <div style="color:var(--admin-muted); font-size:11.5px;">{{ u.email }}</div>
                                 {% if u.telegram_handle %}
-                                <a href="https://t.me/{{ u.telegram_handle.lstrip('@') }}" target="_blank" style="color:var(--admin-accent-cyan); text-decoration:none; font-size:11px;">
-                                    {{ u.telegram_handle }}
-                                </a>
+                                <div style="margin-top:2px;">
+                                    <a href="https://t.me/{{ u.telegram_handle.lstrip('@') }}" target="_blank" rel="noopener noreferrer" style="color:var(--admin-accent-cyan); text-decoration:none; font-size:11px; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                                        {{ u.telegram_handle }}
+                                    </a>
+                                </div>
                                 {% endif %}
                             </td>
                             <td>
                                 {% if u.id == 1 and u.role == 'ADMIN' %}
-                                <span class="status-pill admin" style="background:#00e5ff; color:#000; font-weight:800;">IN-BUILT MASTER ADMIN</span>
+                                <span class="status-pill admin" style="background:#00e5ff; color:#000; font-weight:800; font-size:10px; padding:2px 7px;">ADMIN</span>
                                 {% elif u.role == 'MODERATOR' %}
-                                <span class="status-pill completed" style="background:#10b981; color:#000; font-weight:800;">STAFF MODERATOR</span>
+                                <span class="status-pill completed" style="background:#10b981; color:#000; font-weight:800; font-size:10px; padding:2px 7px;">MODERATOR</span>
                                 {% else %}
-                                <span class="status-pill" style="color:var(--admin-muted);">CUSTOMER</span>
+                                <span class="badge-tag" style="background:rgba(255,255,255,0.06); color:#a1a1aa; font-size:10px; padding:2px 7px;">CUSTOMER</span>
                                 {% endif %}
                             </td>
                             <td style="font-size:10.5px; color:var(--admin-muted);">
-                                <div>{{ u.device_hwid if u.device_hwid else 'HWID: Pending capture' }}</div>
-                                <div style="color:#00e5ff;">{{ u.last_ip if u.last_ip else 'IP: Not recorded' }}</div>
+                                <div style="color:#00e5ff; font-weight:600;">{{ u.last_ip if u.last_ip else 'IP: Not recorded' }}</div>
+                                <div style="margin-top:2px; font-size:10px; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="{{ u.device_hwid or 'Not recorded' }}">{{ u.device_hwid if u.device_hwid else 'HWID: Not recorded' }}</div>
                             </td>
                             <td>
                                 {% if u.is_active %}
-                                <span style="color:var(--admin-accent-green); font-weight:700;"><span style="display:inline-block; width:6px; height:6px; background:#22c55e; border-radius:50%; margin-right:4px;"></span>ACTIVE</span>
+                                <span style="color:var(--admin-accent-green); font-weight:700; font-size:11px; display:inline-flex; align-items:center; gap:5px;">
+                                    <span style="display:inline-block; width:6px; height:6px; background:#10b981; border-radius:50%; box-shadow:0 0 6px rgba(16,185,129,0.5);"></span>
+                                    ACTIVE
+                                </span>
                                 {% else %}
-                                <span style="color:var(--admin-accent-red); font-weight:700; background:rgba(239,68,68,0.15); padding:2px 6px; border-radius:3px;">BANNED</span>
+                                <span class="badge-tag" style="background:rgba(239,68,68,0.18); color:#ef4444; border:1px solid rgba(239,68,68,0.4); font-weight:700; font-size:10px;">
+                                    BANNED
+                                </span>
                                 {% endif %}
                             </td>
-                            <td style="color:var(--admin-muted);">{{ u.created_at[:10] }}</td>
+                            <td style="color:var(--admin-muted); font-size:11px;">{{ u.created_at[:10] }}</td>
                             <td style="text-align:right; white-space:nowrap;">
-                                <button type="button" class="btn-admin btn-admin-outline" style="padding:0.3rem 0.55rem; font-size:10px;"
-                                        onclick="openPasswordResetModal({{ u.id }}, '{{ u.username }}')" title="Change user password">
-                                    RESET PASS
+                                <button type="button" class="btn-admin btn-admin-outline" style="padding:0.28rem 0.52rem; font-size:10px; font-weight:700;"
+                                        onclick="openPasswordResetModal({{ u.id }}, {{ u.username|tojson|forceescape }})" title="Reset account credentials">
+                                    RESET PWD
                                 </button>
                                 {% if u.id != 1 %}
                                     {% if u.is_active %}
-                                    <button type="button" class="btn-admin btn-admin-danger" style="padding:0.3rem 0.55rem; font-size:10px; margin-left:3px;"
-                                            onclick="toggleUserBan({{ u.id }}, '{{ u.username }}', true)" title="Permanently ban account, hardware ID, and network routing">
+                                    <button type="button" class="btn-admin btn-admin-danger" style="padding:0.28rem 0.52rem; font-size:10px; font-weight:700; margin-left:3px;"
+                                            onclick="toggleUserBan({{ u.id }}, {{ u.username|tojson|forceescape }}, true)" title="Ban user account, device HWID, and IP">
                                         BAN
                                     </button>
                                     {% else %}
-                                    <button type="button" class="btn-admin" style="padding:0.3rem 0.55rem; font-size:10px; margin-left:3px; background:#10b981; color:#000; font-weight:700;"
-                                            onclick="toggleUserBan({{ u.id }}, '{{ u.username }}', false)" title="Unban account and restore site access">
+                                    <button type="button" class="btn-admin" style="padding:0.28rem 0.52rem; font-size:10px; margin-left:3px; background:#10b981; color:#000; font-weight:700;"
+                                            onclick="toggleUserBan({{ u.id }}, {{ u.username|tojson|forceescape }}, false)" title="Unban account and restore clearance">
                                         UNBAN
                                     </button>
                                     {% endif %}
 
                                     {% if u.role == 'CUSTOMER' %}
-                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:0.3rem 0.55rem; font-size:10px; margin-left:3px; border-color:#10b981; color:#10b981;"
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:0.28rem 0.52rem; font-size:10px; margin-left:3px; border-color:rgba(16,185,129,0.5); color:#10b981; font-weight:700;"
                                             onclick="toggleUserRole({{ u.id }}, 'MODERATOR')" title="Promote to Staff Moderator">
-                                        PROMOTE MOD
+                                        + MOD
                                     </button>
                                     {% elif u.role == 'MODERATOR' %}
-                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:0.3rem 0.55rem; font-size:10px; margin-left:3px; border-color:#f59e0b; color:#f59e0b;"
-                                            onclick="toggleUserRole({{ u.id }}, 'CUSTOMER')" title="Revoke moderator privileges to customer">
-                                        ⤓ REVOKE MOD
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:0.28rem 0.52rem; font-size:10px; margin-left:3px; border-color:rgba(245,158,11,0.5); color:#f59e0b; font-weight:700;"
+                                            onclick="toggleUserRole({{ u.id }}, 'CUSTOMER')" title="Revoke moderator clearance">
+                                        - MOD
                                     </button>
                                     {% endif %}
 
-                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:0.3rem 0.55rem; font-size:10px; margin-left:3px;"
-                                            onclick='openUserModal({{ u|tojson }})' title="Edit account details">
+                                    <button type="button" class="btn-admin btn-admin-outline" style="padding:0.28rem 0.52rem; font-size:10px; font-weight:700; margin-left:3px;"
+                                            onclick="openUserModal({{ u|tojson|forceescape }})" title="Edit account profile">
                                         EDIT
                                     </button>
-                                    <button type="button" class="btn-admin btn-admin-danger" style="padding:0.3rem 0.55rem; font-size:10px; margin-left:3px;"
-                                            onclick="deleteUser({{ u.id }}, '{{ u.username }}')">
+                                    <button type="button" class="btn-admin btn-admin-danger" style="padding:0.28rem 0.52rem; font-size:10px; font-weight:700; margin-left:3px;"
+                                            onclick="deleteUser({{ u.id }}, {{ u.username|tojson|forceescape }})" title="Permanently delete operator account">
                                         DEL
                                     </button>
                                 {% endif %}
@@ -102,15 +190,36 @@
                 </table>
             </div>
 
-            <!-- BLACKLISTED HARDWARE & IP REGISTRY -->
-            <div style="margin-top:2.5rem; border-top:1px solid var(--admin-border); padding-top:1.5rem;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <!-- USERS PAGINATION BAR (30 PER PAGE) -->
+            <div class="matrix-pagination-footer" id="users-pagination-bar" style="margin-top:0.75rem; border-radius:4px; border:1px solid var(--admin-border);">
+                <div style="font-family:var(--admin-font-mono); font-size:11.5px; color:var(--admin-muted);">
+                    SHOWING <strong id="users-page-range" style="color:#fff;">1–{{ [users_list|length, 30]|min if users_list else 0 }}</strong> OF <strong id="users-total-count" style="color:#00e5ff;">{{ users_list|length if users_list else 0 }}</strong> TOTAL OPERATORS (30 / PAGE)
+                </div>
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <button type="button" id="btn-users-prev" class="btn-admin btn-admin-outline" onclick="goToUsersPrevPage()" style="padding:0.35rem 0.85rem; font-size:11px; display:inline-flex; align-items:center; gap:5px;">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                        <span>PREV</span>
+                    </button>
+                    <span style="font-family:var(--admin-font-mono); font-size:11.5px; padding:0 0.5rem; color:#fff; font-weight:700;">
+                        PAGE <span id="users-current-page" style="color:#00e5ff;">1</span> / <span id="users-total-pages">1</span>
+                    </span>
+                    <button type="button" id="btn-users-next" class="btn-admin btn-admin-outline" onclick="goToUsersNextPage()" style="padding:0.35rem 0.85rem; font-size:11px; display:inline-flex; align-items:center; gap:5px;">
+                        <span>NEXT</span>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- BLACKLISTED HARDWARE & IP REGISTRY (PERIMETER DEFENSE) -->
+            <div style="margin-top:2.5rem; border:1px solid var(--admin-border); background:var(--admin-surface); border-radius:6px; padding:1.25rem 1.5rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem; margin-bottom:1rem; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:0.85rem;">
                     <div>
-                        <h3 style="font-size:14px; font-weight:700; color:#ef4444; letter-spacing:0.06em; text-transform:uppercase;">
-                            // BLACKLISTED HARDWARE (MAC / HWID) &amp; NETWORK ORIGIN REGISTRY ({{ banned_clients_list|length }})
+                        <h3 style="font-size:13px; font-weight:800; color:#ef4444; letter-spacing:0.06em; text-transform:uppercase; display:flex; align-items:center; gap:6px;">
+                            <span style="display:inline-block; width:8px; height:8px; background:#ef4444; border-radius:50%; box-shadow:0 0 8px rgba(239,68,68,0.5);"></span>
+                            PERIMETER DEFENSE · BLOCKED DEVICES &amp; IP ADDRESSES ({{ banned_clients_list|length }})
                         </h3>
                         <p style="font-size:11px; color:var(--admin-muted); margin-top:2px;">
-                            Hardware signatures and IP addresses automatically blocked from loading any page on the website.
+                            Hardware signatures (HWID) and client IP addresses actively blocked by perimeter security enforcement.
                         </p>
                     </div>
                 </div>
@@ -119,29 +228,29 @@
                     <table class="admin-table">
                         <thead>
                             <tr>
-                                <th>BID</th>
-                                <th>TARGET USER</th>
-                                <th>NETWORK IP</th>
-                                <th>HARDWARE SIGNATURE (HWID / MAC)</th>
-                                <th>SANCTION REASON</th>
-                                <th>BANNED AT</th>
-                                <th style="text-align:right;">ACTION</th>
+                                <th style="width:80px;">BAN ID</th>
+                                <th>ASSOCIATED USER</th>
+                                <th>BLOCKED IP ADDRESS</th>
+                                <th>BLOCKED DEVICE HWID</th>
+                                <th>ENFORCEMENT REASON</th>
+                                <th style="width:130px;">BLOCKED AT</th>
+                                <th style="width:100px; text-align:right;">ACTION</th>
                             </tr>
                         </thead>
                         <tbody style="font-family: var(--admin-font-mono); font-size:11px;">
                             {% if banned_clients_list %}
                                 {% for b in banned_clients_list %}
-                                <tr>
+                                <tr id="ban-row-{{ b.id }}">
                                     <td style="font-weight:700; color:#ef4444;">#{{ b.id }}</td>
                                     <td style="font-weight:700; color:#fff;">{{ b.username if b.username else 'ANONYMOUS' }}</td>
                                     <td style="color:#00e5ff;">{{ b.ip_address if b.ip_address else '—' }}</td>
                                     <td style="color:#f59e0b; font-size:10px;">{{ b.device_hwid if b.device_hwid else '—' }}</td>
                                     <td style="color:var(--admin-muted);">{{ b.reason }}</td>
-                                    <td style="color:var(--admin-muted);">{{ b.banned_at }}</td>
+                                    <td style="color:var(--admin-muted);">{{ b.banned_at[:16] }}</td>
                                     <td style="text-align:right;">
-                                        <button type="button" class="btn-admin btn-admin-outline" style="padding:0.25rem 0.6rem; font-size:10px; border-color:#00e5ff; color:#00e5ff;"
-                                                onclick="unbanIdentifier({{ b.id }})">
-                                            UNBAN HARDWARE
+                                        <button type="button" class="btn-admin btn-admin-outline" style="padding:0.25rem 0.6rem; font-size:10px; border-color:#00e5ff; color:#00e5ff; font-weight:700;"
+                                                onclick="unbanIdentifier({{ b.id }})" title="Restore access for this identifier">
+                                            UNBAN
                                         </button>
                                     </td>
                                 </tr>
@@ -149,7 +258,7 @@
                             {% else %}
                                 <tr>
                                     <td colspan="7" style="text-align:center; padding:1.5rem; color:var(--admin-muted);">
-                                        NO HARDWARE IDENTIFIERS CURRENTLY BLACKLISTED. SYSTEM SECURE.
+                                        No blocked devices or IP addresses recorded.
                                     </td>
                                 </tr>
                             {% endif %}

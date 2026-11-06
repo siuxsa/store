@@ -3,9 +3,11 @@
 ZERO//FORM — HIGH-ASSURANCE WSGI PRODUCTION APPLICATION SERVER
 =================================================================
 Production WSGI entrypoint for Gunicorn, Waitress, uWSGI, and reverse proxies.
+Features built-in Werkzeug ProxyFix middleware, active security policy
+enforcement, dynamic stealth admin path routing, and multi-tier rate limiting.
 
 Standard Deployment Commands:
-  1. Standalone Production Server (Waitress):
+  1. Standalone Production Server (Waitress — Multi-Threaded):
      python3 wsgi.py
 
   2. Gunicorn WSGI Server (Linux/Unix):
@@ -30,9 +32,22 @@ if PROJECT_DIR not in sys.path:
 # Optional .env support if python-dotenv is installed
 try:
     from dotenv import load_dotenv
-    load_dotenv(os.path.join(PROJECT_DIR, ".env"))
+    env_path = os.path.join(PROJECT_DIR, ".env")
+    if os.path.exists(env_path):
+        load_dotenv(env_path)
+    else:
+        load_dotenv()
 except ImportError:
     pass
+
+def _safe_int(val, default):
+    """Safely parse integer environment variables with a guaranteed fallback."""
+    if val is None:
+        return default
+    try:
+        return int(str(val).strip())
+    except (ValueError, TypeError):
+        return default
 
 # Import the configured Flask instance and schema initializer
 from app import app, init_db
@@ -51,11 +66,11 @@ if enable_proxy_fix:
         from werkzeug.middleware.proxy_fix import ProxyFix
         app.wsgi_app = ProxyFix(
             app.wsgi_app,
-            x_for=int(os.environ.get("PROXY_FIX_FOR", 1)),
-            x_proto=int(os.environ.get("PROXY_FIX_PROTO", 1)),
-            x_host=int(os.environ.get("PROXY_FIX_HOST", 1)),
-            x_port=int(os.environ.get("PROXY_FIX_PORT", 1)),
-            x_prefix=int(os.environ.get("PROXY_FIX_PREFIX", 1))
+            x_for=_safe_int(os.environ.get("PROXY_FIX_FOR"), 1),
+            x_proto=_safe_int(os.environ.get("PROXY_FIX_PROTO"), 1),
+            x_host=_safe_int(os.environ.get("PROXY_FIX_HOST"), 1),
+            x_port=_safe_int(os.environ.get("PROXY_FIX_PORT"), 1),
+            x_prefix=_safe_int(os.environ.get("PROXY_FIX_PREFIX"), 1)
         )
     except Exception as e:
         sys.stderr.write(f"[WARNING] Could not apply ProxyFix middleware: {e}\n")
@@ -68,20 +83,27 @@ def create_app():
     return app
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+    port = _safe_int(os.environ.get("PORT"), 5000)
     host = os.environ.get("HOST", "0.0.0.0")
-    threads = int(os.environ.get("THREADS", os.environ.get("WEB_CONCURRENCY", 8)))
+    threads = _safe_int(os.environ.get("THREADS", os.environ.get("WEB_CONCURRENCY")), 8)
+
+    from core.security import get_admin_custom_path
+    admin_slug = get_admin_custom_path()
 
     # Prefer production-grade Waitress multi-threaded WSGI server if available
     try:
         from waitress import serve
         print(f"[*] ZERO//FORM WSGI production server running via Waitress")
         print(f"[*] Bound interface: http://{host}:{port} (Threads: {threads})")
+        print(f"[*] Active Admin Panel Route: /{admin_slug} (Stealth Mode Active)")
+        print(f"[*] Security Defenses: Rate Limiting [Active], CSRF Shield [Active], XSS Filter [Active]")
+        print(f"[*] ProxyFix Middleware: {'Enabled' if enable_proxy_fix else 'Disabled'}")
         print(f"[*] Press CTRL+C to shutdown.")
         serve(application, host=host, port=port, threads=threads)
     except ImportError:
         print(f"[*] ZERO//FORM WSGI fallback server running via Werkzeug")
         print(f"[*] Bound interface: http://{host}:{port}")
+        print(f"[*] Active Admin Panel Route: /{admin_slug}")
         application.run(host=host, port=port, debug=False)
     except KeyboardInterrupt:
         print("\n[*] ZERO//FORM WSGI server cleanly terminated.")
